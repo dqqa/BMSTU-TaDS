@@ -8,6 +8,7 @@ int main(void)
 {
     char num1_buf[MAX_INPUT_BUF_SIZE];
     int rc = ERR_OK;
+    (void)rc;
     fgets(num1_buf, sizeof(num1_buf), stdin);
     size_t newlen = str_strip(num1_buf);
     printf("newlen: %zu, str: [%s]\n", newlen, num1_buf);
