@@ -36,6 +36,7 @@ int bignum_parse(bignum_t *num, const char *str)
     for (i_exp = 0; i_exp < new_size; i_exp++)
     {
         if (str[i_exp] == '.')
+        {
             if (!point_count)
             {
                 point_count++;
@@ -43,6 +44,7 @@ int bignum_parse(bignum_t *num, const char *str)
             }
             else
                 return ERR_NUMBER;
+        }
 
         if (str[i_exp] == 'e' || str[i_exp] == 'E')
         {
@@ -100,7 +102,7 @@ int bignum_normalize(bignum_t *num)
     return ERR_OK;
 }
 
-int bignum_print(const bignum_t *num)
+void bignum_print(const bignum_t *num)
 {
     if (num->sign < 0)
         printf("-");
@@ -118,6 +120,8 @@ int bignum_multiply(const bignum_t *num1, const bignum_t *num2, bignum_t *result
     memcpy(result, num1, sizeof(*result));
     result->exponent += num2->exponent - 1;
     result->sign *= num2->sign;
+
+    return ERR_OK;
 }
 
 // -123e-41
