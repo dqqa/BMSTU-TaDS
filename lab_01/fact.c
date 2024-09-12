@@ -3,10 +3,15 @@
 #include "errors.h"
 #include "str.h"
 #include <stdio.h>
+#include <time.h>
+
+#define MS_MULTIPLIER 1000
+#define US_MULTIPLIER 1000000
 
 void fact(void)
 {
     int iter_count, rc = ERR_OK;
+    clock_t start, end;
     bignum_t num = {0}, m = {0};
     bignum_parse(&num, "1");
     bignum_parse(&m, "2");
@@ -15,21 +20,28 @@ void fact(void)
     if (scanf("%d", &iter_count) != 1)
     {
         print_err(ERR_IO);
-        return ERR_IO;
+        return;
     }
-    for (int i = 0; i < iter_count; i++)
+    start = clock();
+    int i;
+    for (i = 0; i < iter_count; i++)
     {
-        printf("2^%d = ", i);
-        bignum_print(&num);
+        // printf("2^%d = ", i);
+        // bignum_print(&num);
 
         bignum_t new = {0};
         if ((rc = bignum_multiply(&num, &m, &new)) != ERR_OK)
         {
             print_err(rc);
-            return;
+            break;
         }
         num = new;
     }
+    end = clock();
+    printf("Latest number: 2^%d = ", i);
+    bignum_print(&num);
+    printf("Total elapsed: %fms\n", (float)(end - start) / CLOCKS_PER_SEC * MS_MULTIPLIER);
+    printf("Avg iteration: %fus\n", (float)(end - start) / CLOCKS_PER_SEC / i * US_MULTIPLIER);
 }
 
 // 633825300114114700748351602688

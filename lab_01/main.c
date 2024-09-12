@@ -10,6 +10,7 @@ void fact(void);
 
 int main(void)
 {
+#if 0
     char num1_buf[MAX_INPUT_BUF_SIZE];
     char num2_buf[MAX_INPUT_BUF_SIZE];
     int rc = ERR_OK;
@@ -56,6 +57,8 @@ int main(void)
 
     printf("Result: ");
     bignum_print(&result);
-
+#else
+    fact();
+#endif
     return ERR_OK;
 }
