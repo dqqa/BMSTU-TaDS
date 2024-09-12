@@ -4,13 +4,14 @@
 #include "str.h"
 #include <stdio.h>
 
+#define DO_TEST 0
 
 // Посчитать факториал от заданного числа
 void fact(void);
 
 int main(void)
 {
-#if 0
+#if !DO_TEST
     char num1_buf[MAX_INPUT_BUF_SIZE];
     char num2_buf[MAX_INPUT_BUF_SIZE];
     int rc = ERR_OK;
@@ -28,8 +29,8 @@ int main(void)
         return rc;
     }
 
-    size_t new_size1 = str_strip(num1_buf);
-    size_t new_size2 = str_strip(num2_buf);
+    /*size_t new_size1 = */str_strip(num1_buf);
+    /*size_t new_size2 = */str_strip(num2_buf);
 
     bignum_t bignum_1, bignum_2, result;
 
