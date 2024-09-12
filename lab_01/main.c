@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #define DO_TEST 0
+#define DO_DEBUG_PRINT 1
 
 // Посчитать факториал от заданного числа
 void fact(void);
@@ -39,21 +40,21 @@ int main(void)
         print_err(rc);
         return rc;
     }
-
+#if DO_DEBUG_PRINT
     printf("RC: %d\n", rc);
     printf("Num 1 parsed: ");
     bignum_print(&bignum_1);
-
+#endif
     if ((rc = bignum_parse(&bignum_2, num2_buf)) != ERR_OK)
     {
         print_err(rc);
         return rc;
     }
-
+#if DO_DEBUG_PRINT
     printf("RC: %d\n", rc);
     printf("Num 2 parsed: ");
     bignum_print(&bignum_2);
-
+#endif
     bignum_multiply(&bignum_1, &bignum_2, &result);
 
     printf("Result: ");
