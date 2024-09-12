@@ -4,6 +4,10 @@
 #include "str.h"
 #include <stdio.h>
 
+
+// Посчитать факториал от заданного числа
+void fact(void);
+
 int main(void)
 {
     char num1_buf[MAX_INPUT_BUF_SIZE];

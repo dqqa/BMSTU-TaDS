@@ -13,7 +13,7 @@ int bignum_parse(bignum_t *num, const char *str)
     assert(num && "Invalid pointer");
 
     size_t new_size = strlen(str);
-    size_t i_mantissa = 0, i_exp = 0;
+    size_t i_exp = 0;
     size_t e_count = 0, point_count = 0;
     bool starting_with_zero = false;
     if (!new_size)
@@ -90,15 +90,7 @@ int bignum_parse(bignum_t *num, const char *str)
 
 int bignum_normalize(bignum_t *num)
 {
-    size_t whole_count = num->mantissa_whole_size, frac_leading_count = 0, frac_ending_count = 0;
-
-    for (size_t i = 0; i < num->mantissa_frac_size; i++)
-    {
-        if (!num->mantissa_frac[i])
-            frac_leading_count++;
-        else
-            break;
-    }
+    size_t whole_count = num->mantissa_whole_size, frac_ending_count = 0;
 
     memcpy(num->mantissa_frac + whole_count, num->mantissa_frac, sizeof(uint8_t) * num->mantissa_frac_size);
     memcpy(num->mantissa_frac, num->mantissa_whole, sizeof(uint8_t) * whole_count);
@@ -112,6 +104,13 @@ int bignum_normalize(bignum_t *num)
     num->mantissa_frac_size -= frac_ending_count;
     num->exponent += whole_count;
 
+    for (size_t i = 0; i < num->mantissa_frac_size && !num->mantissa_frac[i]; i++)
+    {
+        memmove(num->mantissa_frac, num->mantissa_frac + 1, num->mantissa_frac_size - 1);
+        num->mantissa_frac_size--;
+        num->exponent--;
+        i--;
+    }
     return ERR_OK;
 }
 
@@ -128,58 +127,59 @@ void bignum_print(const bignum_t *num)
 
 int bignum_validate(const bignum_t *num);
 
-void shift_array_right(uint8_t *arr, size_t size, size_t amount)
+static void shift_array_right(uint8_t *arr, uint16_t *size, size_t amount)
 {
-    memmove(arr + amount, arr, sizeof(*arr) * size);
+    memmove(arr + amount, arr, sizeof(*arr) * *size);
     memset(arr, 0, sizeof(*arr) * amount);
+    *size += amount;
 }
 
-int bignum_multiply(const bignum_t *num1, const bignum_t *num2, bignum_t *result)
+int bignum_multiply(const bignum_t *left, const bignum_t *right, bignum_t *result)
 {
     int rc = ERR_OK;
-    memcpy(result, num2, sizeof(*result));
+    memcpy(result, right, sizeof(*result));
 
     memset(result->mantissa_frac, 0, sizeof(result->mantissa_frac));
     memset(result->mantissa_whole, 0, sizeof(result->mantissa_whole));
 
-    result->exponent += num1->exponent - 1;
-    result->sign *= num1->sign;
+    result->exponent += left->exponent;
+    result->sign *= left->sign;
 
-    size_t max_shift = 0;
+    size_t max_shift = left->mantissa_frac_size;
     int remainder = 0;
-    for (long i = num2->mantissa_frac_size - 1; i >= 0; i--)
+   
+    if (max_shift + right->mantissa_frac_size > MAX_MANTISSA_SIZE)
+        return ERR_OVERFLOW;
+
+    /*
+        Сдвигаем мантиссу result на right->mantissa_frac_size + left->mantissa_frac_size
+        (максиммальное возможное число имеет столько разрядов при перемножении)
+    */
+
+    shift_array_right(result->mantissa_frac, &result->mantissa_frac_size, max_shift);
+
+    for (long i = right->mantissa_frac_size - 1; i >= 0; i--)
     {
         remainder = 0;
-        for (long j = num1->mantissa_frac_size - 1; j >= 0; j--)
+        for (long j = left->mantissa_frac_size - 1; j >= 0; j--)
         {
-            /////////////////////////////////////////////////////////////////////////////////
-            //////////// Определить когда необходимо делать сдвиг и на сколько //////////////
-            /////////////////////////////////////////////////////////////////////////////////
-            
-            if ((i - j) < 0 && ABS(i - j) > max_shift)
-            {
-                max_shift = ABS(i - j);
-                shift_array_right(result->mantissa_frac, result->mantissa_frac_size, ABS(i - j));
-                result->mantissa_frac_size+=ABS(i-j);
-                // result->exponent++; // (?)
-            }
+            size_t new_index = i - (left->mantissa_frac_size - j - 1) + max_shift;
+            int digit_mult = right->mantissa_frac[i] * left->mantissa_frac[j];
 
-            result->mantissa_frac[i - (num1->mantissa_frac_size - j - 1) + max_shift] += num2->mantissa_frac[i] * num1->mantissa_frac[j] + remainder;
-            remainder = result->mantissa_frac[i - (num1->mantissa_frac_size - j - 1) + max_shift] / 10;
-
-            result->mantissa_frac[i - (num1->mantissa_frac_size - j - 1) + max_shift] %= 10;
+            result->mantissa_frac[new_index] += digit_mult + remainder;
+            remainder = result->mantissa_frac[new_index] / 10;
+            result->mantissa_frac[new_index] %= 10;
         }
 
         if (remainder)
         {
-            shift_array_right(result->mantissa_frac, result->mantissa_frac_size, 1);
-
-            // TODO: Check if remainder > 10
-            result->mantissa_frac[0] = remainder;
-            result->mantissa_frac_size++;
-            if (i != 0)
-                result->exponent++; // (?)
-            max_shift++;
+            long ind = i - left->mantissa_frac_size + max_shift;
+            while (remainder)
+            {
+                result->mantissa_frac[ind] = remainder % 10;
+                remainder /= 10;
+                ind--;
+            }
         }
     }
 
@@ -210,4 +210,9 @@ int bignum_multiply(const bignum_t *num1, const bignum_t *num2, bignum_t *result
 
 99
 99
+=> 0.9801e4
+
+999
+999
+=> 0.998001e6
 */
