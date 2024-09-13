@@ -14,7 +14,7 @@ void fact(void)
     clock_t start, end;
     bignum_t num = {0}, m = {0};
     bignum_parse(&num, "1");
-    bignum_parse(&m, "2");
+    bignum_parse(&m, "256");
 
     printf("Input iter count: ");
     if (scanf("%d", &iter_count) != 1)
@@ -26,8 +26,8 @@ void fact(void)
     int i;
     for (i = 0; i < iter_count; i++)
     {
-        // printf("2^%d = ", i);
-        // bignum_print(&num);
+        printf("256^%d = ", i);
+        bignum_print(&num);
 
         bignum_t new = {0};
         if ((rc = bignum_multiply(&num, &m, &new)) != ERR_OK)
@@ -38,7 +38,7 @@ void fact(void)
         num = new;
     }
     end = clock();
-    printf("Latest number: 2^%d = ", i);
+    printf("Latest number: 256^%d = ", i);
     bignum_print(&num);
     printf("Total elapsed: %fms\n", (float)(end - start) / CLOCKS_PER_SEC * MS_MULTIPLIER);
     printf("Avg iteration: %fus\n", (float)(end - start) / CLOCKS_PER_SEC / i * US_MULTIPLIER);

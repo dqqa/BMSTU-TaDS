@@ -30,8 +30,8 @@ int main(void)
         return rc;
     }
 
-    /*size_t new_size1 = */str_strip(num1_buf);
-    /*size_t new_size2 = */str_strip(num2_buf);
+    /*size_t new_size1 = */ str_strip(num1_buf);
+    /*size_t new_size2 = */ str_strip(num2_buf);
 
     bignum_t bignum_1, bignum_2, result;
 
@@ -55,7 +55,11 @@ int main(void)
     printf("Num 2 parsed: ");
     bignum_print(&bignum_2);
 #endif
-    bignum_multiply(&bignum_1, &bignum_2, &result);
+    if ((rc = bignum_multiply(&bignum_1, &bignum_2, &result)) != ERR_OK)
+    {
+        print_err(rc);
+        return rc;
+    }
 
     printf("Result: ");
     bignum_print(&result);
