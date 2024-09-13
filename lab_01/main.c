@@ -10,13 +10,30 @@
 // Посчитать факториал от заданного числа
 void fact(void);
 
+void draw_ruler(size_t init_space, size_t length)
+{
+    for (size_t i = 0; i < init_space; i++)
+        printf(" ");
+
+    for (size_t i = 0; i < length; i++)
+    {
+        if (i % 10 == 0)
+            printf("%zu", i / 10 + 1);
+        else
+            printf("-");
+    }
+    printf("\n");
+}
+
 int main(void)
 {
 #if !DO_TEST
     char num1_buf[MAX_INPUT_BUF_SIZE];
     char num2_buf[MAX_INPUT_BUF_SIZE];
     int rc = ERR_OK;
-    printf("Input first big number: ");
+    draw_ruler(25, 100);
+    
+    printf("Input first big number:  ");
     if ((rc = str_input(stdin, num1_buf, sizeof(num1_buf))) != ERR_OK)
     {
         print_err(rc);
