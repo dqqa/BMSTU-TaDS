@@ -18,4 +18,11 @@ int bignum_validate(const bignum_t *num);
 int bignum_multiply(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
 int bignum_normalize(bignum_t *num);
 
+/*
+TODO:
+    - bignum_cmp
+    - bignum_divide
+    - bignum_add
+*/
+
 #endif // BIGNUM_H_

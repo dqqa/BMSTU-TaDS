@@ -26,8 +26,8 @@ void fact(void)
     int i;
     for (i = 0; i < iter_count; i++)
     {
-        printf("256^%d = ", i);
-        bignum_print(&num);
+        // printf("256^%d = ", i);
+        // bignum_print(&num);
 
         bignum_t new = {0};
         if ((rc = bignum_multiply(&num, &m, &new)) != ERR_OK)
