@@ -15,7 +15,7 @@ void draw_ruler(size_t init_space, size_t length)
     for (size_t i = 0; i < init_space; i++)
         printf(" ");
 
-    for (size_t i = 0; i < length; i++)
+    for (size_t i = 1; i <= length; i++)
     {
         if (i % 10 == 0)
             printf("%zu", i / 10 + 1);
@@ -31,7 +31,7 @@ int main(void)
     char num1_buf[MAX_INPUT_BUF_SIZE];
     char num2_buf[MAX_INPUT_BUF_SIZE];
     int rc = ERR_OK;
-    draw_ruler(25, 100);
+    draw_ruler(25, 80);
     
     printf("Input first big number:  ");
     if ((rc = str_input(stdin, num1_buf, sizeof(num1_buf))) != ERR_OK)
