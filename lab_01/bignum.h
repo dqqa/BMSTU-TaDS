@@ -7,11 +7,9 @@
 typedef struct
 {
     int8_t sign;
-    uint16_t mantissa_whole_size;
     uint16_t mantissa_frac_size;
-    uint8_t mantissa_whole[MAX_MANTISSA_SIZE];
     uint8_t mantissa_frac[MAX_MANTISSA_SIZE];
-    int16_t exponent;
+    int32_t exponent;
 } bignum_t;
 
 int bignum_parse(bignum_t *num, const char *str);

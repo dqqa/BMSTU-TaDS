@@ -15,19 +15,17 @@ int bignum_parse(bignum_t *num, const char *str)
     size_t new_size = strlen(str);
     size_t i_exp = 0;
     size_t e_count = 0, point_count = 0;
-    bool starting_with_zero = false;
+
     if (!new_size)
         return ERR_IO;
 
-    if (str[0] == '-')
+    if (strchr("+-", str[0]))
     {
-        num->sign = -1;
-        str++;
-        new_size--;
-    }
-    else if (str[0] == '+')
-    {
-        num->sign = 1;
+        if (str[0] == '-')
+            num->sign = -1;
+        else
+            num->sign = 1;
+
         str++;
         new_size--;
     }
@@ -35,8 +33,8 @@ int bignum_parse(bignum_t *num, const char *str)
         num->sign = 1;
 
     num->mantissa_frac_size = 0;
-    num->mantissa_whole_size = 0;
     num->exponent = 0;
+
     for (i_exp = 0; i_exp < new_size; i_exp++)
     {
         if (str[i_exp] == '.')
@@ -65,23 +63,21 @@ int bignum_parse(bignum_t *num, const char *str)
         uint8_t digit = str[i_exp] - '0';
         if (!point_count)
         {
-            if (!i_exp && digit == 0)
-                starting_with_zero = true;
-
-            num->mantissa_whole[num->mantissa_whole_size] = digit;
-            if (!starting_with_zero)
-                num->mantissa_whole_size++;
+            num->mantissa_frac[num->mantissa_frac_size] = digit;
+            num->exponent++;
         }
         else
-        {
             num->mantissa_frac[num->mantissa_frac_size] = digit;
-            num->mantissa_frac_size++;
-        }
+        num->mantissa_frac_size++;
     }
 
+    int32_t new_exp;
     if (e_count)
-        if (sscanf(e_count ? str + i_exp + 1 : str + i_exp, "%" SCNd16, &num->exponent) != 1)
+    {
+        if (sscanf(e_count ? str + i_exp + 1 : str + i_exp, "%" SCNd32, &new_exp) != 1)
             return ERR_IO;
+        num->exponent += new_exp;
+    }
 
     bignum_normalize(num);
 
@@ -90,19 +86,12 @@ int bignum_parse(bignum_t *num, const char *str)
 
 int bignum_normalize(bignum_t *num)
 {
-    size_t whole_count = num->mantissa_whole_size, frac_ending_count = 0;
-
-    memcpy(num->mantissa_frac + whole_count, num->mantissa_frac, sizeof(uint8_t) * num->mantissa_frac_size);
-    memcpy(num->mantissa_frac, num->mantissa_whole, sizeof(uint8_t) * whole_count);
-
-    num->mantissa_frac_size += whole_count;
+    size_t frac_ending_count = 0;
 
     for (long i = num->mantissa_frac_size - 1; i >= 0 && !num->mantissa_frac[i]; i--)
         frac_ending_count++;
 
-    num->mantissa_whole_size = 0;
     num->mantissa_frac_size -= frac_ending_count;
-    num->exponent += whole_count;
 
     for (size_t i = 0; i < num->mantissa_frac_size && !num->mantissa_frac[i]; i++)
     {
@@ -111,6 +100,15 @@ int bignum_normalize(bignum_t *num)
         num->exponent--;
         i--;
     }
+
+    if (num->mantissa_frac_size >= MAX_MANTISSA_SIZE / 2)
+        return ERR_OVERFLOW;
+
+    if (num->exponent > 99999)
+        return ERR_OVERFLOW;
+    else if (num->exponent < -99999)
+        return ERR_UNDERFLOW;
+
     return ERR_OK;
 }
 
@@ -140,14 +138,13 @@ int bignum_multiply(const bignum_t *left, const bignum_t *right, bignum_t *resul
     memcpy(result, right, sizeof(*result));
 
     memset(result->mantissa_frac, 0, sizeof(result->mantissa_frac));
-    memset(result->mantissa_whole, 0, sizeof(result->mantissa_whole));
 
     result->exponent += left->exponent;
     result->sign *= left->sign;
 
     size_t max_shift = left->mantissa_frac_size;
     int remainder = 0;
-   
+
     if (max_shift + right->mantissa_frac_size > MAX_MANTISSA_SIZE)
         return ERR_OVERFLOW;
 
@@ -189,24 +186,30 @@ int bignum_multiply(const bignum_t *left, const bignum_t *right, bignum_t *resul
     return ERR_OK;
 }
 
-// -123e-41
-// -0.00123
-
 /*
+-123e-41
+-0.00123
+=> 0.15129e-41
+
 1.12e123
 10.5e15
+=> 0.1176e140
 
 0.1e1
 0.2e2
+=> 0.2e2
 
 1000
 1
+=>0.1e4
 
 100.01
 0.1
+=> 0.10001e2
 
 -131.e156
 831.4
+=> -0.1089134e162
 
 99
 99
@@ -215,4 +218,8 @@ int bignum_multiply(const bignum_t *left, const bignum_t *right, bignum_t *resul
 999
 999
 => 0.998001e6
+
+999.99
+999.99
+=> 0.9999800001e6
 */

@@ -14,6 +14,12 @@ void print_err(int err)
         case ERR_OVERFLOW:
             printf("Overflow error");
             break;
+        case ERR_UNDERFLOW:
+            printf("Underflow error");
+            break;
+        case ERR_NUMBER:
+            printf("Bad number");
+            break;
         default:
             printf("Unknown error: %d", err);
             break;
