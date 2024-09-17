@@ -13,8 +13,8 @@ void fact(void)
     int iter_count, rc = ERR_OK;
     clock_t start, end;
     bignum_t num = {0}, m = {0};
-    bignum_parse(&num, "1");
-    bignum_parse(&m, "256");
+    bignum_parse_real(&num, "1");
+    bignum_parse_real(&m, "256");
 
     printf("Input iter count: ");
     if (scanf("%d", &iter_count) != 1)

@@ -8,7 +8,7 @@
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-int bignum_parse(bignum_t *num, const char *str)
+int bignum_parse_real(bignum_t *num, const char *str)
 {
     assert(num && "Invalid pointer");
 
@@ -19,9 +19,9 @@ int bignum_parse(bignum_t *num, const char *str)
     if (!new_size)
         return ERR_IO;
 
-    if (strchr("+-", str[0]))
+    if (strchr(SIGNS, str[0]))
     {
-        if (str[0] == '-')
+        if (str[0] == SIGN_MINUS)
             num->sign = -1;
         else
             num->sign = 1;
@@ -37,7 +37,7 @@ int bignum_parse(bignum_t *num, const char *str)
 
     for (i_exp = 0; i_exp < new_size; i_exp++)
     {
-        if (str[i_exp] == '.')
+        if (str[i_exp] == SYMBOL_DECIMAL_DOT)
         {
             if (!point_count)
             {
@@ -48,19 +48,19 @@ int bignum_parse(bignum_t *num, const char *str)
                 return ERR_NUMBER;
         }
 
-        if (str[i_exp] == 'e' || str[i_exp] == 'E')
-        {
-            if (e_count)
+        if (strchr(SYMBOLS_EXPONENT, str[i_exp]))
+        { //  str[i_exp] == 'e' || str[i_exp] == 'E'
+            if (e_count || !num->mantissa_frac_size)
                 return ERR_NUMBER;
 
             e_count++;
             break;
         }
 
-        if (str[i_exp] > '9' || str[i_exp] < '0')
+        if (str[i_exp] > DIGIT_MAX || str[i_exp] < DIGIT_MIN)
             return ERR_NUMBER;
 
-        uint8_t digit = str[i_exp] - '0';
+        uint8_t digit = str[i_exp] - DIGIT_MIN;
         if (!point_count)
         {
             num->mantissa_frac[num->mantissa_frac_size] = digit;
@@ -72,15 +72,14 @@ int bignum_parse(bignum_t *num, const char *str)
     }
 
     int32_t new_exp;
-    char buf[2];
-    int pos;
     if (e_count)
     {
-        if (sscanf(e_count ? str + i_exp + 1 : str + i_exp, "%" SCNd32 "%n", &new_exp, &pos) != 1)
-            return ERR_IO;
-        int res = sscanf(str + pos + i_exp + 1, "%1s", buf);
-        if (res > 0)
+        int pos;
+        if (sscanf(str + i_exp + 1, "%" SCNd32 "%n", &new_exp, &pos) != 1)
             return ERR_NUMBER;
+        if (pos + i_exp + 1 != new_size)
+            return ERR_NUMBER;
+
         num->exponent += new_exp;
     }
 
@@ -99,9 +98,9 @@ int bignum_parse_int(bignum_t *num, const char *str)
     if (!new_size)
         return ERR_IO;
 
-    if (strchr("+-", str[0]))
+    if (strchr(SIGNS, str[0]))
     {
-        if (str[0] == '-')
+        if (str[0] == SIGN_MINUS)
             num->sign = -1;
         else
             num->sign = 1;
@@ -117,18 +116,18 @@ int bignum_parse_int(bignum_t *num, const char *str)
 
     for (i_exp = 0; i_exp < new_size; i_exp++)
     {
-        if (str[i_exp] > '9' || str[i_exp] < '0')
+        if (str[i_exp] > DIGIT_MAX || str[i_exp] < DIGIT_MIN)
             return ERR_NUMBER;
 
-        uint8_t digit = str[i_exp] - '0';
+        uint8_t digit = str[i_exp] - DIGIT_MIN;
 
         num->mantissa_frac[num->mantissa_frac_size] = digit;
         num->exponent++;
         num->mantissa_frac_size++;
     }
-    // if (num->mantissa_frac_size > 30)
-    char buf[2];
-    if (sscanf(str + i_exp + 1, "%1s", buf) > 0)
+    // MAYBE? if (num->mantissa_frac_size > 30)
+
+    if (i_exp != new_size)
         return ERR_NUMBER;
     bignum_normalize(num);
 
@@ -155,16 +154,18 @@ int bignum_normalize(bignum_t *num)
     if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
         return ERR_OVERFLOW;
 
-    if (num->exponent > 99999)
+    if (num->exponent > EXPONENT_MAX)
         return ERR_OVERFLOW;
-    else if (num->exponent < -99999)
+    else if (num->exponent < EXPONENT_MIN)
         return ERR_UNDERFLOW;
+
     if (num->mantissa_frac_size == 0)
     {
         num->mantissa_frac_size++;
         num->mantissa_frac[0] = 0;
         num->exponent = 0;
     }
+
     return ERR_OK;
 }
 

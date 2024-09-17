@@ -33,7 +33,7 @@ int main(void)
     char num1_buf[MAX_INPUT_BUF_SIZE];
     char num2_buf[MAX_INPUT_BUF_SIZE];
     int rc = ERR_OK;
-    printf("Программа для умножения действительного числа на целое.\n");
+    printf("Программа для умножения действительного числа на целое.\n\n");
     draw_ruler(23, 80);
 
     bignum_t bignum_1, bignum_2, result;
@@ -47,7 +47,7 @@ int main(void)
 
     /*size_t new_size1 = */ str_strip(num1_buf);
 
-    if ((rc = bignum_parse(&bignum_1, num1_buf)) != ERR_OK)
+    if ((rc = bignum_parse_real(&bignum_1, num1_buf)) != ERR_OK)
     {
         print_err(rc);
         return rc;
@@ -57,7 +57,7 @@ int main(void)
     printf("Num 1 parsed: ");
     bignum_print(&bignum_1);
 #endif
-    printf("Input int big number:  ");
+    printf("Input int  big number: ");
     if ((rc = str_input(stdin, num2_buf, sizeof(num2_buf))) != ERR_OK)
     {
         print_err(rc);
