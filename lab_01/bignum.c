@@ -72,13 +72,64 @@ int bignum_parse(bignum_t *num, const char *str)
     }
 
     int32_t new_exp;
+    char buf[2];
+    int pos;
     if (e_count)
     {
-        if (sscanf(e_count ? str + i_exp + 1 : str + i_exp, "%" SCNd32, &new_exp) != 1)
+        if (sscanf(e_count ? str + i_exp + 1 : str + i_exp, "%" SCNd32 "%n", &new_exp, &pos) != 1)
             return ERR_IO;
+        int res = sscanf(str + pos + i_exp + 1, "%1s", buf);
+        if (res > 0)
+            return ERR_NUMBER;
         num->exponent += new_exp;
     }
 
+    bignum_normalize(num);
+
+    return ERR_OK;
+}
+
+int bignum_parse_int(bignum_t *num, const char *str)
+{
+    assert(num && "Invalid pointer");
+
+    size_t new_size = strlen(str);
+    size_t i_exp = 0;
+
+    if (!new_size)
+        return ERR_IO;
+
+    if (strchr("+-", str[0]))
+    {
+        if (str[0] == '-')
+            num->sign = -1;
+        else
+            num->sign = 1;
+
+        str++;
+        new_size--;
+    }
+    else
+        num->sign = 1;
+
+    num->mantissa_frac_size = 0;
+    num->exponent = 0;
+
+    for (i_exp = 0; i_exp < new_size; i_exp++)
+    {
+        if (str[i_exp] > '9' || str[i_exp] < '0')
+            return ERR_NUMBER;
+
+        uint8_t digit = str[i_exp] - '0';
+
+        num->mantissa_frac[num->mantissa_frac_size] = digit;
+        num->exponent++;
+        num->mantissa_frac_size++;
+    }
+    // if (num->mantissa_frac_size > 30)
+    char buf[2];
+    if (sscanf(str + i_exp + 1, "%1s", buf) > 0)
+        return ERR_NUMBER;
     bignum_normalize(num);
 
     return ERR_OK;
@@ -101,14 +152,19 @@ int bignum_normalize(bignum_t *num)
         i--;
     }
 
-    if (num->mantissa_frac_size >= MAX_MANTISSA_SIZE / 2)
+    if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
         return ERR_OVERFLOW;
 
     if (num->exponent > 99999)
         return ERR_OVERFLOW;
     else if (num->exponent < -99999)
         return ERR_UNDERFLOW;
-
+    if (num->mantissa_frac_size == 0)
+    {
+        num->mantissa_frac_size++;
+        num->mantissa_frac[0] = 0;
+        num->exponent = 0;
+    }
     return ERR_OK;
 }
 
@@ -122,8 +178,6 @@ void bignum_print(const bignum_t *num)
 
     printf("e%" PRId16 "\n", num->exponent);
 }
-
-int bignum_validate(const bignum_t *num);
 
 static void shift_array_right(uint8_t *arr, uint16_t *size, size_t amount)
 {
