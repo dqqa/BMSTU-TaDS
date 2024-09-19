@@ -7,6 +7,7 @@
 #include <string.h>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
+#define MAX(x, y) ((x) < (y) ? (y) : (x))
 
 int bignum_parse_real(bignum_t *num, const char *str)
 {
@@ -59,6 +60,8 @@ int bignum_parse_real(bignum_t *num, const char *str)
 
         if (str[i_exp] > DIGIT_MAX || str[i_exp] < DIGIT_MIN)
             return ERR_NUMBER;
+        if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2 - 1)
+            return ERR_OVERFLOW;
 
         uint8_t digit = str[i_exp] - DIGIT_MIN;
         if (!point_count)
@@ -118,6 +121,8 @@ int bignum_parse_int(bignum_t *num, const char *str)
     {
         if (str[i_exp] > DIGIT_MAX || str[i_exp] < DIGIT_MIN)
             return ERR_NUMBER;
+        if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
+            return ERR_OVERFLOW;
 
         uint8_t digit = str[i_exp] - DIGIT_MIN;
 
@@ -151,8 +156,42 @@ int bignum_normalize(bignum_t *num)
         i--;
     }
 
+    // Shouldn't be an error
+    // if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
+    //     return ERR_OVERFLOW;
+
     if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
-        return ERR_OVERFLOW;
+    {
+        // Алгоритм округления мантиссы до MAX_MANTISSA_SIZE / 2 знаков.
+        int remainder = 0;
+        if (num->mantissa_frac[MAX_MANTISSA_SIZE / 2] >= 5)
+        {
+            remainder = 1;
+            for (long i = MAX_MANTISSA_SIZE / 2 - 1; i >= 0; i--)
+            {
+                num->mantissa_frac[i] += remainder;
+                remainder = num->mantissa_frac[i] / 10;
+                num->mantissa_frac[i] %= 10;
+
+                if (!remainder)
+                    break;
+            }
+        }
+        if (remainder)
+        {
+            num->mantissa_frac_size = 1;
+            num->mantissa_frac[0] = remainder;
+            num->exponent++;
+        }
+        else
+            num->mantissa_frac_size = MAX_MANTISSA_SIZE / 2;
+    }
+
+    frac_ending_count = 0;
+    for (long i = num->mantissa_frac_size - 1; i >= 0 && !num->mantissa_frac[i]; i--)
+        frac_ending_count++;
+
+    num->mantissa_frac_size -= frac_ending_count;
 
     if (num->exponent > EXPONENT_MAX)
         return ERR_OVERFLOW;
@@ -196,12 +235,17 @@ int bignum_multiply(const bignum_t *left, const bignum_t *right, bignum_t *resul
 
     result->exponent += left->exponent;
     result->sign *= left->sign;
+    if (result->exponent > EXPONENT_MAX)
+        return ERR_OVERFLOW;
+    if (result->exponent < EXPONENT_MIN)
+        return ERR_UNDERFLOW;
 
     size_t max_shift = left->mantissa_frac_size;
     int remainder = 0;
 
-    if (max_shift + right->mantissa_frac_size > MAX_MANTISSA_SIZE)
-        return ERR_OVERFLOW;
+    // This shouldn't be an error
+    // if (max_shift + right->mantissa_frac_size > MAX_MANTISSA_SIZE)
+    //     return ERR_OVERFLOW;
 
     /*
         Сдвигаем мантиссу result на right->mantissa_frac_size + left->mantissa_frac_size
@@ -240,6 +284,38 @@ int bignum_multiply(const bignum_t *left, const bignum_t *right, bignum_t *resul
 
     return ERR_OK;
 }
+
+int bignum_divide(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
+
+// int bignum_add(const bignum_t *num1, const bignum_t *num2, bignum_t *result)
+// {
+//     memcpy(result, num1, sizeof(result));
+//     int32_t new_exp = MAX(num1->exponent, num2->exponent);
+//     if (num1->exponent >= num2->exponent)
+//     {
+//         if ((num1->exponent - num2->exponent) + num1->mantissa_frac_size + num2->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
+//             return ERR_OVERFLOW;
+
+//         new_exp = num1->exponent;
+//         shift_array_right(num2->mantissa_frac, &num2->mantissa_frac_size, num1->exponent - num2->exponent);
+//     }
+//     else
+//     {
+//         if ((num1->exponent - num2->exponent) + num1->mantissa_frac_size + num2->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
+//             return ERR_OVERFLOW;
+
+//         new_exp = num1->exponent;
+//         shift_array_right(num2->mantissa_frac, &num2->mantissa_frac_size, num1->exponent - num2->exponent);
+//     }
+//     result->exponent = new_exp;
+//     // shift_array_right()
+//     for (long i = num2->mantissa_frac_size - 1; i >= 0; i--)
+//     {
+//         long modifier = result->exponent - num2->exponent;
+//     }
+// }
+
+int bignum_sub(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
 
 /*
 -123e-41

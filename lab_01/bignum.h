@@ -29,6 +29,9 @@ int bignum_parse_real(bignum_t *num, const char *str);
 int bignum_parse_int(bignum_t *num, const char *str);
 void bignum_print(const bignum_t *num);
 int bignum_multiply(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
+int bignum_divide(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
+int bignum_add(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
+int bignum_sub(const bignum_t *num1, const bignum_t *num2, bignum_t *result);
 int bignum_normalize(bignum_t *num);
 
 /*
