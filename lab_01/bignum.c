@@ -9,6 +9,15 @@
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 
+int check_exp(int exp)
+{
+    if (exp > EXPONENT_MAX)
+        return ERR_OVERFLOW;
+    else if (exp < EXPONENT_MIN)
+        return ERR_UNDERFLOW;
+    return ERR_OK;
+}
+
 int bignum_parse_real(bignum_t *num, const char *str)
 {
     assert(num && "Invalid pointer");
@@ -84,6 +93,9 @@ int bignum_parse_real(bignum_t *num, const char *str)
             return ERR_NUMBER;
 
         num->exponent += new_exp;
+        int rc;
+        if ((rc = check_exp(num->exponent) != ERR_OK))
+            return rc;
     }
 
     bignum_normalize(num);
@@ -193,10 +205,9 @@ int bignum_normalize(bignum_t *num)
 
     num->mantissa_frac_size -= frac_ending_count;
 
-    if (num->exponent > EXPONENT_MAX)
-        return ERR_OVERFLOW;
-    else if (num->exponent < EXPONENT_MIN)
-        return ERR_UNDERFLOW;
+    int rc;
+    if ((rc = check_exp(num->exponent)) != ERR_OK)
+        return rc;
 
     if (num->mantissa_frac_size == 0)
     {

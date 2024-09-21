@@ -3,12 +3,26 @@
 #include "errors.h"
 #include "str.h"
 #include <stdio.h>
+#include <string.h>
 
 #define DO_TEST 0
 #define DO_DEBUG_PRINT 0
 
 // Посчитать факториал от заданного числа
 void fact(void);
+
+void test(void)
+{
+    bignum_t num = {0};
+    memset(num.mantissa_frac, 9, 41);
+    num.mantissa_frac[10] = 8;
+    // memset(num.mantissa_frac+30, 8, 11);
+    num.mantissa_frac_size = 41;
+    num.exponent = 45;
+
+    bignum_normalize(&num);
+    bignum_print(&num);
+}
 
 void draw_ruler(size_t init_space, size_t length)
 {
@@ -85,7 +99,8 @@ int main(void)
     printf("Result: ");
     bignum_print(&result);
 #else
-    fact();
+    // fact();
+    test();
 #endif
     return ERR_OK;
 }
