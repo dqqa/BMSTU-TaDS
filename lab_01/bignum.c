@@ -93,9 +93,9 @@ int bignum_parse_real(bignum_t *num, const char *str)
             return ERR_NUMBER;
 
         num->exponent += new_exp;
-        int rc;
-        if ((rc = check_exp(num->exponent) != ERR_OK))
-            return rc;
+        // int rc;
+        // if ((rc = check_exp(num->exponent - num->mantissa_frac_size) != ERR_OK))
+        //     return rc;
     }
 
     bignum_normalize(num);
@@ -133,7 +133,7 @@ int bignum_parse_int(bignum_t *num, const char *str)
     {
         if (str[i_exp] > DIGIT_MAX || str[i_exp] < DIGIT_MIN)
             return ERR_NUMBER;
-        if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2)
+        if (num->mantissa_frac_size > MAX_MANTISSA_SIZE / 2 - 1)
             return ERR_OVERFLOW;
 
         uint8_t digit = str[i_exp] - DIGIT_MIN;
