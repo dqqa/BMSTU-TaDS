@@ -1,0 +1,8 @@
+#ifndef CONSTANTS_H_
+#define CONSTANTS_H_
+
+#define MAX_COUNTRY_NAME_LEN (25 + 1)
+#define MAX_COUNTRY_CAPITAL_LEN (25 + 1)
+#define MAX_COUNTRY_CONTINENT_LEN (25 + 1)
+
+#endif // CONSTANTS_H_
