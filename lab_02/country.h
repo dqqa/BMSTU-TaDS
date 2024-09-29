@@ -72,7 +72,7 @@ typedef struct
     } tourism;
 } country_t;
 
-int country_read(FILE *fp, country_t *country);
+int country_input(FILE *fp, country_t *country);
 void country_print(FILE *fp, const country_t *country);
 
 #endif // COUNTRY_H_

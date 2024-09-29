@@ -3,6 +3,8 @@ OBJS := $(SRCS:%.c=%.o)
 
 EXE := app.exe
 
+CFLAGS += -Wall -Wextra -Wpedantic
+
 .PHONY: clean all
 all: release
 

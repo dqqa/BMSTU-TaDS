@@ -84,8 +84,6 @@ static int get_sport_type(FILE *fp, sport_t *s)
 
 static int fill_tourism_info(FILE *fp, country_t *c)
 {
-    char buf[32];
-
     switch (c->main_tourism)
     {
         case TOURISM_EXCURSION: {
@@ -120,7 +118,7 @@ static int fill_tourism_info(FILE *fp, country_t *c)
     return ERR_OK;
 }
 
-int country_read(FILE *fp, country_t *country)
+int country_input(FILE *fp, country_t *country)
 {
     int rc = ERR_OK;
     if ((rc = str_input(fp, country->name, sizeof(country->name))) != ERR_OK)
@@ -157,19 +155,17 @@ int country_read(FILE *fp, country_t *country)
 
 void country_print(FILE *fp, const country_t *c)
 {
-    printf("%s %s %s %d %" PRIu32 " %" PRIu32 " %d ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, c->main_tourism);
+    fprintf(fp, "%s %s %s %d %" PRIu32 " %" PRIu32 " %d ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, c->main_tourism);
     switch (c->main_tourism)
     {
         case TOURISM_EXCURSION:
-            printf("%d %d\n", c->tourism.exc_type, c->tourism.exc_object_count);
+            fprintf(fp, "%d %" PRIu32 "\n", c->tourism.exc_type, c->tourism.exc_object_count);
             break;
         case TOURISM_BEACH:
-            printf("%d %.1f %.1f\n", c->tourism.beach_main_season, c->tourism.beach_air_temp, c->tourism.beach_water_temp);
+            fprintf(fp, "%d %.1f %.1f\n", c->tourism.beach_main_season, c->tourism.beach_air_temp, c->tourism.beach_water_temp);
             break;
         case TOURISM_SPORT:
-            printf("%d\n", c->tourism.sport_type);
-            break;
-        default:
+            fprintf(fp, "%d\n", c->tourism.sport_type);
             break;
     }
 }
