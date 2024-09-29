@@ -8,7 +8,7 @@ int str_input(FILE *fp, char *buf, size_t buf_size)
     int c;
     while ((c = fgetc(fp)) != EOF)
     {
-        if (length > buf_size)
+        if (length >= buf_size)
             return ERR_OVERFLOW;
         if (c == '/' || c == '\n')
         {

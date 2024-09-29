@@ -32,7 +32,10 @@ int ca_input(FILE *fp, country_t *countries, size_t arr_size, size_t *count)
 void ca_print(FILE *fp, const country_t *countries, size_t count)
 {
     for (size_t i = 0; i < count; i++)
+    {
+        printf("[%zu] ", i);
         country_print(fp, countries + i);
+    }
 }
 
 int ca_append(FILE *fp, country_t *countries, size_t arr_size, size_t *count)

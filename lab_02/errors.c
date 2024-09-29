@@ -17,6 +17,15 @@ void print_err(int err)
         case ERR_UNKNOWN_TYPE:
             printf("Unknown type error");
             break;
+        case ERR_ARGS:
+            printf("Arguments error");
+            break;
+        case ERR_PARAMS:
+            printf("Parameters error");
+            break;
+        case ERR_EMPTY_FILE:
+            printf("Empty file error");
+            break;
         default:
             printf("Unknown error: %d", err);
             break;

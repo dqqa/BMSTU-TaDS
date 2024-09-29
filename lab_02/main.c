@@ -6,7 +6,7 @@
 
 #define ARR_LEN(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-typedef enum
+typedef enum __operation_t
 {
     OP_SHOW_TABLE,
     OP_APPEND,
@@ -15,6 +15,7 @@ typedef enum
     OP_SHOW_SORTED_TABLE,
     OP_SHOW_SORTED_TABLE_BY_KEY_TABLE,
     OP_SHOW_COMPARISON_RESULTS,
+    OP_SHOW_COMPARISON_EFFICIENCY,
     OP_EXIT,
     OP_UNKNOWN,
     OP_COUNT
@@ -22,19 +23,22 @@ typedef enum
 
 operation_t get_menu_choice(void)
 {
-    printf("1. Вывести все записи на экран\n"
+    printf("\n"
+           "1. Вывести все записи на экран\n"
            "2. Добавить запись в конец\n"
            "3. Удалить запись\n"
            "4. Просмотр отсортированной таблицы ключей при несорт. исх. табл.\n"
            "5. Вывод упорядоченной таблицы по ключу\n"
            "6. Вывод исходной таблицы в упорядоченном виде, используя упоряд. табл. ключей\n"
            "7. Вывод результатов исп. различных сортровок.\n"
-           "8. Выйти.\n");
+           "8. Вывод результатов сравнения эфф. работы программы.\n"
+           "9. Выйти.\n");
 
     printf("Введите операцию: ");
     int op;
     if (scanf("%d", &op) != 1)
         return OP_UNKNOWN;
+    getchar();
 
     if (op > OP_COUNT || op <= 0)
         return OP_UNKNOWN;
@@ -70,11 +74,10 @@ int main(int argc, char **argv)
         rc = ca_input(fp, countries, MAX_COUNTRIES, &count);
         fclose(fp);
 
-        printf("COUNT: %zu\n", count);
-        if (rc == ERR_OK)
-            ; // ca_print(stdout, countries, count);
-        else
+        if (rc != ERR_OK)
             print_err(rc);
+        else
+            printf("COUNT: %zu\n", count);
     }
     else
     {
@@ -90,23 +93,29 @@ int main(int argc, char **argv)
             printf("Введите индекс записи для удаления: ");
             if (scanf("%zu", &ind) != 1)
                 rc = ERR_IO;
+
             if (rc == ERR_OK)
-            {
                 ca_remove(countries, &count, ind);
-                ca_print(stdout, countries, count);
-            }
+        }
+        else if (op == OP_APPEND)
+        {
+            rc = ca_append(stdin, countries, MAX_COUNTRIES, &count);
         }
         else if (op == OP_SHOW_TABLE)
         {
+            printf("Таблица: \n");
             ca_print(stdout, countries, count);
         }
         else if (op == OP_EXIT)
             break;
-        printf("[DEBUG] Operation %d\n", op);
-
-        if (op == OP_UNKNOWN)
+        else
             rc = ERR_UNKNOWN_OP;
+
+        printf("[DEBUG] Operation %d\n", op);
     }
+
+    if (rc != ERR_OK)
+        print_err(rc);
 
     free(countries);
     return rc;
