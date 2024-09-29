@@ -1,9 +1,10 @@
 #ifndef COUNTRY_H_
 #define COUNTRY_H_
 
+#include "constants.h"
 #include <inttypes.h>
 #include <stdbool.h>
-#include "constants.h"
+#include <stdio.h>
 
 typedef enum
 {
@@ -47,18 +48,31 @@ typedef struct
 
     union
     {
+        // TODO: C99 forbids anonymous structs/unions
         /* EXCURSION */
-        excursion_t type;
-        uint32_t object_count;
-        
+        struct
+        {
+            excursion_t exc_type;
+            uint32_t exc_object_count;
+        };
+
         /* BEACH */
-        season_t main_season;
-        float air_temp;
-        float water_temp;
-        
+        struct
+        {
+            season_t beach_main_season;
+            float beach_air_temp;
+            float beach_water_temp;
+        };
+
         /* SPORT */
-        sport_t sport;
+        struct
+        {
+            sport_t sport_type;
+        };
     } tourism;
 } country_t;
+
+int country_read(FILE *fp, country_t *country);
+void country_print(FILE *fp, const country_t *country);
 
 #endif // COUNTRY_H_
