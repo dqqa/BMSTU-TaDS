@@ -1,6 +1,7 @@
 #include "country_array.h"
 #include "country.h"
 #include "errors.h"
+#include <assert.h>
 #include <string.h>
 
 int ca_input(FILE *fp, country_t *countries, size_t arr_size, size_t *count)
@@ -49,6 +50,19 @@ int ca_append(FILE *fp, country_t *countries, size_t arr_size, size_t *count)
 
     memcpy(countries + *count, &c, sizeof(c));
     (*count)++;
+    return ERR_OK;
+}
+
+int ca_remove(country_t *countries, size_t *count, size_t index)
+{
+    assert(*count != 0 && "Array size must be > 0");
+
+    if (index >= *count)
+        return ERR_PARAMS;
+
+    memmove(countries + index, countries + index + 1, sizeof(*countries) * (*count - index - 1));
+    (*count)--;
+
     return ERR_OK;
 }
 

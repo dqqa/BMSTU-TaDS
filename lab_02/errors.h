@@ -8,6 +8,7 @@
 #define ERR_UNKNOWN_TYPE 4
 #define ERR_EMPTY_FILE 5
 #define ERR_ARGS 6
+#define ERR_PARAMS 7
 
 void print_err(int err);
 
