@@ -33,60 +33,52 @@ accordance_t sports[] = {
     {SPORT_CLIMBING, "climb"},
     {SPORT_SURFING, "surf"}};
 
-int set_tourism_info(char *buf, tourism_t t)
+const char *set_tourism_info(tourism_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(tourisms); i++)
     {
         if (t == tourisms[i].val)
         {
-            strcpy(buf, tourisms[i].str);
-            return ERR_OK;
+            return tourisms[i].str;
         }
     }
-
-    return ERR_UNKNOWN_TYPE;
+    return NULL;
 }
 
-int set_excursion_info(char *buf, excursion_t t)
+const char *set_excursion_info(excursion_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(excursions); i++)
     {
         if (t == excursions[i].val)
         {
-            strcpy(buf, excursions[i].str);
-            return ERR_OK;
+            return excursions[i].str;
         }
     }
-
-    return ERR_UNKNOWN_TYPE;
+    return NULL;
 }
 
-int set_sport_info(char *buf, sport_t t)
+const char *set_sport_info(sport_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(sports); i++)
     {
         if (t == sports[i].val)
         {
-            strcpy(buf, sports[i].str);
-            return ERR_OK;
+            return sports[i].str;
         }
     }
-
-    return ERR_UNKNOWN_TYPE;
+    return NULL;
 }
 
-int set_season_info(char *buf, season_t t)
+const char *set_season_info(season_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(seasons); i++)
     {
         if (t == seasons[i].val)
         {
-            strcpy(buf, seasons[i].str);
-            return ERR_OK;
+            return seasons[i].str;
         }
     }
-
-    return ERR_UNKNOWN_TYPE;
+    return NULL;
 }
 
 static int get_tourism_info(FILE *fp, tourism_t *t)
@@ -235,17 +227,17 @@ int country_input(FILE *fp, country_t *country)
 
 void country_print(FILE *fp, const country_t *c)
 {
-    fprintf(fp, "%s %s %s %d %" PRIu32 " %" PRIu32 " %d ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, c->main_tourism);
+    fprintf(fp, "%s %s %s %d %" PRIu32 " %" PRIu32 " %s ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, set_tourism_info(c->main_tourism));
     switch (c->main_tourism)
     {
         case TOURISM_EXCURSION:
-            fprintf(fp, "%d %" PRIu32 "\n", c->tourism.exc_type, c->tourism.exc_object_count);
+            fprintf(fp, "%" PRIu32 " %s\n", c->tourism.exc_object_count, set_excursion_info(c->tourism.exc_type));
             break;
         case TOURISM_BEACH:
-            fprintf(fp, "%d %.1f %.1f\n", c->tourism.beach_main_season, c->tourism.beach_air_temp, c->tourism.beach_water_temp);
+            fprintf(fp, "%s %.1f %.1f\n", set_season_info(c->tourism.beach_main_season), c->tourism.beach_air_temp, c->tourism.beach_water_temp);
             break;
         case TOURISM_SPORT:
-            fprintf(fp, "%d\n", c->tourism.sport_type);
+            fprintf(fp, "%s\n", set_sport_info(c->tourism.sport_type));
             break;
     }
 }
