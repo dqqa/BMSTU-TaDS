@@ -4,8 +4,12 @@ name3/cap3/materik3/1/333/228/E/9090/H
 name4/cap4/materik4/1/111/228/B/winter/25/19
 name5/cap5/materik5/1/222/228/B/spring/-10/1
 name6/cap6/materik6/1/333/228/B/summer/32/44
-name4/cap4/materik4/1/111/228/S/ski
+name4/cap4/materik4/1/111/100/S/ski
+name4/cap4/materik4/1/111/200/S/ski
+name4/cap4/materik4/1/111/300/S/ski
+name4/cap4/materik4/1/111/400/S/ski
 name5/cap5/materik5/1/222/228/S/surf
+name4/cap4/materik4/1/111/199/S/ski
 name6/cap6/materik6/1/333/228/S/climb
 name1/cap1/materik1/1/111/228/E/9090/N
 name1/cap1/materik1/1/111/228/E/9090/N

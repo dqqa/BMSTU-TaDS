@@ -78,4 +78,17 @@ void ca_print_key(FILE *fp, const country_t *countries, size_t count, const key_
     }
 }
 
-int ca_sort(country_t *countries);
+void ca_filter(country_t *countries, size_t *count, filter_fun_t filter, const country_t *params)
+{
+    size_t i = 0;
+    while (i < *count)
+    {
+        if (!filter(countries + i, params))
+        {
+            memmove(countries + i, countries + i + 1, sizeof(*countries) * (*count - i - 1));
+            (*count)--;
+        }
+        else
+            i++;
+    }
+}

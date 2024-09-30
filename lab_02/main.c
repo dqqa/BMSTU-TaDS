@@ -21,10 +21,51 @@ typedef enum __operation_t
     OP_SHOW_SORTED_TABLE_BY_KEY_TABLE,
     OP_SHOW_COMPARISON_RESULTS,
     OP_SHOW_COMPARISON_EFFICIENCY,
+    OP_SEARCH,
     OP_EXIT,
     OP_UNKNOWN,
     OP_COUNT
 } operation_t;
+
+static int my_filter(const country_t *c, const country_t *params)
+{
+    if (strcmp(c->continent, params->continent) != 0)
+        return 0;
+    if (c->main_tourism != TOURISM_SPORT)
+        return 0;
+    if (c->tourism.sport_type != params->tourism.sport_type)
+        return 0;
+    if (c->min_vacation_cost >= params->min_vacation_cost)
+        return 0;
+
+    return 1;
+}
+
+static int get_sport_type(const char *buf, sport_t *s)
+{
+    if (strcmp(buf, "ski") == 0)
+        *s = SPORT_SKIING;
+    else if (strcmp(buf, "surf") == 0)
+        *s = SPORT_SURFING;
+    else if (strcmp(buf, "climb") == 0)
+        *s = SPORT_CLIMBING;
+    else
+        return ERR_UNKNOWN_TYPE;
+
+    return ERR_OK;
+}
+
+static int str_input_until_newline(char *buf, size_t buf_size)
+{
+    if (!fgets(buf, buf_size, stdin))
+        return ERR_IO;
+    char *newline = strrchr(buf, '\n');
+    if (newline)
+        *newline = 0;
+    else
+        return ERR_OVERFLOW;
+    return ERR_OK;
+}
 
 operation_t get_menu_choice(void)
 {
@@ -37,7 +78,8 @@ operation_t get_menu_choice(void)
            "6. Вывод исходной таблицы в упорядоченном виде, используя упоряд. табл. ключей\n"
            "7. Вывод результатов исп. различных сортровок.\n"
            "8. Вывод результатов сравнения эфф. работы программы.\n"
-           "9. Выйти.\n");
+           "9. Список стран на выбранном материке, где можно заняться видом спорта со ст. отдыха меньше указанной.\n"
+           "10. Выйти.\n");
 
     printf("Введите операцию: ");
     int op;
@@ -121,18 +163,20 @@ int main(int argc, char **argv)
         }
         else if (op == OP_APPEND)
         {
+            printf("Введите данные о стране в формате название/столица/материк/виза/время_полета/стоимсость_отдыха/вид_тур/[параметры]\n");
+            printf("> ");
             rc = ca_append(stdin, countries, MAX_COUNTRIES, &count);
         }
         else if (op == OP_SHOW_TABLE)
         {
-            printf("Таблица: \n");
+            printf("Исходная таблица: \n");
             ca_print(stdout, countries, count);
         }
         else if (op == OP_SHOW_SORTED_TABLE)
         {
             sort_bubble(countries, count, sizeof(country_t), country_cmp_travel_time);
 
-            printf("Таблица: \n");
+            printf("Отсортированная таблица: \n");
             ca_print(stdout, countries, count);
         }
         else if (op == OP_SHOW_SORTED_KEY_TABLE)
@@ -284,6 +328,51 @@ int main(int argc, char **argv)
 
             free(new_countries);
             free(keytable);
+        }
+        else if (op == OP_SEARCH)
+        {
+            char continent[MAX_COUNTRY_CONTINENT_LEN], sport[32];
+            country_t search_term = {0};
+            uint32_t price;
+            sport_t sport_type;
+
+            printf("Введите название континента: ");
+            rc = str_input_until_newline(continent, sizeof(continent));
+            if (rc == ERR_OK)
+            {
+                printf("Введите вид спорта: ");
+                rc = str_input_until_newline(sport, sizeof(sport));
+            }
+            if (rc == ERR_OK)
+                rc = get_sport_type(sport, &sport_type);
+            if (rc == ERR_OK)
+            {
+                printf("Введите максимальную стоимость отдыха: ");
+                if (scanf("%" SCNu32, &price) != 1)
+                    rc = ERR_IO;
+            }
+            if (rc == ERR_OK)
+            {
+                country_t *new_countries = calloc(count, sizeof(country_t));
+                size_t new_count = count;
+                if (!new_countries)
+                {
+                    rc = ERR_ALLOC;
+                    break;
+                }
+                memcpy(new_countries, countries, sizeof(country_t) * count);
+
+                strcpy(search_term.continent, continent);
+                search_term.min_vacation_cost = price;
+                search_term.main_tourism = TOURISM_SPORT;
+                search_term.tourism.sport_type = sport_type;
+
+                ca_filter(new_countries, &new_count, my_filter, &search_term);
+                printf("\nНайденные записи в базе данных:\n");
+                ca_print(stdout, new_countries, new_count);
+
+                free(new_countries);
+            }
         }
         else if (op == OP_EXIT)
             break;
