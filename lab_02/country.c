@@ -4,23 +4,107 @@
 #include <stdio.h>
 #include <string.h>
 
+#define ARR_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+typedef struct
+{
+    int val;
+    const char *str;
+} accordance_t;
+
+accordance_t tourisms[] = {
+    {TOURISM_EXCURSION, "E"},
+    {TOURISM_BEACH, "B"},
+    {TOURISM_SPORT, "S"}};
+
+accordance_t excursions[] = {
+    {EXCURSION_NATURE, "N"},
+    {EXCURSION_ART, "A"},
+    {EXCURSION_HISTORY, "H"}};
+
+accordance_t seasons[] = {
+    {SEASON_AUTUMN, "autumn"},
+    {SEASON_SPRING, "spring"},
+    {SEASON_SUMMER, "summer"},
+    {SEASON_WINTER, "winter"}};
+
+accordance_t sports[] = {
+    {SPORT_SKIING, "ski"},
+    {SPORT_CLIMBING, "climb"},
+    {SPORT_SURFING, "surf"}};
+
+int set_tourism_info(char *buf, tourism_t t)
+{
+    for (size_t i = 0; i < ARR_SIZE(tourisms); i++)
+    {
+        if (t == tourisms[i].val)
+        {
+            strcpy(buf, tourisms[i].str);
+            return ERR_OK;
+        }
+    }
+
+    return ERR_UNKNOWN_TYPE;
+}
+
+int set_excursion_info(char *buf, excursion_t t)
+{
+    for (size_t i = 0; i < ARR_SIZE(excursions); i++)
+    {
+        if (t == excursions[i].val)
+        {
+            strcpy(buf, excursions[i].str);
+            return ERR_OK;
+        }
+    }
+
+    return ERR_UNKNOWN_TYPE;
+}
+
+int set_sport_info(char *buf, sport_t t)
+{
+    for (size_t i = 0; i < ARR_SIZE(sports); i++)
+    {
+        if (t == sports[i].val)
+        {
+            strcpy(buf, sports[i].str);
+            return ERR_OK;
+        }
+    }
+
+    return ERR_UNKNOWN_TYPE;
+}
+
+int set_season_info(char *buf, season_t t)
+{
+    for (size_t i = 0; i < ARR_SIZE(seasons); i++)
+    {
+        if (t == seasons[i].val)
+        {
+            strcpy(buf, seasons[i].str);
+            return ERR_OK;
+        }
+    }
+
+    return ERR_UNKNOWN_TYPE;
+}
+
 static int get_tourism_info(FILE *fp, tourism_t *t)
 {
     char buf[32];
     int rc;
     if ((rc = str_input(fp, buf, sizeof(buf))) != ERR_OK)
         return rc;
+    for (size_t i = 0; i < ARR_SIZE(tourisms); i++)
+    {
+        if (strcmp(tourisms[i].str, buf) == 0)
+        {
+            *t = tourisms[i].val;
+            return ERR_OK;
+        }
+    }
 
-    if (strcmp(buf, "E") == 0)
-        *t = TOURISM_EXCURSION;
-    else if (strcmp(buf, "B") == 0)
-        *t = TOURISM_BEACH;
-    else if (strcmp(buf, "S") == 0)
-        *t = TOURISM_SPORT;
-    else
-        return ERR_UNKNOWN_TYPE;
-
-    return ERR_OK;
+    return ERR_UNKNOWN_TYPE;
 }
 
 static int get_excursion_type(FILE *fp, excursion_t *e)
@@ -30,16 +114,16 @@ static int get_excursion_type(FILE *fp, excursion_t *e)
     if ((rc = str_input(fp, buf, sizeof(buf))) != ERR_OK)
         return rc;
 
-    if (strcmp(buf, "N") == 0)
-        *e = EXCURSION_NATURE;
-    else if (strcmp(buf, "A") == 0)
-        *e = EXCURSION_ART;
-    else if (strcmp(buf, "H") == 0)
-        *e = EXCURSION_HISTORY;
-    else
-        return ERR_UNKNOWN_TYPE;
+    for (size_t i = 0; i < ARR_SIZE(excursions); i++)
+    {
+        if (strcmp(excursions[i].str, buf) == 0)
+        {
+            *e = excursions[i].val;
+            return ERR_OK;
+        }
+    }
 
-    return ERR_OK;
+    return ERR_UNKNOWN_TYPE;
 }
 
 static int get_beach_season(FILE *fp, season_t *s)
@@ -48,19 +132,16 @@ static int get_beach_season(FILE *fp, season_t *s)
     int rc;
     if ((rc = str_input(fp, buf, sizeof(buf))) != ERR_OK)
         return rc;
+    for (size_t i = 0; i < ARR_SIZE(seasons); i++)
+    {
+        if (strcmp(seasons[i].str, buf) == 0)
+        {
+            *s = seasons[i].val;
+            return ERR_OK;
+        }
+    }
 
-    if (strcmp(buf, "winter") == 0)
-        *s = SEASON_WINTER;
-    else if (strcmp(buf, "spring") == 0)
-        *s = SEASON_SPRING;
-    else if (strcmp(buf, "summer") == 0)
-        *s = SEASON_SUMMER;
-    else if (strcmp(buf, "autumn") == 0)
-        *s = SEASON_AUTUMN;
-    else
-        return ERR_UNKNOWN_TYPE;
-
-    return ERR_OK;
+    return ERR_UNKNOWN_TYPE;
 }
 
 static int get_sport_type(FILE *fp, sport_t *s)
@@ -69,17 +150,16 @@ static int get_sport_type(FILE *fp, sport_t *s)
     int rc;
     if ((rc = str_input(fp, buf, sizeof(buf))) != ERR_OK)
         return rc;
+    for (size_t i = 0; i < ARR_SIZE(sports); i++)
+    {
+        if (strcmp(sports[i].str, buf) == 0)
+        {
+            *s = sports[i].val;
+            return ERR_OK;
+        }
+    }
 
-    if (strcmp(buf, "ski") == 0)
-        *s = SPORT_SKIING;
-    else if (strcmp(buf, "surf") == 0)
-        *s = SPORT_SURFING;
-    else if (strcmp(buf, "climb") == 0)
-        *s = SPORT_CLIMBING;
-    else
-        return ERR_UNKNOWN_TYPE;
-
-    return ERR_OK;
+    return ERR_UNKNOWN_TYPE;
 }
 
 static int fill_tourism_info(FILE *fp, country_t *c)
