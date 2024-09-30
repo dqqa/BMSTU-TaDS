@@ -1,6 +1,7 @@
 #include "country.h"
 #include "country_array.h"
 #include "errors.h"
+#include "sort.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,7 +29,7 @@ operation_t get_menu_choice(void)
            "2. Добавить запись в конец\n"
            "3. Удалить запись\n"
            "4. Просмотр отсортированной таблицы ключей при несорт. исх. табл.\n"
-           "5. Вывод упорядоченной таблицы по ключу\n"
+           "5. Вывод упорядоченной таблицы по времени полета.\n"
            "6. Вывод исходной таблицы в упорядоченном виде, используя упоряд. табл. ключей\n"
            "7. Вывод результатов исп. различных сортровок.\n"
            "8. Вывод результатов сравнения эфф. работы программы.\n"
@@ -62,6 +63,11 @@ int main(int argc, char **argv)
     // country_t countries[MAX_COUNTRIES] = {0};
     // В куче можно выделить существенно больше места, нежели чем на стеке, где мы ограничены ~8MiB
     country_t *countries = calloc(MAX_COUNTRIES, sizeof(country_t));
+    if (!countries)
+    {
+        print_err(ERR_ALLOC);
+        return ERR_ALLOC;
+    }
 
     size_t count;
 
@@ -103,6 +109,13 @@ int main(int argc, char **argv)
         }
         else if (op == OP_SHOW_TABLE)
         {
+            printf("Таблица: \n");
+            ca_print(stdout, countries, count);
+        }
+        else if (op == OP_SHOW_SORTED_TABLE)
+        {
+            sort_bubble(countries, count, sizeof(country_t), country_cmp_travel_time);
+
             printf("Таблица: \n");
             ca_print(stdout, countries, count);
         }

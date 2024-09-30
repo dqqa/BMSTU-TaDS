@@ -169,3 +169,8 @@ void country_print(FILE *fp, const country_t *c)
             break;
     }
 }
+
+int country_cmp_travel_time(const void *l, const void *r)
+{
+    return ((const country_t *)l)->travel_time > ((const country_t *)r)->travel_time;
+}

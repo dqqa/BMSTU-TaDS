@@ -75,4 +75,11 @@ typedef struct
 int country_input(FILE *fp, country_t *country);
 void country_print(FILE *fp, const country_t *country);
 
+/* COMPARISON */
+int country_cmp_name(const void *l, const void *r);
+int country_cmp_country(const void *l, const void *r);
+int country_cmp_capital(const void *l, const void *r);
+
+int country_cmp_travel_time(const void *l, const void *r);
+
 #endif // COUNTRY_H_

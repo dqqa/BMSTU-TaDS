@@ -9,6 +9,7 @@
 #define ERR_EMPTY_FILE 5
 #define ERR_ARGS 6
 #define ERR_PARAMS 7
+#define ERR_ALLOC 8
 
 void print_err(int err);
 
