@@ -69,4 +69,13 @@ int ca_remove(country_t *countries, size_t *count, size_t index)
     return ERR_OK;
 }
 
+void ca_print_key(FILE *fp, const country_t *countries, size_t count, const key_record_t *keytable)
+{
+    for (size_t i = 0; i < count; i++)
+    {
+        printf("[%zu] ", i);
+        country_print(fp, &countries[keytable[i].table_index]);
+    }
+}
+
 int ca_sort(country_t *countries);

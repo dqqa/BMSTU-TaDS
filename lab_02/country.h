@@ -35,6 +35,16 @@ typedef enum
     SPORT_CLIMBING
 } sport_t;
 
+typedef enum
+{
+    FIELD_NAME,
+    FIELD_CAPITAL,
+    FIELD_CONTINENT,
+    FIELD_VISA,
+    FIELD_TRAVEL_TIME,
+    FIELD_MIN_VACATION_COST
+} field_t;
+
 typedef struct
 {
     char name[MAX_COUNTRY_NAME_LEN];

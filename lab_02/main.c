@@ -4,6 +4,7 @@
 #include "sort.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define ARR_LEN(arr) (sizeof(arr) / sizeof((arr)[0]))
 
@@ -25,9 +26,9 @@ typedef enum __operation_t
 operation_t get_menu_choice(void)
 {
     printf("\n"
-           "1. Вывести все записи на экран\n"
-           "2. Добавить запись в конец\n"
-           "3. Удалить запись\n"
+           "1. Вывести все записи на экран.\n"
+           "2. Добавить запись в конец.\n"
+           "3. Удалить запись.\n"
            "4. Просмотр отсортированной таблицы ключей при несорт. исх. табл.\n"
            "5. Вывод упорядоченной таблицы по времени полета.\n"
            "6. Вывод исходной таблицы в упорядоченном виде, используя упоряд. табл. ключей\n"
@@ -118,6 +119,74 @@ int main(int argc, char **argv)
 
             printf("Таблица: \n");
             ca_print(stdout, countries, count);
+        }
+        else if (op == OP_SHOW_SORTED_KEY_TABLE)
+        {
+            key_record_t *keytable = calloc(count, sizeof(key_record_t));
+            size_t keytable_size;
+            if (!keytable)
+            {
+                rc = ERR_ALLOC;
+                break;
+            }
+            rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+            if (rc == ERR_OK)
+            {
+                sort_bubble(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
+                printf("\nОтсортированная таблица ключей:\n");
+                key_table_print(keytable, keytable_size, FIELD_TRAVEL_TIME);
+            }
+
+            free(keytable);
+        }
+        else if (op == OP_SHOW_SORTED_TABLE_BY_KEY_TABLE)
+        {
+            key_record_t *keytable = calloc(count, sizeof(key_record_t));
+            size_t keytable_size;
+            if (!keytable)
+            {
+                rc = ERR_ALLOC;
+                break;
+            }
+            rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+            if (rc == ERR_OK)
+            {
+                printf("\n\n===================\nUnsorted:\n");
+                ca_print_key(stdout, countries, count, keytable);
+                printf("\n\n===================\n\n");
+                sort_bubble(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
+                printf("\n\n===================\nSorted:\n");
+                ca_print_key(stdout, countries, count, keytable);
+                // key_table_print(keytable, keytable_size, FIELD_TRAVEL_TIME);
+            }
+
+            free(keytable);
+        }
+        else if (op == OP_SHOW_COMPARISON_RESULTS)
+        {
+            country_t *new_countries = calloc(count, sizeof(country_t));
+            if (!new_countries)
+            {
+                rc = ERR_ALLOC;
+                break;
+            }
+            memcpy(new_countries, countries, count * sizeof(country_t));
+
+            sort_bubble(new_countries, count, sizeof(country_t), country_cmp_travel_time);
+            printf("\nРезультат сортировки алгоритмом пузырька:\n");
+            ca_print(stdout, new_countries, count);
+
+            memcpy(new_countries, countries, count * sizeof(country_t));
+
+            qsort(new_countries, count, sizeof(country_t), country_cmp_travel_time);
+            printf("\nРезультат сортировки алгоритмом qsort:\n");
+            ca_print(stdout, new_countries, count);
+
+            free(new_countries);
+        }
+        else if (op == OP_SHOW_COMPARISON_EFFICIENCY)
+        {
+            printf("TODO\n");
         }
         else if (op == OP_EXIT)
             break;
