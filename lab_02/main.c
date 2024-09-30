@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
+#define EFFICIENCY_ITERS 1000
 
 #define ARR_LEN(arr) (sizeof(arr) / sizeof((arr)[0]))
 
@@ -50,7 +53,17 @@ operation_t get_menu_choice(void)
 
 void print_format(void)
 {
-    printf("TODO");
+    printf("Задание:\n");
+    printf("Ввести список стран, содержащий название страны, столицу, материк, необходимость\n"
+           "наличия визы, время полета до страны, минимальную стоимость отдыха, основной вид туризма:\n"
+           "\t1. Экскурсионный:\n"
+           "\t\tКол-во объектов\n"
+           "\t\tОсновной вид объектов (природа, искусство, история)\n"
+           "\t2. Пляжный\n"
+           "\t\tОсновной сезон\n"
+           "\t\tТемпература воздуха и воды\n"
+           "\t3. Спортивный\n"
+           "\t\tВид спорта (горные лыжи, серфинг, восхождения)\n");
 }
 
 int main(int argc, char **argv)
@@ -60,6 +73,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "Usage: %s <DATABASE_FILE>\n", argv[0]);
         return ERR_ARGS;
     }
+
+    print_format();
 
     // country_t countries[MAX_COUNTRIES] = {0};
     // В куче можно выделить существенно больше места, нежели чем на стеке, где мы ограничены ~8MiB
@@ -84,11 +99,11 @@ int main(int argc, char **argv)
         if (rc != ERR_OK)
             print_err(rc);
         else
-            printf("COUNT: %zu\n", count);
+            printf("Количество стран в файле \"%s\": %zu\n", argv[1], count);
     }
     else
     {
-        perror("Unable to open file");
+        perror("Невозможно открыть файл");
         rc = ERR_IO;
     }
     while (rc == ERR_OK)
@@ -151,11 +166,8 @@ int main(int argc, char **argv)
             rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
             if (rc == ERR_OK)
             {
-                printf("\n\n===================\nUnsorted:\n");
-                ca_print_key(stdout, countries, count, keytable);
-                printf("\n\n===================\n\n");
                 sort_bubble(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
-                printf("\n\n===================\nSorted:\n");
+                printf("\nСортированная таблица ключей:\n");
                 ca_print_key(stdout, countries, count, keytable);
                 // key_table_print(keytable, keytable_size, FIELD_TRAVEL_TIME);
             }
@@ -186,14 +198,99 @@ int main(int argc, char **argv)
         }
         else if (op == OP_SHOW_COMPARISON_EFFICIENCY)
         {
-            printf("TODO\n");
+            country_t *new_countries = calloc(count, sizeof(country_t));
+            if (!new_countries)
+            {
+                rc = ERR_ALLOC;
+                break;
+            }
+            key_record_t *keytable = calloc(count, sizeof(key_record_t));
+            size_t keytable_size;
+            if (!keytable)
+            {
+                rc = ERR_ALLOC;
+                break;
+            }
+
+            float qsort_full = 0;
+            for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
+            {
+                clock_t start, end;
+                memcpy(new_countries, countries, count * sizeof(country_t));
+                start = clock();
+
+                qsort(new_countries, count, sizeof(country_t), country_cmp_travel_time);
+
+                end = clock();
+
+                qsort_full += end - start;
+            }
+            qsort_full /= EFFICIENCY_ITERS;
+            printf("Алгоритм сортировки qsort полной таблицы: %f us. (Микросекунд)\n", qsort_full);
+
+            float bsort_full = 0;
+            for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
+            {
+                clock_t start, end;
+                memcpy(new_countries, countries, count * sizeof(country_t));
+                start = clock();
+
+                sort_bubble(new_countries, count, sizeof(country_t), country_cmp_travel_time);
+
+                end = clock();
+
+                bsort_full += end - start;
+            }
+            bsort_full /= EFFICIENCY_ITERS;
+            printf("Алгоритм сортировки пузырьком полной таблицы: %f us. (Микросекунд)\n", bsort_full);
+
+            float qsort_key = 0;
+            rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+            for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
+            {
+                clock_t start, end;
+                memcpy(new_countries, countries, count * sizeof(country_t));
+                start = clock();
+
+                qsort(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
+
+                end = clock();
+
+                qsort_key += end - start;
+            }
+            qsort_key /= EFFICIENCY_ITERS;
+            printf("Алгоритм сортировки qsort таблицы ключей: %f us. (Микросекунд)\n", qsort_key);
+
+            float bsort_key = 0;
+            rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+            for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
+            {
+                clock_t start, end;
+                memcpy(new_countries, countries, count * sizeof(country_t));
+                start = clock();
+
+                sort_bubble(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
+
+                end = clock();
+
+                bsort_key += end - start;
+            }
+            bsort_key /= EFFICIENCY_ITERS;
+            printf("Алгоритм сортировки пузырьком таблицы ключей: %f us. (Микросекунд)\n", bsort_key);
+
+            printf("Сравнение эффективности работы программы:\n\n");
+            printf("qsort abs: %+f ns.\nqsort rel: %+.1f%%\n\n", qsort_key - qsort_full, (qsort_key - qsort_full) / qsort_full * 100);
+            printf("bsort abs: %+f ns.\nbsort rel: %+.1f%%\n\n", bsort_key - bsort_full, (bsort_key - bsort_full) / bsort_full * 100);
+
+            free(new_countries);
+            free(keytable);
         }
         else if (op == OP_EXIT)
             break;
         else
             rc = ERR_UNKNOWN_OP;
 
-        printf("[DEBUG] Operation %d\n", op);
+        // printf("[DEBUG] Operation %d\n", op);
     }
 
     if (rc != ERR_OK)
