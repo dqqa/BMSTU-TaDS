@@ -33,7 +33,7 @@ void ca_print(FILE *fp, const country_t *countries, size_t count)
 {
     for (size_t i = 0; i < count; i++)
     {
-        printf("[%zu] ", i);
+        printf("[%02zu] ", i);
         country_print(fp, countries + i);
     }
 }
@@ -73,7 +73,7 @@ void ca_print_key(FILE *fp, const country_t *countries, size_t count, const key_
 {
     for (size_t i = 0; i < count; i++)
     {
-        printf("[%zu] ", i);
+        printf("[%02zu] ", i);
         country_print(fp, &countries[keytable[i].table_index]);
     }
 }
