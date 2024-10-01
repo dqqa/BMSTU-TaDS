@@ -31,6 +31,8 @@ int ca_input(FILE *fp, country_t *countries, size_t arr_size, size_t *count)
 
 void ca_print(FILE *fp, const country_t *countries, size_t count)
 {
+    printf("%4s %15s %15s %15s %5s %5s %6s %15s\n", "#", "Country", "Capital", "Continent", "Visa", "Time", "Cost", "Tour type");
+
     for (size_t i = 0; i < count; i++)
     {
         printf("[%02zu] ", i);
@@ -71,6 +73,7 @@ int ca_remove(country_t *countries, size_t *count, size_t index)
 
 void ca_print_key(FILE *fp, const country_t *countries, size_t count, const key_record_t *keytable)
 {
+    printf("%4s %15s %15s %15s %5s %5s %6s %15s\n", "#", "Country", "Capital", "Continent", "Visa", "Time", "Cost", "Tour type");
     for (size_t i = 0; i < count; i++)
     {
         printf("[%02zu] ", i);

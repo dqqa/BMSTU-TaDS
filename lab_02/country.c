@@ -10,74 +10,63 @@ typedef struct
 {
     unsigned val;
     const char *str;
+    const char *pretty;
 } accordance_t;
 
 accordance_t tourisms[] = {
-    {TOURISM_EXCURSION, "E"},
-    {TOURISM_BEACH, "B"},
-    {TOURISM_SPORT, "S"}};
+    {TOURISM_EXCURSION, "E", "Excursion"},
+    {TOURISM_BEACH, "B", "Beach"},
+    {TOURISM_SPORT, "S", "Sport"}};
 
 accordance_t excursions[] = {
-    {EXCURSION_NATURE, "N"},
-    {EXCURSION_ART, "A"},
-    {EXCURSION_HISTORY, "H"}};
+    {EXCURSION_NATURE, "N", "Nature"},
+    {EXCURSION_ART, "A", "Art"},
+    {EXCURSION_HISTORY, "H", "History"}};
 
 accordance_t seasons[] = {
-    {SEASON_AUTUMN, "autumn"},
-    {SEASON_SPRING, "spring"},
-    {SEASON_SUMMER, "summer"},
-    {SEASON_WINTER, "winter"}};
+    {SEASON_AUTUMN, "autumn", "Autumn"},
+    {SEASON_SPRING, "spring", "Spring"},
+    {SEASON_SUMMER, "summer", "Summer"},
+    {SEASON_WINTER, "winter", "Winter"}};
 
 accordance_t sports[] = {
-    {SPORT_SKIING, "ski"},
-    {SPORT_CLIMBING, "climb"},
-    {SPORT_SURFING, "surf"}};
+    {SPORT_SKIING, "ski", "Skiing"},
+    {SPORT_CLIMBING, "climb", "Climbing"},
+    {SPORT_SURFING, "surf", "Surfing"}};
 
 const char *set_tourism_info(tourism_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(tourisms); i++)
-    {
         if (t == tourisms[i].val)
-        {
-            return tourisms[i].str;
-        }
-    }
+            return tourisms[i].pretty;
+
     return NULL;
 }
 
 const char *set_excursion_info(excursion_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(excursions); i++)
-    {
         if (t == excursions[i].val)
-        {
-            return excursions[i].str;
-        }
-    }
+            return excursions[i].pretty;
+
     return NULL;
 }
 
 const char *set_sport_info(sport_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(sports); i++)
-    {
         if (t == sports[i].val)
-        {
-            return sports[i].str;
-        }
-    }
+            return sports[i].pretty;
+
     return NULL;
 }
 
 const char *set_season_info(season_t t)
 {
     for (size_t i = 0; i < ARR_SIZE(seasons); i++)
-    {
         if (t == seasons[i].val)
-        {
-            return seasons[i].str;
-        }
-    }
+            return seasons[i].pretty;
+
     return NULL;
 }
 
@@ -227,7 +216,7 @@ int country_input(FILE *fp, country_t *country)
 
 void country_print(FILE *fp, const country_t *c)
 {
-    fprintf(fp, "%15s %15s %15s %5d %5" PRIu32 " %5" PRIu32 " %5s ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, set_tourism_info(c->main_tourism));
+    fprintf(fp, "%15s %15s %15s %5d %5" PRIu32 " %6" PRIu32 " %15s ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, set_tourism_info(c->main_tourism));
     switch (c->main_tourism)
     {
         case TOURISM_EXCURSION:
