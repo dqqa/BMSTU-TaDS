@@ -348,8 +348,8 @@ int main(int argc, char **argv)
             printf("\nГенерация таблицы ключей: %f us. (Микросекунд)\n", create_keytable);
 
             printf("Сравнение эффективности работы программы:\n\n");
-            printf("qsort abs: %+f ns.\nqsort rel: %+.1f%%\n\n", qsort_key - qsort_full, (qsort_key - qsort_full) / qsort_full * 100);
-            printf("bsort abs: %+f ns.\nbsort rel: %+.1f%%\n\n", bsort_key - bsort_full, (bsort_key - bsort_full) / bsort_full * 100);
+            printf("qsort abs: %+f us. / iter\nqsort rel: %+.1f%%\n\n", qsort_key - qsort_full, (qsort_key - qsort_full) / qsort_full * 100);
+            printf("bsort abs: %+f us. / iter\nbsort rel: %+.1f%%\n\n", bsort_key - bsort_full, (bsort_key - bsort_full) / bsort_full * 100);
 
             free(new_countries);
             free(keytable);

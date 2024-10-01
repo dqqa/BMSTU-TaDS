@@ -2,7 +2,7 @@
 #include "errors.h"
 #include <string.h>
 
-static void swap(void *a, void *b, size_t el_size)
+static inline void swap(void *a, void *b, size_t el_size)
 {
     for (size_t i = 0; i < el_size; i++)
     {
