@@ -8,7 +8,7 @@
 
 typedef struct
 {
-    int val;
+    unsigned val;
     const char *str;
 } accordance_t;
 
@@ -227,17 +227,17 @@ int country_input(FILE *fp, country_t *country)
 
 void country_print(FILE *fp, const country_t *c)
 {
-    fprintf(fp, "%s %s %s %d %" PRIu32 " %" PRIu32 " %s ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, set_tourism_info(c->main_tourism));
+    fprintf(fp, "%15s %15s %15s %5.d %5." PRIu32 " %5." PRIu32 " %5s ", c->name, c->capital, c->continent, c->is_visa_needed, c->travel_time, c->min_vacation_cost, set_tourism_info(c->main_tourism));
     switch (c->main_tourism)
     {
         case TOURISM_EXCURSION:
-            fprintf(fp, "%" PRIu32 " %s\n", c->tourism.exc_object_count, set_excursion_info(c->tourism.exc_type));
+            fprintf(fp, "%5." PRIu32 " %5s\n", c->tourism.exc_object_count, set_excursion_info(c->tourism.exc_type));
             break;
         case TOURISM_BEACH:
-            fprintf(fp, "%s %.1f %.1f\n", set_season_info(c->tourism.beach_main_season), c->tourism.beach_air_temp, c->tourism.beach_water_temp);
+            fprintf(fp, "%15s %.1f %.1f\n", set_season_info(c->tourism.beach_main_season), c->tourism.beach_air_temp, c->tourism.beach_water_temp);
             break;
         case TOURISM_SPORT:
-            fprintf(fp, "%s\n", set_sport_info(c->tourism.sport_type));
+            fprintf(fp, "%8s\n", set_sport_info(c->tourism.sport_type));
             break;
     }
 }

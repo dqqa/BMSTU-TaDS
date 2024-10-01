@@ -151,6 +151,7 @@ int main(int argc, char **argv)
     while (rc == ERR_OK)
     {
         operation_t op = get_menu_choice();
+        printf("\n");
         if (op == OP_REMOVE)
         {
             size_t ind;
@@ -158,8 +159,16 @@ int main(int argc, char **argv)
             if (scanf("%zu", &ind) != 1)
                 rc = ERR_IO;
 
-            if (rc == ERR_OK)
-                ca_remove(countries, &count, ind);
+            if (count)
+            {
+                if (rc == ERR_OK)
+                {
+                    rc = ca_remove(countries, &count, ind);
+                    if (rc != ERR_OK)
+                        printf("Индекс не может быть больше размера массива!\n");
+                    rc = ERR_OK;
+                }
+            }
         }
         else if (op == OP_APPEND)
         {
@@ -212,6 +221,9 @@ int main(int argc, char **argv)
             {
                 sort_bubble(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
                 printf("\nСортированная таблица ключей:\n");
+                key_table_print(keytable, keytable_size, FIELD_TRAVEL_TIME);
+
+                printf("\nСортированная таблица по таблице ключей:\n");
                 ca_print_key(stdout, countries, count, keytable);
                 // key_table_print(keytable, keytable_size, FIELD_TRAVEL_TIME);
             }
@@ -252,9 +264,13 @@ int main(int argc, char **argv)
             size_t keytable_size;
             if (!keytable)
             {
+                free(new_countries);
                 rc = ERR_ALLOC;
                 break;
             }
+            size_t keytable_sizeof = sizeof(*keytable) * count;
+            size_t countries_sizeof = sizeof(*countries) * count;
+            printf("Размер полной таблицы: %ld байт\nРазмер таблицы ключей: %ld байт\n", countries_sizeof, keytable_sizeof);
 
             float qsort_full = 0;
             for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
@@ -288,11 +304,15 @@ int main(int argc, char **argv)
             bsort_full /= EFFICIENCY_ITERS;
             printf("Алгоритм сортировки пузырьком полной таблицы: %f us. (Микросекунд)\n", bsort_full);
 
-            float qsort_key = 0;
-            rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+            float qsort_key = 0, create_keytable = 0;
             for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
             {
                 clock_t start, end;
+                start = clock();
+                rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+                end = clock();
+                create_keytable += end - start;
+
                 memcpy(new_countries, countries, count * sizeof(country_t));
                 start = clock();
 
@@ -306,10 +326,12 @@ int main(int argc, char **argv)
             printf("Алгоритм сортировки qsort таблицы ключей: %f us. (Микросекунд)\n", qsort_key);
 
             float bsort_key = 0;
-            rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
             for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
             {
                 clock_t start, end;
+
+                rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+
                 memcpy(new_countries, countries, count * sizeof(country_t));
                 start = clock();
 
@@ -321,6 +343,9 @@ int main(int argc, char **argv)
             }
             bsort_key /= EFFICIENCY_ITERS;
             printf("Алгоритм сортировки пузырьком таблицы ключей: %f us. (Микросекунд)\n", bsort_key);
+
+            create_keytable /= EFFICIENCY_ITERS;
+            printf("\nГенерация таблицы ключей: %f us. (Микросекунд)\n", create_keytable);
 
             printf("Сравнение эффективности работы программы:\n\n");
             printf("qsort abs: %+f ns.\nqsort rel: %+.1f%%\n\n", qsort_key - qsort_full, (qsort_key - qsort_full) / qsort_full * 100);

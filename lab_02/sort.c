@@ -68,6 +68,8 @@ int key_table_create(const country_t *countries, size_t countries_count, key_rec
             case FIELD_MIN_VACATION_COST:
                 keytable[i].data = &countries[i].min_vacation_cost;
                 break;
+            default:
+                break;
         }
     }
 
@@ -89,6 +91,8 @@ void key_table_print(key_record_t *keytable, size_t keytable_size, field_t field
             case FIELD_TRAVEL_TIME:
             case FIELD_MIN_VACATION_COST:
                 printf("%" PRIu32, *(const uint32_t *)keytable[i].data);
+                break;
+            default:
                 break;
         }
         printf("\n");
