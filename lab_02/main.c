@@ -147,8 +147,10 @@ int main(int argc, char **argv)
     {
         perror("Невозможно открыть файл");
         rc = ERR_IO;
+        free(countries);
+        return rc;
     }
-    while (rc == ERR_OK)
+    while (/*rc == ERR_OK*/ 1)
     {
         operation_t op = get_menu_choice();
         printf("\n");
@@ -405,7 +407,10 @@ int main(int argc, char **argv)
         else if (op == OP_EXIT)
             break;
         else
-            rc = ERR_UNKNOWN_OP;
+        {
+            printf("Введена неверная операция!\n");
+            // rc = ERR_UNKNOWN_OP;
+        }
 
         // printf("[DEBUG] Operation %d\n", op);
     }
