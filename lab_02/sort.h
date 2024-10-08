@@ -7,7 +7,7 @@
 typedef struct
 {
     size_t table_index;
-    const void *data;
+    uint32_t data;
 } key_record_t;
 
 typedef int (*cmp_fun_t)(const void *, const void *);
@@ -18,6 +18,5 @@ void key_table_print(key_record_t *keytable, size_t keytable_size, field_t field
 void sort_bubble(void *base, size_t arr_size, size_t el_size, cmp_fun_t comp);
 
 int key_record_int_cmp(const void *l, const void *r);
-int key_record_str_cmp(const void *l, const void *r);
 
 #endif // SORT_H_

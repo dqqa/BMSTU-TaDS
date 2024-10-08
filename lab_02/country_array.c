@@ -76,7 +76,7 @@ void ca_print_key(FILE *fp, const country_t *countries, size_t count, const key_
     printf("%4s %15s %15s %15s %5s %5s %6s %15s\n", "#", "Country", "Capital", "Continent", "Visa", "Time", "Cost", "Tour type");
     for (size_t i = 0; i < count; i++)
     {
-        printf("[%02zu] ", i);
+        printf("[%02zu] ", keytable[i].table_index);
         country_print(fp, &countries[keytable[i].table_index]);
     }
 }

@@ -23,6 +23,7 @@ typedef enum __operation_t
     OP_SHOW_COMPARISON_EFFICIENCY,
     OP_SEARCH,
     OP_EXIT,
+    OP_SAVE,
     OP_UNKNOWN,
     OP_COUNT
 } operation_t;
@@ -79,7 +80,8 @@ operation_t get_menu_choice(void)
            "7. Результаты исп. различных сортровок.\n"
            "8. Результаты сравнения эфф. работы программы.\n"
            "9. Фильтр (по варианту 2).\n"
-           "10. Выйти.\n");
+           "10. Выйти.\n"
+           "11. Сохранить.\n");
 
     printf("Введите операцию: ");
     int op;
@@ -97,15 +99,15 @@ void print_format(void)
 {
     printf("Задание:\n");
     printf("Ввести список стран, содержащий название страны, столицу, материк, необходимость\n"
-           "наличия визы, время полета до страны, минимальную стоимость отдыха, основной вид туризма:\n"
-           "\t1. Экскурсионный:\n"
+           "наличия визы (0/1), время полета до страны (минут), минимальную стоимость отдыха, основной вид туризма:\n"
+           "\t1. Экскурсионный (E):\n"
            "\t\tКол-во объектов\n"
-           "\t\tОсновной вид объектов (природа, искусство, история)\n"
-           "\t2. Пляжный\n"
-           "\t\tОсновной сезон\n"
+           "\t\tОсновной вид объектов (природа (N), искусство (A), история (H))\n"
+           "\t2. Пляжный (B):\n"
+           "\t\tОсновной сезон (winter/spring/summer/autumn)\n"
            "\t\tТемпература воздуха и воды\n"
-           "\t3. Спортивный\n"
-           "\t\tВид спорта (горные лыжи, серфинг, восхождения)\n");
+           "\t3. Спортивный (S):\n"
+           "\t\tВид спорта (горные лыжи (ski), серфинг (surf), восхождения (climb))\n");
 }
 
 int main(int argc, char **argv)
@@ -156,15 +158,20 @@ int main(int argc, char **argv)
         printf("\n");
         if (op == OP_REMOVE)
         {
-            size_t ind;
-            printf("Введите индекс записи для удаления: ");
-            if (scanf("%zu", &ind) != 1)
+            size_t ind = count;
+            char buf[256];
+            printf("Введите название страны для удаления: ");
+            if (!fgets(buf, sizeof(buf), stdin))
                 rc = ERR_IO;
-
+            *strchr(buf, '\n') = 0;
             if (count)
             {
                 if (rc == ERR_OK)
                 {
+                    for (size_t i = 0; i < count; i++)
+                        if (strcmp(countries[i].name, buf) == 0)
+                            ind = i;
+                    
                     rc = ca_remove(countries, &count, ind);
                     if (rc != ERR_OK)
                         printf("Индекс не может быть больше размера массива!\n");
@@ -406,6 +413,13 @@ int main(int argc, char **argv)
         }
         else if (op == OP_EXIT)
             break;
+        else if (op == OP_SAVE)
+        {
+            FILE *fp = fopen(argv[1], "w");
+            for (size_t i = 0; i < count; i++)
+                country_save(fp, countries + i);
+            fclose(fp);
+        }
         else
         {
             printf("Введена неверная операция!\n");

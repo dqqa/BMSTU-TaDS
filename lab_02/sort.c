@@ -30,13 +30,7 @@ void sort_bubble(void *base, size_t arr_size, size_t el_size, cmp_fun_t comp)
 int key_record_int_cmp(const void *l, const void *r)
 {
     const key_record_t *lp = l, *rp = r;
-    return *((const unsigned *)lp->data) > *((const unsigned *)rp->data);
-}
-
-int key_record_str_cmp(const void *l, const void *r)
-{
-    const key_record_t *lp = l, *rp = r;
-    return strcmp(lp->data, rp->data);
+    return lp->data > rp->data;
 }
 
 int key_table_create(const country_t *countries, size_t countries_count, key_record_t *keytable, size_t keytable_size, size_t *keytable_count, field_t field)
@@ -53,20 +47,11 @@ int key_table_create(const country_t *countries, size_t countries_count, key_rec
 
         switch (field)
         {
-            case FIELD_CAPITAL:
-                keytable[i].data = countries[i].capital;
-                break;
-            case FIELD_CONTINENT:
-                keytable[i].data = countries[i].continent;
-                break;
-            case FIELD_NAME:
-                keytable[i].data = countries[i].name;
-                break;
             case FIELD_TRAVEL_TIME:
-                keytable[i].data = &countries[i].travel_time;
+                keytable[i].data = countries[i].travel_time;
                 break;
             case FIELD_MIN_VACATION_COST:
-                keytable[i].data = &countries[i].min_vacation_cost;
+                keytable[i].data = countries[i].min_vacation_cost;
                 break;
             default:
                 break;
@@ -83,14 +68,9 @@ void key_table_print(key_record_t *keytable, size_t keytable_size, field_t field
         printf("[%zu] ", keytable[i].table_index);
         switch (field)
         {
-            case FIELD_CAPITAL:
-            case FIELD_CONTINENT:
-            case FIELD_NAME:
-                printf("%s", (const char *)keytable[i].data);
-                break;
             case FIELD_TRAVEL_TIME:
             case FIELD_MIN_VACATION_COST:
-                printf("%" PRIu32, *(const uint32_t *)keytable[i].data);
+                printf("%" PRIu32, keytable[i].data);
                 break;
             default:
                 break;
