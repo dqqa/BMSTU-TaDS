@@ -65,7 +65,7 @@ void key_table_print(key_record_t *keytable, size_t keytable_size, field_t field
 {
     for (size_t i = 0; i < keytable_size; i++)
     {
-        printf("[%zu] ", keytable[i].table_index);
+        printf("[%02zu] ", keytable[i].table_index);
         switch (field)
         {
             case FIELD_TRAVEL_TIME:
