@@ -171,7 +171,7 @@ int main(int argc, char **argv)
                     for (size_t i = 0; i < count; i++)
                         if (strcmp(countries[i].name, buf) == 0)
                             ind = i;
-                    
+
                     rc = ca_remove(countries, &count, ind);
                     if (rc != ERR_OK)
                         printf("Индекс не может быть больше размера массива!\n");
@@ -352,6 +352,42 @@ int main(int argc, char **argv)
             }
             bsort_key /= EFFICIENCY_ITERS;
             printf("Алгоритм сортировки пузырьком таблицы ключей: %f us. (Микросекунд)\n", bsort_key);
+
+            float bubble2_key = 0;
+            for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
+            {
+                clock_t start, end;
+                start = clock();
+                rc = key_table_create(countries, count, keytable, count, &keytable_size, FIELD_TRAVEL_TIME);
+                end = clock();
+
+                memcpy(new_countries, countries, count * sizeof(country_t));
+                start = clock();
+
+                sort_bubble2(keytable, keytable_size, sizeof(*keytable), key_record_int_cmp);
+
+                end = clock();
+
+                bubble2_key += end - start;
+            }
+            bubble2_key /= EFFICIENCY_ITERS;
+            printf("Алгоритм сортировки bubble2 таблицы ключей: %f us. (Микросекунд)\n", bubble2_key);
+
+            float bubble2 = 0;
+            for (size_t i = 0; i < EFFICIENCY_ITERS; i++)
+            {
+                clock_t start, end;
+                memcpy(new_countries, countries, count * sizeof(country_t));
+                start = clock();
+
+                sort_bubble(new_countries, count, sizeof(country_t), country_cmp_travel_time);
+
+                end = clock();
+
+                bubble2 += end - start;
+            }
+            bubble2 /= EFFICIENCY_ITERS;
+            printf("Алгоритм сортировки bubble2 полной таблицы: %f us. (Микросекунд)\n", bubble2);
 
             create_keytable /= EFFICIENCY_ITERS;
             printf("\nГенерация таблицы ключей: %f us. (Микросекунд)\n", create_keytable);

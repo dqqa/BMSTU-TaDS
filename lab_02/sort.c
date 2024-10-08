@@ -2,7 +2,7 @@
 #include "errors.h"
 #include <string.h>
 
-static inline void swap(void *a, void *b, size_t el_size)
+static void swap(void *a, void *b, size_t el_size)
 {
     for (size_t i = 0; i < el_size; i++)
     {
@@ -23,6 +23,28 @@ void sort_bubble(void *base, size_t arr_size, size_t el_size, cmp_fun_t comp)
 
             if (comp(l, r) > 0)
                 swap(l, r, el_size);
+        }
+    }
+}
+
+void sort_bubble2(void *base, size_t arr_size, size_t el_size, cmp_fun_t comp)
+{
+    for (size_t i = arr_size; i > 1; i--)
+    {
+        for (size_t j = 1; j < i; j++)
+        {
+            void *l = ((char *)base) + el_size * (j - 1);
+            void *r = ((char *)base) + el_size * j;
+
+            if (comp(l, r) > 0)
+            {
+                for (size_t i = 0; i < el_size; i++)
+                {
+                    char tmp = *((char *)l + i);
+                    *((char *)l + i) = *((char *)r + i);
+                    *((char *)r + i) = tmp;
+                }
+            }
         }
     }
 }
