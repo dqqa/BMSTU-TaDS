@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/app.exe",
-            "args": ["data/test_01.txt"],
+            "args": []
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
