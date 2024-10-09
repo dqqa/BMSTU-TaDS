@@ -1,0 +1,40 @@
+Australia/Canberra/Oceania/1/960/1500/B/summer/30/25
+France/Paris/Europe/1/240/1200/E/30/N
+Brazil/Brasilia/South America/1/720/1000/B/summer/32/28
+Japan/Tokyo/Asia/1/600/2000/E/40/A
+Canada/Ottawa/North America/1/480/1300/S/ski
+Thailand/Bangkok/Asia/0/540/800/B/summer/34/30
+Italy/Rome/Europe/1/180/1400/E/25/H
+Mexico/Mexico City/North America/0/720/900/B/spring/28/26
+Switzerland/Bern/Europe/1/240/1600/S/ski
+Spain/Madrid/Europe/1/300/1100/E/35/A
+Argentina/Buenos Aires/South America/1/840/1000/B/autumn/22/18
+New Zealand/Wellington/Oceania/1/1080/1600/S/surf
+Germany/Berlin/Europe/1/240/1500/E/40/H
+South Africa/Pretoria/Africa/0/900/1200/B/summer/35/27
+Russia/Moscow/Europe/1/300/1300/E/30/H
+USA/Washington/North America/1/540/1800/B/summer/33/26
+Greece/Athens/Europe/1/180/1400/B/summer/29/24
+Morocco/Rabat/Africa/0/420/800/S/surf
+Austria/Vienna/Europe/1/240/1300/E/20/H
+Fiji/Suva/Oceania/1/1080/1100/B/winter/27/25
+Turkey/Ankara/Europe/0/240/900/E/30/N
+Norway/Oslo/Europe/1/300/1500/S/ski
+Indonesia/Jakarta/Asia/0/660/700/B/summer/32/28
+Chile/Santiago/South America/1/780/1000/E/25/N
+Egypt/Cairo/Africa/0/480/700/E/40/H
+Portugal/Lisbon/Europe/1/240/1200/B/summer/28/22
+South Korea/Seoul/Asia/1/540/1500/E/35/A
+Iceland/Reykjavik/Europe/1/360/1700/S/ski
+Malaysia/Kuala Lumpur/Asia/0/600/800/B/spring/30/28
+Sweden/Stockholm/Europe/1/360/1400/E/25/H
+Peru/Lima/South America/1/840/1000/E/30/N
+Sri Lanka/Colombo/Asia/0/660/600/B/summer/33/29
+Finland/Helsinki/Europe/1/300/1500/S/ski
+Netherlands/Amsterdam/Europe/1/300/1300/E/25/A
+Australia/Sydney/Oceania/1/960/1700/B/summer/30/25
+China/Beijing/Asia/1/600/1800/E/50/H
+Costa Rica/San Jose/North America/0/780/800/B/summer/32/28
+Nepal/Kathmandu/Asia/0/540/700/S/climb
+Czech Republic/Prague/Europe/1/240/1300/E/30/H
+Venezuela/Caracas/South America/0/720/900/B/summer/31/28

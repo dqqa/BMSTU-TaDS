@@ -1,0 +1,22 @@
+SRCS := $(notdir $(wildcard src/*.c))
+OBJS := $(addprefix out/, $(notdir $(SRCS:%.c=%.o)))
+EXE := ./app.exe
+
+all:
+	echo $(SRCS)
+
+out/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(EXE): $(OBJS)
+	$(CC) $(OBJS) -o $(EXE)
+
+debug: CFLAGS += -g
+debug: app.exe
+
+release: CFLAGS += -O0
+release: app.exe
+
+.PHONY: clean
+clean:
+	$(RM) out/*.o *.exe
