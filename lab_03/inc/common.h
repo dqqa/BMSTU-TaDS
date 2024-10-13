@@ -2,6 +2,7 @@
 #define COMMON_H__
 
 #include <inttypes.h>
+#include <stdio.h>
 #include <stddef.h>
 
 #define DATA_TYPE uint32_t

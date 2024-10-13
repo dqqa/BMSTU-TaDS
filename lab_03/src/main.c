@@ -1,6 +1,6 @@
+#include "errors.h"
 #include "sparse_mat_a.h"
 #include "sparse_mat_b.h"
-#include "errors.h"
 #include <stdio.h>
 
 /*
@@ -12,8 +12,38 @@ TODO:
    при различном проценте их заполенения.
 */
 
-int main(void)
+void print_usage(void)
 {
-    printf("Hello world\n");
+    fprintf(stderr, "Usage: app.exe <matrix>\n");
+}
+
+int main(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        print_usage();
+        return ERR_ARGS;
+    }
+
+    FILE *fp = fopen(argv[1], "r");
+    if (fp)
+    {
+        mat_a_t mat_a = {0};
+        size_t n, m;
+        if (fscanf(fp, "%zu%zu", &n, &m) == 2)
+        {
+            mat_a_create(&mat_a, n, m);
+            mat_a_read(fp, n, m, &mat_a);
+            
+            mat_a_free(&mat_a);
+        }
+        fclose(fp);
+    }
+    else
+    {
+        print_err(ERR_IO);
+        return ERR_IO;
+    }
+
     return 0;
 }

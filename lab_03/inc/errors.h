@@ -6,6 +6,8 @@
 #define ERR_ALLOC 2
 #define ERR_RANGE 3
 #define ERR_PARAMS 4
+#define ERR_NOT_FOUND 5
+#define ERR_ARGS 6
 
 void print_err(int rc);
 
