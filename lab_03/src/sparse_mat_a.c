@@ -101,6 +101,14 @@ static size_t get_min_ind(size_t *arr, size_t size, size_t val)
     return size;
 }
 
+/*
+4 случая:
+  1. mat[i][j] != 0 && src != 0 // заменяем число из массива данных на новое
+  2. mat[i][j] == 0 && src != 0 // увеличиваем размеры массивов, инкрементируем каждый элемент в массиве указателей после i-го(?)
+  3. mat[i][j] != 0 && src == 0 // обрезаем массивы уменьшаем в массиве указателей каждый после i(?) на 1
+  4. mat[i][j] == 0 && src == 0 // игнорируем
+*/
+
 int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
 {
     mat_a_t *mat = dst;
