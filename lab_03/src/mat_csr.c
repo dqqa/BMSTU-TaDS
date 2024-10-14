@@ -1,16 +1,16 @@
-#include "sparse_mat_a.h"
+#include "mat_csr.h"
 #include "errors.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
-int mat_a_create(mat_a_t *mat, size_t n, size_t m)
+int mat_csr_create(mat_csr_t *mat, size_t n, size_t m)
 {
     int rc;
 
     /* vtable emulation :) */
-    mat->base.getter = mat_a_get_element;
-    mat->base.setter = mat_a_set_element;
+    mat->base.getter = mat_csr_get_element;
+    mat->base.setter = mat_csr_set_element;
 
     mat->base.n = n;
     mat->base.m = m;
@@ -53,16 +53,16 @@ cleanup:
     return rc;
 }
 
-void mat_a_free(mat_a_t *mat)
+void mat_csr_free(mat_csr_t *mat)
 {
     free(mat->data);
     free(mat->col_indices);
     free(mat->row_ptrs);
 }
 
-int mat_a_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
+int mat_csr_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
 {
-    const mat_a_t *mat = src;
+    const mat_csr_t *mat = src;
 
     if (i >= mat->base.n || j >= mat->base.m)
         return ERR_RANGE;
@@ -108,9 +108,9 @@ static size_t get_min_ind(size_t *arr, size_t size, size_t val)
   4. mat[i][j] == 0 && src == 0 // игнорируем
 */
 
-int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
+int mat_csr_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
 {
-    mat_a_t *mat = dst;
+    mat_csr_t *mat = dst;
     if (i >= mat->base.n || j >= mat->base.m)
         return ERR_RANGE;
 
@@ -119,7 +119,7 @@ int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     size_t nz_el_count = next_row - cur_row;
 
     DATA_TYPE tmp;
-    int rc = mat_a_get_element(dst, i, j, &tmp);
+    int rc = mat_csr_get_element(dst, i, j, &tmp);
     if (rc == ERR_OK) // if element in mat[i][j] != 0
     {
         if (*src != 0)
@@ -200,7 +200,7 @@ int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     return ERR_OK;
 }
 
-int mat_a_read(FILE *fp, mat_a_t *mat)
+int mat_csr_read(FILE *fp, mat_csr_t *mat)
 {
     for (size_t i = 0; i < mat->base.n; i++)
     {
@@ -211,7 +211,7 @@ int mat_a_read(FILE *fp, mat_a_t *mat)
                 return ERR_IO;
 
             int rc;
-            if ((rc = mat_a_set_element(mat, i, j, &el) != ERR_OK))
+            if ((rc = mat_csr_set_element(mat, i, j, &el) != ERR_OK))
                 return rc;
         }
     }

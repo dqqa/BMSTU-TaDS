@@ -1,6 +1,6 @@
 #include "common.h"
 #include "errors.h"
-#include "sparse_mat_a.h"
+#include "mat_csr.h"
 
 static DATA_TYPE calc_mult(const void *mat1, mat_common_t mat1_props, const void *mat2, mat_common_t mat2_props, size_t i, size_t j)
 {

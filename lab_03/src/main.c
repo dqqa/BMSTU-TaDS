@@ -1,6 +1,6 @@
 #include "errors.h"
-#include "sparse_mat_a.h"
-#include "sparse_mat_b.h"
+#include "mat_csr.h"
+#include "mat_csc.h"
 #include <stdio.h>
 
 /*
@@ -31,35 +31,35 @@ int main(int argc, char **argv)
         FILE *fp2 = fopen(argv[2], "r");
         if (fp2)
         {
-            mat_a_t mat_a = {0}, mat_b = {0};
-            mat_a_t res = {0};
+            mat_csr_t mat_a = {0}, mat_b = {0};
+            mat_csr_t res = {0};
             size_t n1, m1, n2, m2;
             if (fscanf(fp1, "%zu%zu", &n1, &m1) == 2)
             {
-                mat_a_create(&mat_a, n1, m1);
-                mat_a_read(fp1, &mat_a);
+                mat_csr_create(&mat_a, n1, m1);
+                mat_csr_read(fp1, &mat_a);
 
                 printf("Matrix 1:\n");
                 mat_print(stdout, &mat_a, mat_a.base);
             }
             if (fscanf(fp2, "%zu%zu", &n2, &m2) == 2)
             {
-                mat_a_create(&mat_b, n2, m2);
-                mat_a_read(fp2, &mat_b);
+                mat_csr_create(&mat_b, n2, m2);
+                mat_csr_read(fp2, &mat_b);
 
                 printf("\nMatrix 2:\n");
                 mat_print(stdout, &mat_b, mat_b.base);
             }
 
-            mat_a_create(&res, n1, m2);
+            mat_csr_create(&res, n1, m2);
             mat_multiply(&mat_a, mat_a.base, &mat_b, mat_b.base, &res, res.base);
 
             printf("\nResult:\n");
             mat_print(stdout, &res, res.base);
 
-            mat_a_free(&mat_a);
-            mat_a_free(&mat_b);
-            mat_a_free(&res);
+            mat_csr_free(&mat_a);
+            mat_csr_free(&mat_b);
+            mat_csr_free(&res);
 
             fclose(fp2);
         }
