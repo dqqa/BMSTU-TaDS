@@ -1,6 +1,6 @@
 #include "errors.h"
-#include "mat_csr.h"
 #include "mat_csc.h"
+#include "mat_csr.h"
 #include <stdio.h>
 
 /*
@@ -31,9 +31,11 @@ int main(int argc, char **argv)
         FILE *fp2 = fopen(argv[2], "r");
         if (fp2)
         {
-            mat_csr_t mat_a = {0}, mat_b = {0};
-            mat_csr_t res = {0};
+            mat_csr_t mat_a = {0};
+            mat_csc_t mat_b = {0};
             size_t n1, m1, n2, m2;
+            mat_csr_t res = {0};
+
             if (fscanf(fp1, "%zu%zu", &n1, &m1) == 2)
             {
                 mat_csr_create(&mat_a, n1, m1);
@@ -44,8 +46,8 @@ int main(int argc, char **argv)
             }
             if (fscanf(fp2, "%zu%zu", &n2, &m2) == 2)
             {
-                mat_csr_create(&mat_b, n2, m2);
-                mat_csr_read(fp2, &mat_b);
+                mat_csc_create(&mat_b, n2, m2);
+                mat_csc_read(fp2, &mat_b);
 
                 printf("\nMatrix 2:\n");
                 mat_print(stdout, &mat_b, mat_b.base);
@@ -56,6 +58,13 @@ int main(int argc, char **argv)
 
             printf("\nResult:\n");
             mat_print(stdout, &res, res.base);
+
+            printf("Внутреннее представление 1-й матрицы:\n");
+            mat_csr_print_internal(&mat_a);
+            printf("Внутреннее представление 2-й матрицы:\n");
+            mat_csc_print_internal(&mat_b);
+            printf("Внутреннее представление результирующей матрицы:\n");
+            mat_csr_print_internal(&res);
 
             mat_csr_free(&mat_a);
             mat_csr_free(&mat_b);
