@@ -40,7 +40,7 @@ int main(int argc, char **argv)
                 mat_a_read(fp1, &mat_a);
 
                 printf("Matrix 1:\n");
-                mat_a_save(stdout, &mat_a);
+                mat_print(stdout, &mat_a, mat_a.base);
             }
             if (fscanf(fp2, "%zu%zu", &n2, &m2) == 2)
             {
@@ -48,19 +48,19 @@ int main(int argc, char **argv)
                 mat_a_read(fp2, &mat_b);
 
                 printf("\nMatrix 2:\n");
-                mat_a_save(stdout, &mat_b);
+                mat_print(stdout, &mat_b, mat_b.base);
             }
 
             mat_a_create(&res, n1, m2);
             mat_multiply(&mat_a, mat_a.base, &mat_b, mat_b.base, &res, res.base);
 
-            printf("Result:\n");
-            mat_a_save(stdout, &res);
-            
+            printf("\nResult:\n");
+            mat_print(stdout, &res, res.base);
+
             mat_a_free(&mat_a);
             mat_a_free(&mat_b);
             mat_a_free(&res);
-            
+
             fclose(fp2);
         }
         fclose(fp1);

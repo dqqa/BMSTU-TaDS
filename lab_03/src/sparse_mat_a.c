@@ -60,7 +60,6 @@ void mat_a_free(mat_a_t *mat)
     free(mat->row_ptrs);
 }
 
-// TODO: check this
 int mat_a_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
 {
     const mat_a_t *mat = src;
@@ -215,22 +214,6 @@ int mat_a_read(FILE *fp, mat_a_t *mat)
             if ((rc = mat_a_set_element(mat, i, j, &el) != ERR_OK))
                 return rc;
         }
-    }
-    return ERR_OK;
-}
-
-int mat_a_save(FILE *fp, const mat_a_t *mat)
-{
-    for (size_t i = 0; i < mat->base.n; i++)
-    {
-        for (size_t j = 0; j < mat->base.m; j++)
-        {
-            DATA_TYPE el;
-            mat_a_get_element(mat, i, j, &el);
-            if (fprintf(fp, "%3" DATA_PRI " ", el) < 0)
-                return ERR_IO;
-        }
-        fprintf(fp, "\n");
     }
     return ERR_OK;
 }

@@ -32,3 +32,19 @@ int mat_multiply(const void *mat1, mat_common_t mat1_props, const void *mat2, ma
     }
     return ERR_OK;
 }
+
+int mat_print(FILE *fp, const void *mat, mat_common_t mat_props)
+{
+    for (size_t i = 0; i < mat_props.n; i++)
+    {
+        for (size_t j = 0; j < mat_props.m; j++)
+        {
+            DATA_TYPE el;
+            mat_props.getter(mat, i, j, &el);
+            if (fprintf(fp, "%3" DATA_PRI " ", el) < 0)
+                return ERR_IO;
+        }
+        fprintf(fp, "\n");
+    }
+    return ERR_OK;
+}
