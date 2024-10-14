@@ -8,6 +8,7 @@
 #define DATA_TYPE uint32_t
 #define DATA_PRI PRIu32
 #define DATA_SCN SCNu32
+#define DATA_CMP_EQ(a, b) ((a) == (b))
 
 typedef int (*mat_getter_t)(const void *mat, size_t i, size_t j, DATA_TYPE *dst);
 typedef int (*mat_setter_t)(void *mat, size_t i, size_t j, const DATA_TYPE *src);

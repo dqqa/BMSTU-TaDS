@@ -123,15 +123,48 @@ int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     int rc = mat_a_get_element(dst, i, j, &tmp);
     if (rc == ERR_OK) // if element in mat[i][j] != 0
     {
-        for (size_t ii = 0; ii < nz_el_count; ii++)
+        if (*src != 0)
         {
-            if (mat->col_indices[cur_row + ii] == j)
+            for (size_t ii = 0; ii < nz_el_count; ii++)
             {
-                mat->data[mat->col_indices[cur_row + ii]] = *src;
-                return ERR_OK;
+                if (mat->col_indices[cur_row + ii] == j)
+                {
+                    mat->data[mat->col_indices[cur_row + ii]] = *src;
+                    return ERR_OK;
+                }
             }
         }
         // TODO: if new element == 0, then change smth
+        else // TODO: DATA_CMP_EQ
+        {
+            // shrink
+            size_t ind = 0;
+            for (size_t i = 0; i < next_row - cur_row; i++)
+            {
+                if (mat->col_indices[cur_row + i] == j)
+                {
+                    ind = i;
+                    break;
+                }
+            }
+
+            memmove(mat->col_indices + cur_row + ind, mat->col_indices + cur_row + ind + 1, sizeof(size_t) * (mat->col_indices_cnt - cur_row - ind));
+            memmove(mat->data + cur_row + ind, mat->data + cur_row + ind + 1, sizeof(DATA_TYPE) * (mat->data_cnt - cur_row - ind));
+
+            DATA_TYPE *tmp_data = realloc(mat->data, sizeof(*mat->data) * (mat->data_cnt - 1));
+            if (!tmp_data)
+                return ERR_ALLOC;
+            mat->data = tmp_data;
+
+            size_t *tmp_col_indices = realloc(mat->col_indices, sizeof(*mat->col_indices) * (mat->col_indices_cnt - 1));
+            if (!tmp_col_indices)
+                return ERR_ALLOC;
+            mat->col_indices = tmp_col_indices;
+            
+            // decrement
+            for (size_t ii = i + 1; ii < mat->row_ptrs_cnt; ii++)
+                mat->row_ptrs[ii]--;
+        }
     }
 
     if (*src == 0)
