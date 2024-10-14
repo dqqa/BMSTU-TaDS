@@ -24,5 +24,6 @@ typedef struct __mat_common
 
 int mat_multiply(const void *mat1, mat_common_t mat1_props, const void *mat2, mat_common_t mat2_props, void *result, mat_common_t result_props);
 int mat_print(FILE *fp, const void *mat, mat_common_t mat_props);
+void mat_fill_rnd(void *mat, mat_common_t mat_props, int percent);
 
 #endif // COMMON_H__

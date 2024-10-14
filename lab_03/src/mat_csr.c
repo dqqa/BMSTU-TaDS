@@ -19,7 +19,7 @@ int mat_csr_create(mat_csr_t *mat, size_t n, size_t m)
     mat->col_indices = NULL;
     mat->row_ptrs = NULL;
 
-    mat->data = malloc(sizeof(size_t));
+    mat->data = malloc(sizeof(DATA_TYPE));
     mat->data_cnt = 1;
     if (!mat->data)
     {
@@ -122,7 +122,7 @@ int mat_csr_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     int rc = mat_csr_get_element(dst, i, j, &tmp);
     if (rc == ERR_OK) // if element in mat[i][j] != 0
     {
-        if (*src != 0)
+        if (!DATA_CMP_EQ(*src, 0))
         {
             for (size_t ii = 0; ii < nz_el_count; ii++)
             {
@@ -133,7 +133,7 @@ int mat_csr_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
                 }
             }
         }
-        else // TODO: DATA_CMP_EQ
+        else
         {
             // shrink
             size_t ind = 0;
@@ -230,20 +230,20 @@ static size_t csr_calc_size(const mat_csr_t *mat)
 
 void mat_csr_print_internal(const mat_csr_t *mat)
 {
-    printf("Массив значений:         {");
-    for (size_t i = 0; i < mat->data_cnt - 1; i++)
-        printf(i == mat->data_cnt - 2 ? "%" DATA_PRI : "%" DATA_PRI ", ", mat->data[i]);
-    printf("}\n");
+    // printf("Массив значений:         {");
+    // for (size_t i = 0; i < mat->data_cnt - 1; i++)
+    //     printf(i == mat->data_cnt - 2 ? "%" DATA_PRI : "%" DATA_PRI ", ", mat->data[i]);
+    // printf("}\n");
 
-    printf("Индексы столбцов:        {");
-    for (size_t i = 0; i < mat->col_indices_cnt - 1; i++)
-        printf(i == mat->col_indices_cnt - 2 ? "%zu" : "%zu, ", mat->col_indices[i]);
-    printf("}\n");
+    // printf("Индексы столбцов:        {");
+    // for (size_t i = 0; i < mat->col_indices_cnt - 1; i++)
+    //     printf(i == mat->col_indices_cnt - 2 ? "%zu" : "%zu, ", mat->col_indices[i]);
+    // printf("}\n");
 
-    printf("Массив индексации строк: {");
-    for (size_t i = 0; i < mat->row_ptrs_cnt; i++)
-        printf(i == mat->row_ptrs_cnt - 1 ? "%zu" : "%zu, ", mat->row_ptrs[i]);
-    printf("}\n");
+    // printf("Массив индексации строк: {");
+    // for (size_t i = 0; i < mat->row_ptrs_cnt; i++)
+    //     printf(i == mat->row_ptrs_cnt - 1 ? "%zu" : "%zu, ", mat->row_ptrs[i]);
+    // printf("}\n");
 
     printf("Размер структуры CSR: %zu байт\n", csr_calc_size(mat));
 }
