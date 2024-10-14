@@ -33,8 +33,10 @@ int main(int argc, char **argv)
         if (fscanf(fp, "%zu%zu", &n, &m) == 2)
         {
             mat_a_create(&mat_a, n, m);
-            mat_a_read(fp, n, m, &mat_a);
+            mat_a_read(fp, &mat_a);
             
+            mat_a_save(stdout, &mat_a);
+
             mat_a_free(&mat_a);
         }
         fclose(fp);

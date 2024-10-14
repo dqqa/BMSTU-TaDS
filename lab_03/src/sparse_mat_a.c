@@ -80,7 +80,7 @@ int mat_a_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
         if (mat->col_indices[cur_row + ii] == j)
         {
             found = true;
-            *dst = mat->data[mat->col_indices[cur_row + ii]];
+            *dst = mat->data[cur_row + ii];
         }
     }
 
@@ -94,11 +94,11 @@ int mat_a_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
 
 static size_t get_min_ind(size_t *arr, size_t size, size_t val)
 {
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = size; i-- > 0;)
         if (arr[i] < val)
-            return i;
+            return i + 1;
 
-    return size;
+    return 0;
 }
 
 /*
@@ -133,11 +133,13 @@ int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
         }
         // TODO: if new element == 0, then change smth
     }
+
+    if (*src == 0)
+        return ERR_OK;
+
     // if element in mat[i][j] == 0
     // then we should increment row_ptrs after i-th with 1
     // then insert into data array and col_indicies array following data
-    if (*src == 0)
-        return ERR_OK;
 
     size_t new_col = get_min_ind(mat->col_indices + cur_row, nz_el_count, j);
 
@@ -151,13 +153,13 @@ int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
         return ERR_ALLOC;
     mat->col_indices = tmp_col_indices;
 
-    memmove(mat->col_indices + new_col + 1, mat->col_indices + new_col, sizeof(size_t) * (mat->col_indices_cnt - new_col));
-    memmove(mat->data + new_col + 1, mat->data + new_col, sizeof(DATA_TYPE) * (mat->data_cnt - new_col));
+    memmove(mat->col_indices + cur_row + new_col + 1, mat->col_indices + cur_row + new_col, sizeof(size_t) * (mat->col_indices_cnt - cur_row - new_col));
+    memmove(mat->data + cur_row + new_col + 1, mat->data + cur_row + new_col, sizeof(DATA_TYPE) * (mat->data_cnt - new_col - cur_row));
 
-    mat->col_indices[new_col] = j;
+    mat->col_indices[cur_row + new_col] = j;
     mat->col_indices_cnt++;
 
-    mat->data[new_col] = *src;
+    mat->data[cur_row + new_col] = *src;
     mat->data_cnt++;
 
     for (size_t ii = i + 1; ii < mat->row_ptrs_cnt; ii++)
@@ -166,11 +168,11 @@ int mat_a_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     return ERR_OK;
 }
 
-int mat_a_read(FILE *fp, size_t n, size_t m, mat_a_t *mat)
+int mat_a_read(FILE *fp, mat_a_t *mat)
 {
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < mat->base.n; i++)
     {
-        for (size_t j = 0; j < m; j++)
+        for (size_t j = 0; j < mat->base.m; j++)
         {
             DATA_TYPE el;
             if (fscanf(fp, "%" DATA_SCN, &el) != 1)
@@ -184,4 +186,18 @@ int mat_a_read(FILE *fp, size_t n, size_t m, mat_a_t *mat)
     return ERR_OK;
 }
 
-int mat_a_save(FILE *fp, size_t n, size_t m, const mat_a_t *mat);
+int mat_a_save(FILE *fp, const mat_a_t *mat)
+{
+    for (size_t i = 0; i < mat->base.n; i++)
+    {
+        for (size_t j = 0; j < mat->base.m; j++)
+        {
+            DATA_TYPE el;
+            mat_a_get_element(mat, i, j, &el);
+            if (fprintf(fp, "%3" DATA_PRI " ", el) < 0)
+                return ERR_IO;
+        }
+        fprintf(fp, "\n");
+    }
+    return ERR_OK;
+}
