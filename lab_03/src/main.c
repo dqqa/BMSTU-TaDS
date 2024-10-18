@@ -169,6 +169,19 @@ int main(void)
                 }
             }
         }
+        else if (op == OP_EDIT)
+        {
+            printf("TODO");
+        }
+        else if (op == OP_PERF)
+        {
+            printf("TODO");
+        }
+        else if (op == OP_MULT_STD)
+        {
+            printf("TODO");
+        }
+
         if (rc != ERR_OK)
             printf("Ошибка!\n");
     }
