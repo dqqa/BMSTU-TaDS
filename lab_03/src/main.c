@@ -14,56 +14,41 @@ TODO:
    при различном проценте их заполенения.
 */
 
-static int str_input(char *buf, size_t buf_size)
-{
-    if (!fgets(buf, buf_size, stdin))
-        return ERR_IO;
-
-    char *newline = strchr(buf, '\n');
-    if (newline)
-        *newline = 0;
-    else
-        return ERR_OVERFLOW;
-
-    return ERR_OK;
-}
-
 typedef enum
 {
     OP_EXIT,
-    OP_LOAD_1,
-    OP_LOAD_2,
-    OP_FILL_RND,
-    OP_MULT,
-    OP_EDIT_COORD,
-    OP_CMP,
+    OP_LOAD,
+    OP_PRINT,
+    OP_PRINT_INTERNAL,
+    OP_MULT_STD,
+    OP_MULT_SPARSE,
+    OP_EDIT,
+    OP_PERF,
     OP_COUNT,
     OP_UNKNOWN,
-    OP_EOF,
-} operation_t;
+    OP_EOF
+} op_t;
 
-operation_t get_operaion(void)
+op_t get_op(void)
 {
     printf("0. Выйти\n"
-           "1. Загрузить 1-ю матрицу из файла\n"
-           "2. Загрузить 2-ю матрицу из файла\n"
-           "3. Заполнить случайно матрицу\n"
-           "4. Умножить две матрицы\n"
-           "5. Редактировать матрицу\n"
-           "6. Сравнить эффективность хранения\n");
+           "1. Заполнить матрицы\n"
+           "2. Вывести матрицы\n"
+           "3. Вывести внутреннее представление матриц\n"
+           "4. Умножить матрицы (массив массивов)\n"
+           "5. Умножить матрицы (разреженные)\n"
+           "6. Редактировать матрицу\n"
+           "7. Сравнить эффективность\n");
     printf("Введите номер операции: ");
     int input;
     int rc = scanf("%d", &input);
     getchar();
     if (rc < 0)
         return OP_EOF;
-    if (rc == 0)
+    if (rc == 0 || input >= OP_COUNT || input < 0)
         return OP_UNKNOWN;
 
-    if (input >= OP_COUNT || input < 0)
-        return OP_UNKNOWN;
-
-    return (operation_t)input;
+    return (op_t)input;
 }
 
 void print_usage(void)
@@ -84,102 +69,108 @@ void print_guide(void)
 void func(void)
 {
     mat_csr_t mat = {0};
-    if (mat_csr_create(&mat, 1000, 1000) == ERR_OK)
+    if (mat_csr_create(&mat, 3, 3) == ERR_OK)
     {
-        mat_fill_rnd(&mat, mat.base, 40);
-        FILE *fp = fopen("out.txt", "w");
+        // mat_fill_rnd(&mat, mat.base, 40);
+        FILE *fp = fopen("out.txt", "r");
         if (fp)
         {
-            // mat_print(fp, &mat, mat.base);
+            mat_csc_read(fp, &mat);
+            mat_csc_print_internal(&mat);
             fclose(fp);
         }
-        mat_csr_print_internal(&mat);
+        // mat_csr_print_internal(&mat);
         mat_csr_free(&mat);
     }
 }
 
-int main()
+int main(void)
 {
     print_guide();
-    // if (argc != 3)
-    // {
-    //     print_usage();
-    //     return ERR_ARGS;
-    // }
 
-    FILE *fp1 = NULL;
-    FILE *fp2 = NULL;
-    bool mat1_created = false, mat2_created = false;
-    mat_csr_t mat1;
-    mat_csc_t mat2;
-    mat_csr_t res;
+    FILE *fp1 = NULL, *fp2 = NULL;
 
-err:
-    while (1)
+    bool mat1_created = false, mat2_created = false, res_created = false;
+    bool need_exit = false;
+    mat_csr_t mat1 = {0}, res = {0};
+    mat_csc_t mat2 = {0};
+
+    int rc = ERR_OK;
+    while (!need_exit)
     {
-        operation_t op = get_operaion();
+        op_t op = get_op();
         if (op == OP_EXIT || op == OP_EOF)
         {
+            need_exit = true;
             break;
         }
-        else if (op == OP_LOAD_1)
+        else if (op == OP_LOAD)
         {
-            if (mat1_created)
+            if (!mat1_created)
             {
-                printf("Эта матрица уже введена\n");
-                goto err;
-            }
-            printf("Введите путь до 1 матрицы: ");
-            char buf[100];
-            if (str_input(buf, sizeof(buf)) == ERR_OK)
-            {
-                fp1 = fopen(buf, "r");
-                if (!fp1)
-                    printf("Ошибка. Такого пути не существует\n");
-                else
-                {
-                    size_t n, m;
-                    if (fscanf(fp1, "%zu%zu", &n, &m) != 2)
-                        goto err;
-                    mat_csc_create(&mat1, n, m);
-                    mat_csc_read(fp1, &mat1);
+                rc = mat_fill_ex(&mat1, MAT_CSR);
+                if (rc == ERR_OK)
                     mat1_created = true;
-                }
             }
+            else
+                printf("Матрица 1 уже загружена!\n");
+
+            if (!mat2_created)
+            {
+                rc = mat_fill_ex(&mat2, MAT_CSC);
+                if (rc == ERR_OK)
+                    mat2_created = true;
+            }
+            else
+                printf("Матрица 2 уже загружена!\n");
         }
-        else if (op == OP_LOAD_2)
+        else if (op == OP_PRINT_INTERNAL)
         {
-            if (mat2_created)
+            printf("Матрица 1:\n");
+            mat_csr_print_internal(&mat1);
+
+            printf("\nМатрица 2:\n");
+            mat_csc_print_internal(&mat2);
+        }
+        else if (op == OP_PRINT)
+        {
+            printf("Матрица 1:\n");
+            mat_print(stdout, &mat1, mat1.base);
+
+            printf("\nМатрица 2:\n");
+            mat_print(stdout, &mat2, mat2.base);
+        }
+        else if (op == OP_MULT_SPARSE)
+        {
+            if (res_created)
             {
-                printf("Эта матрица уже введена\n");
-                goto err;
+                printf("Результирующая матрица:\n");
+                mat_print(stdout, &res, res.base);
             }
-            printf("Введите путь до 2 матрицы: ");
-            char buf[100];
-            if (str_input(buf, sizeof(buf)) == ERR_OK)
+            else
             {
-                fp2 = fopen(buf, "r");
-                if (!fp2)
-                    printf("Ошибка. Такого пути не существует\n");
+                if (!(mat1_created && mat2_created))
+                    printf("Необходимо загрузить две матрицы!\n");
                 else
                 {
-                    size_t n, m;
-                    if (fscanf(fp2, "%zu%zu", &n, &m) != 2)
-                        goto err;
-                    mat_csc_create(&mat2, n, m);
-                    mat_csc_read(fp2, &mat2);
-                    mat2_created = true;
+                    rc = mat_csr_create(&res, mat1.base.m, mat2.base.n);
+                    if (rc == ERR_OK)
+                        rc = mat_multiply(&mat1, mat1.base, &mat2, mat2.base, &res, res.base);
+                    else
+                        printf("Невозможно создать матрицу\n");
+                    if (rc == ERR_OK)
+                    {
+                        printf("Результирующая матрица:\n");
+                        mat_print(stdout, &res, res.base);
+                        res_created = true;
+                    }
+                    else
+                        printf("Невозможно умножить эти две матрицы\n");
                 }
             }
         }
-        else if (op == OP_MULT)
-        {
-            mat_csr_create(&res, mat1.base.n, mat2.base.m);
-            if (mat_multiply(&mat1, mat1.base, &mat2, mat2.base, &res, res.base) != ERR_OK)
-                printf("Ошибка при умножении матрицы\n");
-            else
-                mat_print(stdout, &res, res.base);
-        }
+        if (rc != ERR_OK)
+            printf("Ошибка!\n");
     }
 
     if (fp1)

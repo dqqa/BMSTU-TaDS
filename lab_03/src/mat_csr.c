@@ -7,6 +7,7 @@
 int mat_csr_create(mat_csr_t *mat, size_t n, size_t m)
 {
     int rc;
+    mat->base.type = MAT_CSR;
 
     /* vtable emulation :) */
     mat->base.getter = mat_csr_get_element;
@@ -45,7 +46,7 @@ int mat_csr_create(mat_csr_t *mat, size_t n, size_t m)
 
     return ERR_OK;
 
-cleanup:
+    cleanup:
     free(mat->data);
     free(mat->row_ptrs);
     free(mat->col_indices);
@@ -55,9 +56,12 @@ cleanup:
 
 void mat_csr_free(mat_csr_t *mat)
 {
-    free(mat->data);
-    free(mat->col_indices);
-    free(mat->row_ptrs);
+    if (mat->data)
+        free(mat->data);
+    if (mat->col_indices)
+        free(mat->col_indices);
+    if (mat->row_ptrs)
+        free(mat->row_ptrs);
 }
 
 int mat_csr_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
@@ -230,20 +234,51 @@ static size_t csr_calc_size(const mat_csr_t *mat)
 
 void mat_csr_print_internal(const mat_csr_t *mat)
 {
-    // printf("Массив значений:         {");
-    // for (size_t i = 0; i < mat->data_cnt - 1; i++)
-    //     printf(i == mat->data_cnt - 2 ? "%" DATA_PRI : "%" DATA_PRI ", ", mat->data[i]);
-    // printf("}\n");
+    printf("Массив значений:         {");
+    for (size_t i = 0; i < mat->data_cnt - 1; i++)
+        printf(i == mat->data_cnt - 2 ? "%" DATA_PRI : "%" DATA_PRI ", ", mat->data[i]);
+    printf("}\n");
 
-    // printf("Индексы столбцов:        {");
-    // for (size_t i = 0; i < mat->col_indices_cnt - 1; i++)
-    //     printf(i == mat->col_indices_cnt - 2 ? "%zu" : "%zu, ", mat->col_indices[i]);
-    // printf("}\n");
+    printf("Индексы столбцов:        {");
+    for (size_t i = 0; i < mat->col_indices_cnt - 1; i++)
+        printf(i == mat->col_indices_cnt - 2 ? "%zu" : "%zu, ", mat->col_indices[i]);
+    printf("}\n");
 
-    // printf("Массив индексации строк: {");
-    // for (size_t i = 0; i < mat->row_ptrs_cnt; i++)
-    //     printf(i == mat->row_ptrs_cnt - 1 ? "%zu" : "%zu, ", mat->row_ptrs[i]);
-    // printf("}\n");
+    printf("Массив индексации строк: {");
+    for (size_t i = 0; i < mat->row_ptrs_cnt; i++)
+        printf(i == mat->row_ptrs_cnt - 1 ? "%zu" : "%zu, ", mat->row_ptrs[i]);
+    printf("}\n");
 
     printf("Размер структуры CSR: %zu байт\n", csr_calc_size(mat));
+}
+
+/**
+ * @brief Выделить память и заполнить матрицу CSR
+ *
+ * @param filename Путь
+ * @param mat Указатель на матрицу в формате CSR
+ * @return int код ошибки
+ */
+int mat_csr_read_ex(const char *filename, mat_csr_t *mat)
+{
+    FILE *fp = fopen(filename, "r");
+    if (!fp)
+        return ERR_IO;
+
+    int rc = ERR_OK;
+    size_t n, m;
+    if (fscanf(fp, "%zu%zu", &n, &m) != 2)
+    {
+        rc = ERR_IO;
+        goto cleanup;
+    }
+
+    if ((rc = mat_csr_create(mat, n, m)) != ERR_OK)
+        goto cleanup;
+
+    rc = mat_csr_read(fp, mat);
+
+    cleanup:
+    fclose(fp);
+    return rc;
 }

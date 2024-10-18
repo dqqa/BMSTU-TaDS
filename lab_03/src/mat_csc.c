@@ -9,6 +9,7 @@
 int mat_csc_create(mat_csc_t *mat, size_t n, size_t m)
 {
     int rc;
+    mat->base.type = MAT_CSC;
 
     /* vtable emulation :) */
     mat->base.getter = mat_csc_get_element;
@@ -47,7 +48,7 @@ int mat_csc_create(mat_csc_t *mat, size_t n, size_t m)
 
     return ERR_OK;
 
-cleanup:
+    cleanup:
     free(mat->data);
     free(mat->row_ptrs);
     free(mat->col_indices);
@@ -57,9 +58,12 @@ cleanup:
 
 void mat_csc_free(mat_csc_t *mat)
 {
-    free(mat->col_indices);
-    free(mat->row_ptrs);
-    free(mat->data);
+    if (mat->data)
+        free(mat->data);
+    if (mat->col_indices)
+        free(mat->col_indices);
+    if (mat->row_ptrs)
+        free(mat->row_ptrs);
 }
 
 int mat_csc_read(FILE *fp, mat_csc_t *mat)
@@ -180,7 +184,7 @@ int mat_csc_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     if (*src == 0)
         return ERR_OK;
 
-    // if element in mat[i][j] == 0
+    // if element in mat[i][j] == 0 && src != 0
     // then we should increment row_ptrs after i-th with 1
     // then insert into data array and col_indicies array following data
 
@@ -240,4 +244,35 @@ void mat_csc_print_internal(const mat_csc_t *mat)
     printf("}\n");
 
     printf("Размер структуры CSC: %zu байт\n", csc_calc_size(mat));
+}
+
+/**
+ * @brief Выделить память и заполнить матрицу CSC
+ *
+ * @param filename Путь
+ * @param mat Указатель на матрицу в формате CSC
+ * @return int код ошибки
+ */
+int mat_csc_read_ex(const char *filename, mat_csc_t *mat)
+{
+    FILE *fp = fopen(filename, "r");
+    if (!fp)
+        return ERR_IO;
+
+    int rc = ERR_OK;
+    size_t n, m;
+    if (fscanf(fp, "%zu%zu", &n, &m) != 2)
+    {
+        rc = ERR_IO;
+        goto cleanup;
+    }
+
+    if ((rc = mat_csc_create(mat, n, m)) != ERR_OK)
+        goto cleanup;
+
+    rc = mat_csc_read(fp, mat);
+
+    cleanup:
+    fclose(fp);
+    return rc;
 }

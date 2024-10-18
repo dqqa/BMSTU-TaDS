@@ -24,6 +24,7 @@ int mat_csr_create(mat_csr_t *mat, size_t n, size_t m);
 void mat_csr_free(mat_csr_t *mat);
 
 int mat_csr_read(FILE *fp, mat_csr_t *mat);
+int mat_csr_read_ex(const char *filename, mat_csr_t *mat);
 
 int mat_csr_get_element(const void *mat, size_t i, size_t j, DATA_TYPE *dst);
 int mat_csr_set_element(void *mat, size_t i, size_t j, const DATA_TYPE *src);
