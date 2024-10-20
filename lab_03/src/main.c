@@ -1,10 +1,12 @@
 #include "errors.h"
 #include "mat_csc.h"
 #include "mat_csr.h"
+#include "mat_std.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 /*
 TODO:
@@ -14,6 +16,8 @@ TODO:
 3. Сравнение времени выполнения операций и объем памяти при использовании этих 2-х алг.
    при различном проценте их заполенения.
 */
+
+#define PERF_REPEATS 5
 
 typedef enum
 {
@@ -32,6 +36,7 @@ typedef enum
 
 op_t get_op(void)
 {
+    printf("\n");
     printf("0. Выйти\n"
            "1. Заполнить матрицы\n"
            "2. Вывести матрицы\n"
@@ -67,9 +72,89 @@ void print_guide(void)
            "  - На последующих строках файла содержится целочисленная матрица\n\n");
 }
 
-bool check_if_input_needed(const char *inp)
+static int mat_cpy(void *dst, mat_common_t dst_props, const void *src, mat_common_t src_props)
 {
-    return strcasecmp(inp, "y") == 0;
+    if (dst_props.n != src_props.n || dst_props.m != src_props.m)
+        return ERR_PARAMS;
+
+    for (size_t i = 0; i < src_props.n; i++)
+    {
+        for (size_t j = 0; j < src_props.m; j++)
+        {
+            DATA_TYPE el;
+            src_props.getter(src, i, j, &el);
+            dst_props.setter(dst, i, j, &el);
+        }
+    }
+    return ERR_OK;
+}
+
+int performance_comparison(void)
+{
+    struct timespec start, end;
+    mat_csr_t csr_mat1 = {0}, csr_mat2 = {0}, csr_res = {0};
+    mat_std_t std_mat1 = {0}, std_mat2 = {0}, std_res = {0};
+    int rc = ERR_OK;
+
+    for (size_t p = 10; rc == ERR_OK && p <= 100; p += 20)
+    {
+        for (size_t s = 10; rc == ERR_OK && s <= 100; s += 10)
+        {
+            if ((rc = mat_csr_create(&csr_mat1, s, s)) != ERR_OK)
+                goto cleanup;
+            if ((rc = mat_csr_create(&csr_mat2, s, s)) != ERR_OK)
+                goto cleanup;
+            if ((rc = mat_csr_create(&csr_res, s, s)) != ERR_OK)
+                goto cleanup;
+
+            if ((rc = mat_std_create(&std_mat1, s, s)) != ERR_OK)
+                goto cleanup;
+            if ((rc = mat_std_create(&std_mat2, s, s)) != ERR_OK)
+                goto cleanup;
+            if ((rc = mat_std_create(&std_res, s, s)) != ERR_OK)
+                goto cleanup;
+
+            mat_fill_rnd(&csr_mat1, csr_mat1.base, p);
+            mat_fill_rnd(&csr_mat2, csr_mat2.base, p);
+
+            printf("Размер: %zux%zu. Заполнение: %zu%%.\n", s, s, p);
+
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            // for (size_t i = 0; i < PERF_REPEATS; i++) // without mat_free() memory errors!
+            mat_multiply(&csr_mat1, csr_mat1.base, &csr_mat2, csr_mat2.base, &csr_res, csr_res.base);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
+            double t1 = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec)) / 2000;
+            // t /= PERF_REPEATS;
+
+            mat_cpy(&std_mat1, std_mat1.base, &csr_mat1, csr_mat1.base);
+            mat_cpy(&std_mat2, std_mat2.base, &csr_mat2, csr_mat2.base);
+
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            // for (size_t i = 0; i < PERF_REPEATS; i++) // without mat_free() memory errors!
+            mat_multiply(&std_mat1, std_mat1.base, &std_mat2, std_mat2.base, &std_res, std_res.base);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
+            double t2 = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec)) / 1000;
+            // t /= PERF_REPEATS;
+
+            float csr_size = csr_calc_size(&csr_mat1);
+            float std_size = std_calc_size(&std_mat1);
+            printf("  Размер CSR=%10.0f, STD=%10.0f. Эффективность: %+.2f%%\n", csr_size, std_size, (std_size - csr_size) / std_size * 100);
+            printf("  Время  CSR=%10.2f, STD=%10.2f. Эффективность: %+.2f%%\n", t1, t2, (t2 - t1) / t2 * 100);
+
+            cleanup:
+            mat_csr_free(&csr_mat1);
+            mat_csr_free(&csr_mat2);
+            mat_csr_free(&csr_res);
+
+            mat_std_free(&std_mat1);
+            mat_std_free(&std_mat2);
+            mat_std_free(&std_res);
+        }
+    }
+
+    return rc;
 }
 
 int main(void)
@@ -114,19 +199,31 @@ int main(void)
         }
         else if (op == OP_PRINT_INTERNAL)
         {
-            printf("Матрица 1:\n");
-            mat_csr_print_internal(&mat1);
+            if (mat1.data)
+            {
+                printf("Матрица 1:\n");
+                mat_csr_print_internal(&mat1);
+            }
 
-            printf("\nМатрица 2:\n");
-            mat_csc_print_internal(&mat2);
+            if (mat2.data)
+            {
+                printf("\nМатрица 2:\n");
+                mat_csc_print_internal(&mat2);
+            }
         }
         else if (op == OP_PRINT)
         {
-            printf("Матрица 1:\n");
-            mat_print(stdout, &mat1, mat1.base);
-
-            printf("\nМатрица 2:\n");
-            mat_print(stdout, &mat2, mat2.base);
+            if (mat1.data)
+            {
+                printf("Матрица 1:\n");
+                mat_print(stdout, &mat1, mat1.base);
+            }
+            
+            if (mat2.data)
+            {
+                printf("\nМатрица 2:\n");
+                mat_print(stdout, &mat2, mat2.base);
+            }
         }
         else if (op == OP_MULT_SPARSE)
         {
@@ -215,11 +312,35 @@ int main(void)
         }
         else if (op == OP_PERF)
         {
-            printf("TODO");
+            rc = performance_comparison();
         }
         else if (op == OP_MULT_STD)
         {
-            printf("TODO");
+            char buf[128];
+            mat_std_t mat1 = {0}, mat2 = {0}, res = {0};
+            printf("Введите путь до файла с 1-й матрицей: ");
+            str_input(buf, sizeof(buf));
+            if ((rc = mat_std_read_ex(buf, &mat1)) != ERR_OK)
+                goto cleanup;
+
+            printf("Введите путь до файла со 2-й матрицей: ");
+            str_input(buf, sizeof(buf));
+            if ((rc = mat_std_read_ex(buf, &mat2)) != ERR_OK)
+                goto cleanup;
+
+            if ((rc = mat_std_create(&res, mat1.base.m, mat2.base.n)) != ERR_OK)
+                goto cleanup;
+
+            if ((rc = mat_multiply(&mat1, mat1.base, &mat2, mat2.base, &res, res.base)) != ERR_OK)
+                goto cleanup;
+
+            printf("Результирующая матрица:\n");
+            mat_print(stdout, &res, res.base);
+
+            cleanup:
+            mat_std_free(&mat1);
+            mat_std_free(&mat2);
+            mat_std_free(&res);
         }
         err:
         if (rc != ERR_OK)

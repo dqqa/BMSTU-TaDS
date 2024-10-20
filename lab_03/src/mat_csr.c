@@ -20,7 +20,7 @@ int mat_csr_create(mat_csr_t *mat, size_t n, size_t m)
     mat->col_indices = NULL;
     mat->row_ptrs = NULL;
 
-    mat->data = malloc(sizeof(DATA_TYPE));
+    mat->data = calloc(1, sizeof(DATA_TYPE));
     mat->data_cnt = 1;
     if (!mat->data)
     {
@@ -28,7 +28,7 @@ int mat_csr_create(mat_csr_t *mat, size_t n, size_t m)
         goto cleanup;
     }
 
-    mat->col_indices = malloc(sizeof(size_t));
+    mat->col_indices = calloc(1, sizeof(size_t));
     mat->col_indices_cnt = 1;
     if (!mat->col_indices)
     {
@@ -62,6 +62,8 @@ void mat_csr_free(mat_csr_t *mat)
         free(mat->col_indices);
     if (mat->row_ptrs)
         free(mat->row_ptrs);
+
+    memset(mat, 0, sizeof(*mat));
 }
 
 int mat_csr_get_element(const void *src, size_t i, size_t j, DATA_TYPE *dst)
@@ -163,6 +165,9 @@ int mat_csr_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
                 return ERR_ALLOC;
             mat->col_indices = tmp_col_indices;
 
+            mat->data_cnt--;
+            mat->col_indices_cnt--;
+
             // decrement
             for (size_t ii = i + 1; ii < mat->row_ptrs_cnt; ii++)
                 mat->row_ptrs[ii]--;
@@ -221,10 +226,10 @@ int mat_csr_read(FILE *fp, mat_csr_t *mat)
     return ERR_OK;
 }
 
-static size_t csr_calc_size(const mat_csr_t *mat)
+size_t csr_calc_size(const mat_csr_t *mat)
 {
     size_t result = 0;
-    result += sizeof(mat->base);
+    result += sizeof(mat->base.n) * 2;
     result += mat->data_cnt * sizeof(*mat->data);
     result += mat->row_ptrs_cnt * sizeof(*mat->row_ptrs);
     result += mat->col_indices_cnt * sizeof(*mat->col_indices);

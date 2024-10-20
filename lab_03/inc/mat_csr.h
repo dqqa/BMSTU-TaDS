@@ -29,6 +29,7 @@ int mat_csr_read_ex(const char *filename, mat_csr_t *mat);
 int mat_csr_get_element(const void *mat, size_t i, size_t j, DATA_TYPE *dst);
 int mat_csr_set_element(void *mat, size_t i, size_t j, const DATA_TYPE *src);
 
+size_t csr_calc_size(const mat_csr_t *mat);
 void mat_csr_print_internal(const mat_csr_t *mat);
 
 #endif // MAT_CSR_H__

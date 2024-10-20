@@ -102,4 +102,23 @@ int mat_std_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
     return ERR_OK;
 }
 
-void mat_std_print_internal(const mat_std_t *mat);
+size_t std_calc_size(const mat_std_t *mat)
+{
+    size_t result = 0;
+    result += sizeof(mat->base.n) * 2;
+    result += mat->base.n * sizeof(*mat->rows);
+    result += mat->base.n * mat->base.m * sizeof(**mat->rows);
+
+    return result;
+}
+
+void mat_std_print_internal(const mat_std_t *mat)
+{
+    printf("Массив значений:         {");
+    for (size_t i = 0; i < mat->base.n; i++)
+        for (size_t j = 0; j < mat->base.m; j++)
+            printf(i == mat->base.m - 1 ? "%" DATA_PRI : "%" DATA_PRI ", ", mat->rows[i][j]);
+    printf("}\n");
+
+    printf("Размер структуры STD: %zu байт\n", std_calc_size(mat));
+}

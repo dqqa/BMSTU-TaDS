@@ -6,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 
+#define FILL_RND_MAX 10
+
 static DATA_TYPE calc_mult(const void *mat1, mat_common_t mat1_props, const void *mat2, mat_common_t mat2_props, size_t i, size_t j)
 {
     DATA_TYPE res = 0;
@@ -60,7 +62,7 @@ void mat_fill_rnd(void *mat, mat_common_t mat_props, int percent)
     {
         for (size_t j = 0; j < mat_props.m; j++)
         {
-            DATA_TYPE val = (rand() % 100) < percent ? rand() % 10 : 0;
+            DATA_TYPE val = (rand() % 100) < percent ? rand() % FILL_RND_MAX : 0;
             mat_props.setter(mat, i, j, &val);
         }
     }

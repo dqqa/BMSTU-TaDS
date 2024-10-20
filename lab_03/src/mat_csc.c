@@ -175,6 +175,9 @@ int mat_csc_set_element(void *dst, size_t i, size_t j, const DATA_TYPE *src)
                 return ERR_ALLOC;
             mat->col_indices = tmp_col_indices;
 
+            mat->data_cnt--;
+            mat->col_indices_cnt--;
+
             // decrement
             for (size_t jj = i + 1; jj < mat->row_ptrs_cnt; jj++)
                 mat->row_ptrs[jj]--;
