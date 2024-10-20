@@ -7,7 +7,7 @@
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-#define DATA_TYPE int32_t
+typedef int32_t DATA_TYPE;
 #define DATA_PRI PRId32
 #define DATA_SCN SCNd32
 #define DATA_CMP_EQ(a, b) ((a) == (b))
@@ -28,7 +28,8 @@ typedef int (*mat_setter_t)(void *mat, size_t i, size_t j, const DATA_TYPE *src)
 typedef enum
 {
     MAT_CSR,
-    MAT_CSC
+    MAT_CSC,
+    MAT_STD
 } mat_type_t;
 
 typedef struct __mat_common
@@ -48,5 +49,7 @@ void mat_fill_rnd(void *mat, mat_common_t mat_props, int percent);
 int mat_fill_rnd_ex(void *mat, mat_type_t t);
 
 int mat_fill_ex(void *mat, mat_type_t t);
+
+int str_input(char *buf, size_t buf_size);
 
 #endif // COMMON_H__

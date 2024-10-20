@@ -114,7 +114,7 @@ int mat_read_ex(const char *filename, void *mat, mat_type_t t)
     return rc;
 }
 
-static int str_input(char *buf, size_t buf_size)
+int str_input(char *buf, size_t buf_size)
 {
     if (!fgets(buf, buf_size, stdin))
         return ERR_IO;

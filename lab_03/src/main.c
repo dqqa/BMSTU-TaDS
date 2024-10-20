@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 
 /*
 TODO:
@@ -66,22 +67,9 @@ void print_guide(void)
            "  - На последующих строках файла содержится целочисленная матрица\n\n");
 }
 
-void func(void)
+bool check_if_input_needed(const char *inp)
 {
-    mat_csr_t mat = {0};
-    if (mat_csr_create(&mat, 3, 3) == ERR_OK)
-    {
-        // mat_fill_rnd(&mat, mat.base, 40);
-        FILE *fp = fopen("out.txt", "r");
-        if (fp)
-        {
-            mat_csc_read(fp, &mat);
-            mat_csc_print_internal(&mat);
-            fclose(fp);
-        }
-        // mat_csr_print_internal(&mat);
-        mat_csr_free(&mat);
-    }
+    return strcasecmp(inp, "y") == 0;
 }
 
 int main(void)
@@ -171,7 +159,59 @@ int main(void)
         }
         else if (op == OP_EDIT)
         {
-            printf("TODO");
+            int mat_id;
+            printf("Введите номер матрицы: ");
+            if (scanf("%d", &mat_id) != 1)
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+            if (mat_id > 2 || mat_id < 1)
+            {
+                rc = ERR_RANGE;
+                goto err;
+            }
+            if ((mat_id == 1 && !mat1_created) || (mat_id == 2 && !mat2_created))
+            {
+                rc = ERR_RANGE;
+                goto err;
+            }
+
+            bool need_insert = true;
+            while (need_insert)
+            {
+                printf("Введите строку и столбец: ");
+                size_t i, j;
+                if (scanf("%zu%zu", &i, &j) == 2)
+                {
+                    if (i < 1 || j < 1)
+                    {
+                        rc = ERR_RANGE;
+                        goto err;
+                    }
+
+                    i--;
+                    j--;
+
+                    DATA_TYPE el;
+                    printf("Введите значение: ");
+                    if (scanf("%" DATA_SCN, &el) == 1)
+                    {
+                        if (mat_id == 1)
+                            rc = mat_csr_set_element(&mat1, i, j, &el);
+                        else if (mat_id == 2)
+                            rc = mat_csc_set_element(&mat2, i, j, &el);
+                        else
+                            rc = ERR_RANGE;
+                        getchar();
+                    }
+                }
+
+                char inp[32];
+                printf("Изменить еще? (y, [n]): ");
+                str_input(inp, sizeof(inp));
+                need_insert = strcasecmp(inp, "y") == 0;
+            }
         }
         else if (op == OP_PERF)
         {
@@ -181,7 +221,7 @@ int main(void)
         {
             printf("TODO");
         }
-
+        err:
         if (rc != ERR_OK)
             printf("Ошибка!\n");
     }
