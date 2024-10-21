@@ -227,17 +227,18 @@ int main(void)
         }
         else if (op == OP_MULT_SPARSE)
         {
-            if (res_created)
-            {
-                printf("Результирующая матрица:\n");
-                mat_print(stdout, &res, res.base);
-            }
-            else
+            // if (res_created)
+            // {
+            //     printf("Результирующая матрица:\n");
+            //     mat_print(stdout, &res, res.base);
+            // }
+            // else
             {
                 if (!(mat1_created && mat2_created))
                     printf("Необходимо загрузить две матрицы!\n");
                 else
                 {
+                    mat_csr_free(&res);
                     rc = mat_csr_create(&res, mat1.base.m, mat2.base.n);
                     if (rc == ERR_OK)
                         rc = mat_multiply(&mat1, mat1.base, &mat2, mat2.base, &res, res.base);
@@ -345,6 +346,7 @@ int main(void)
         err:
         if (rc != ERR_OK)
             printf("Ошибка!\n");
+        rc = ERR_OK;
     }
 
     if (fp1)

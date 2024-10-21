@@ -33,7 +33,8 @@ int mat_multiply(const void *mat1, mat_common_t mat1_props, const void *mat2, ma
         for (size_t j = 0; j < mat2_props.m; j++)
         {
             DATA_TYPE mult = calc_mult(mat1, mat1_props, mat2, mat2_props, i, j);
-            result_props.setter(result, i, j, &mult);
+            if (mult != 0)
+                result_props.setter(result, i, j, &mult);
         }
     }
     return ERR_OK;
