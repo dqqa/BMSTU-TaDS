@@ -17,6 +17,7 @@ TODO:
    при различном проценте их заполенения.
 */
 
+#define PERF_CSV 1
 #define PERF_REPEATS 5
 
 typedef enum
@@ -95,7 +96,9 @@ int performance_comparison(void)
     mat_csr_t csr_mat1 = {0}, csr_mat2 = {0}, csr_res = {0};
     mat_std_t std_mat1 = {0}, std_mat2 = {0}, std_res = {0};
     int rc = ERR_OK;
-
+#if PERF_CSV
+    printf("percent;size;csr_size;std_size;size_frac;csr_time;std_time;time_frac\n");
+#endif
     for (size_t p = 10; rc == ERR_OK && p <= 100; p += 20)
     {
         for (size_t s = 10; rc == ERR_OK && s <= 100; s += 10)
@@ -116,9 +119,9 @@ int performance_comparison(void)
 
             mat_fill_rnd(&csr_mat1, csr_mat1.base, p);
             mat_fill_rnd(&csr_mat2, csr_mat2.base, p);
-
+#if !PERF_CSV
             printf("Размер: %zux%zu. Заполнение: %zu%%.\n", s, s, p);
-
+#endif
             clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             // for (size_t i = 0; i < PERF_REPEATS; i++) // without mat_free() memory errors!
             mat_multiply(&csr_mat1, csr_mat1.base, &csr_mat2, csr_mat2.base, &csr_res, csr_res.base);
@@ -140,9 +143,12 @@ int performance_comparison(void)
 
             float csr_size = csr_calc_size(&csr_mat1);
             float std_size = std_calc_size(&std_mat1);
+#if !PERF_CSV
             printf("  Размер CSR=%10.0f, STD=%10.0f. Эффективность: %+.2f%%\n", csr_size, std_size, (std_size - csr_size) / std_size * 100);
             printf("  Время  CSR=%10.2f, STD=%10.2f. Эффективность: %+.2f%%\n", t1, t2, (t2 - t1) / t2 * 100);
-
+#else
+            printf("%zu;%zu;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f\n", p, s, csr_size, std_size, (std_size - csr_size) / std_size * 100, t1, t2, (t2 - t1) / t2 * 100);
+#endif
             cleanup:
             mat_csr_free(&csr_mat1);
             mat_csr_free(&csr_mat2);
@@ -218,7 +224,7 @@ int main(void)
                 printf("Матрица 1:\n");
                 mat_print(stdout, &mat1, mat1.base);
             }
-            
+
             if (mat2.data)
             {
                 printf("\nМатрица 2:\n");
