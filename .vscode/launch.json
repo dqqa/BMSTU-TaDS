@@ -6,13 +6,13 @@
     "configurations": [
         {
             "name": "(gdb) Launch",
-            "preLaunchTask": "C/C++: gcc build folder",
+            "preLaunchTask": "C/C++: make build lab",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/app.exe",
-            "args": []
+            "program": "${fileDirname}/../app.exe",
+            "args": ["tests/mat2.txt", "tests/mat3.txt"],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${fileDirname}/../",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

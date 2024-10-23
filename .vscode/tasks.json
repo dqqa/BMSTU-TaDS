@@ -3,22 +3,16 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: gcc build folder",
-            "command": "/usr/bin/gcc",
-            "args": [
-                "-g",
-                "${fileDirname}/*.c",
-                "-o",
-                "${fileDirname}/app.exe"
-            ],
+            "label": "C/C++: make build lab",
+            "command": "make",
+            "args": ["debug"],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${fileDirname}/../"
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build",
-            "detail": "compiler: /usr/bin/gcc"
+            "group": "build"
         }
     ]
 }
