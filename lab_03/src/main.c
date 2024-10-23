@@ -17,7 +17,7 @@ TODO:
    при различном проценте их заполенения.
 */
 
-#define PERF_CSV 1
+#define PERF_CSV 0
 #define PERF_REPEATS 5
 
 typedef enum
@@ -253,7 +253,10 @@ int main(void)
                     if (rc == ERR_OK)
                     {
                         printf("Результирующая матрица:\n");
-                        mat_print(stdout, &res, res.base);
+                        if (res.base.n > 30 || res.base.m > 30)
+                            mat_csr_print_internal(&res);
+                        else
+                            mat_print(stdout, &res, res.base);
                         res_created = true;
                     }
                     else
