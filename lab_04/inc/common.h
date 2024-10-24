@@ -1,9 +1,9 @@
 #ifndef COMMON_H__
 #define COMMON_H__
 
-#define DATA_PRI "f"
-#define DATA_SCN "f"
-typedef float data_t;
+#define DATA_PRI "d"
+#define DATA_SCN "d"
+typedef int data_t;
 
 typedef enum __math_op_t
 {
@@ -20,6 +20,7 @@ typedef enum __math_op_t
 typedef struct
 {
     math_op_t op;
+    int priority;
     const char *str;
 } match_t;
 
