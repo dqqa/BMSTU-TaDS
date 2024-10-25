@@ -21,9 +21,9 @@ typedef struct
 {
     math_op_t op;
     int priority;
-    const char *str;
-} match_t;
+    char symbol;
+} math_op_ex_t;
 
-extern match_t op_matches[];
+extern math_op_ex_t operations[];
 
 #endif // COMMON_H__

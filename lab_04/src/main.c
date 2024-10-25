@@ -1,8 +1,8 @@
 #include "common.h"
 #include "errors.h"
+#include "rev_polish_notation.h"
 #include "stack_dynamic.h"
 #include "stack_static.h"
-#include "rev_polish_notation.h"
 #include <stdio.h>
 
 int main(void)

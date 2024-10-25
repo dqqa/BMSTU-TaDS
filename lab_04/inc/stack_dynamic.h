@@ -28,11 +28,18 @@ typedef struct __stack_op_t
     node_op_t *head;
 } stack_op_dyn_t;
 
+typedef void (*stack_apply_fn)(node_op_t *node, void *arg);
+
 int stack_dyn_data_create(stack_data_dyn_t *s);
 int stack_dyn_op_create(stack_op_dyn_t *s);
 
+void stack_dyn_op_free(stack_op_dyn_t *s);
+
 int stack_dyn_data_push(stack_data_dyn_t *s, data_t el);
 int stack_dyn_op_push(stack_op_dyn_t *s, math_op_t el);
+
+void stack_dyn_op_apply(stack_op_dyn_t *s, stack_apply_fn func, void *arg);
+int stack_dyn_op_peek(stack_op_dyn_t *s, math_op_t *el);
 
 int stack_dyn_data_pop(stack_data_dyn_t *s, data_t *el);
 int stack_dyn_op_pop(stack_op_dyn_t *s, math_op_t *el);
