@@ -8,7 +8,7 @@
 int main(void)
 {
     int rc = ERR_OK;
-    FILE *fp = fopen("tests/test_01.txt", "r");
+    FILE *fp = fopen("tests/test_02.txt", "r");
     if (!fp)
     {
         rc = ERR_IO;
