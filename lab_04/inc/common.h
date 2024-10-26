@@ -26,4 +26,7 @@ typedef struct
 
 extern math_op_ex_t operations[];
 
+math_op_ex_t operation_parse(char c);
+math_op_ex_t get_operation_ex(math_op_t op);
+
 #endif // COMMON_H__

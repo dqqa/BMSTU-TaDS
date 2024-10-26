@@ -2,14 +2,9 @@
 #include "common.h"
 #include "errors.h"
 #include <stdlib.h>
+#include <string.h>
 
-// void stack_dyn_data_create(stack_data_dyn_t *s)
-// {
-//     s->head=NULL;
-//     s->size=0;
-// }
-
-int stack_dyn_op_create(stack_op_dyn_t *s)
+int stack_dyn_create(stack_dyn_t *s)
 {
     s->head = NULL;
     s->size = 0;
@@ -17,67 +12,81 @@ int stack_dyn_op_create(stack_op_dyn_t *s)
     return ERR_OK;
 }
 
-int stack_dyn_data_push(stack_data_dyn_t *s, data_t el);
-
-int stack_dyn_op_push(stack_op_dyn_t *s, math_op_t el)
+int stack_dyn_push(stack_dyn_t *s, const void *src, size_t src_size)
 {
-    node_op_t *new_node = malloc(sizeof(*new_node));
-    if (!new_node)
-        return ERR_ALLOC;
+    int rc = ERR_OK;
+    node_t *new_node = malloc(sizeof(*new_node));
+    void *new_data = malloc(src_size);
+    if (!new_node || !new_data)
+    {
+        rc = ERR_ALLOC;
+        goto err;
+    }
 
+    new_node->data = new_data;
     new_node->next = s->head;
-    new_node->op = el;
+
+    memcpy(new_node->data, src, src_size);
 
     s->size++;
     s->head = new_node;
 
     return ERR_OK;
+
+    err:
+    free(new_data);
+    free(new_node);
+
+    return rc;
 }
 
-int stack_dyn_data_pop(stack_data_dyn_t *s, data_t *el);
-
-int stack_dyn_op_pop(stack_op_dyn_t *s, math_op_t *el)
+int stack_dyn_pop(stack_dyn_t *s, void *dst, size_t dst_size)
 {
     if (s->size == 0)
         return ERR_STACK_UNDERFLOW;
 
-    node_op_t *node = s->head;
-    
-    if (el)
-        *el = s->head->op;
+    node_t *node = s->head;
+
+    if (dst)
+        memcpy(dst, s->head->data, dst_size);
+
     s->head = s->head->next;
     s->size--;
 
+    free(node->data);
     free(node);
     return ERR_OK;
 }
 
-void stack_dyn_op_free(stack_op_dyn_t *s)
+void stack_dyn_free(stack_dyn_t *s)
 {
     while (s->head)
     {
-        node_op_t *node = s->head;
+        node_t *node = s->head;
         s->head = s->head->next;
+
+        free(node->data);
         free(node);
     }
 }
 
-void stack_dyn_op_apply(stack_op_dyn_t *s, stack_apply_fn func, void *arg)
+void stack_dyn_apply(stack_dyn_t *s, stack_apply_fn func, void *arg)
 {
-    while (s->head)
+    node_t *node = s->head;
+    while (node)
     {
-        func(s->head, arg);
-        s->head = s->head->next;
+        func(node, arg);
+        node = node->next;
     }
 }
 
-int stack_dyn_op_peek(stack_op_dyn_t *s, math_op_t *el)
+int stack_dyn_peek(stack_dyn_t *s, void *dst, size_t dst_size)
 {
     if (!s->head)
         return ERR_STACK_UNDERFLOW;
 
-    if (el)
-        *el = s->head->op;
+    if (dst)
+        memcpy(dst, s->head->data, dst_size);
 
     return ERR_OK;
 }

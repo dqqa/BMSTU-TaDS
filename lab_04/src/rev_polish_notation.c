@@ -7,45 +7,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-static math_op_t operation_parse(char c)
+void func(node_t *node, void *fmt)
 {
-    for (size_t i = 0; i < MATH_COUNT; i++)
-    {
-        if (c == operations[i].symbol)
-            return (math_op_t)i;
-    }
-    return MATH_UNKNOWN;
+    printf(fmt, ((math_op_ex_t *)node->data)->symbol);
 }
 
-static math_op_ex_t operation_ex(math_op_t op)
+static int RPN_print_until_opening(stack_dyn_t *s)
 {
-    for (size_t i = 0; i < MATH_COUNT; i++)
-    {
-        if (op == operations[i].op)
-            return operations[i];
-    }
-    return operations[6]; // TODO
-}
-
-void func(node_op_t *node, void *fmt)
-{
-    printf(fmt, operation_ex(node->op).symbol);
-}
-
-static int RPN_print_until_opening(stack_op_dyn_t *s)
-{
-    math_op_t op;
+    math_op_ex_t cur_op_ex;
     bool need_continue = true;
     while (need_continue)
     {
-        int rc = stack_dyn_op_pop(s, &op);
+        int rc = stack_dyn_pop(s, &cur_op_ex, sizeof(cur_op_ex));
         if (rc != ERR_OK)
             return rc;
 
         if (rc == ERR_OK)
         {
-            if (op != MATH_OPEN_PAREN)
-                printf("%c ", operation_ex(op).symbol);
+            if (cur_op_ex.op != MATH_OPEN_PAREN)
+                printf("%c ", cur_op_ex.symbol);
             else
                 need_continue = false;
         }
@@ -55,8 +35,8 @@ static int RPN_print_until_opening(stack_op_dyn_t *s)
 
 int RPN_parse_expr(const char *expr)
 {
-    stack_op_dyn_t s;
-    stack_dyn_op_create(&s);
+    stack_dyn_t s;
+    stack_dyn_create(&s);
 
     while (*expr)
     {
@@ -69,30 +49,28 @@ int RPN_parse_expr(const char *expr)
         }
         else
         {
-            math_op_t op = operation_parse(*expr);
-            if (op == MATH_UNKNOWN)
+            math_op_ex_t cur_op_ex = operation_parse(*expr);
+            if (cur_op_ex.op == MATH_UNKNOWN)
                 return ERR_IO;
 
-            if (op == MATH_CLOSE_PAREN)
+            if (cur_op_ex.op == MATH_CLOSE_PAREN)
                 RPN_print_until_opening(&s); // 3.
             else
             {
-                math_op_t prev_op;
-                math_op_ex_t cur_op_ex = operation_ex(op);
-                if (stack_dyn_op_peek(&s, &prev_op) == ERR_OK)
+                math_op_ex_t prev_op_ex;
+                if (stack_dyn_peek(&s, &prev_op_ex, sizeof(prev_op_ex)) == ERR_OK)
                 {
-                    math_op_ex_t prev_op_ex = operation_ex(prev_op);
                     if (prev_op_ex.op == MATH_OPEN_PAREN || prev_op_ex.priority < cur_op_ex.priority)
-                        stack_dyn_op_push(&s, op); // 4.b || 4.c
+                        stack_dyn_push(&s, &cur_op_ex, sizeof(cur_op_ex)); // 4.b || 4.c
                     else if (prev_op_ex.priority >= cur_op_ex.priority)
                     {
-                        printf("%c ", prev_op_ex.symbol);
-                        stack_dyn_op_pop(&s, NULL);
-                        stack_dyn_op_push(&s, op);
+                        printf("%c ", prev_op_ex.symbol); // 4.a
+                        stack_dyn_pop(&s, NULL, 0);
+                        stack_dyn_push(&s, &cur_op_ex, sizeof(cur_op_ex));
                     }
                 }
                 else
-                    stack_dyn_op_push(&s, op); // 5.
+                    stack_dyn_push(&s, &cur_op_ex, sizeof(cur_op_ex)); // 5.
             }
             expr++;
         }
@@ -101,8 +79,8 @@ int RPN_parse_expr(const char *expr)
     }
 
     // expr ended, need to print contents of stack
-    stack_dyn_op_apply(&s, func, "%c ");
-    stack_dyn_op_free(&s);
+    stack_dyn_apply(&s, func, "%c ");
+    stack_dyn_free(&s);
 
     printf("\n");
     return ERR_OK;

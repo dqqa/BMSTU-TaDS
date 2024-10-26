@@ -4,44 +4,30 @@
 #include "common.h"
 #include <stddef.h>
 
-typedef struct __node_data_t
+typedef struct __node_t
 {
-    data_t data;
-    struct __node_data_t *next;
-} node_data_t;
+    // math_op_ex_t op;
+    void *data;
+    struct __node_t *next;
+} node_t;
 
-typedef struct __node_op_t
-{
-    math_op_t op;
-    struct __node_op_t *next;
-} node_op_t;
-
-typedef struct __stack_data_t
+typedef struct __stack_t
 {
     size_t size;
-    node_data_t *head;
-} stack_data_dyn_t;
+    node_t *head;
+} stack_dyn_t;
 
-typedef struct __stack_op_t
-{
-    size_t size;
-    node_op_t *head;
-} stack_op_dyn_t;
+typedef void (*stack_apply_fn)(node_t *node, void *arg);
 
-typedef void (*stack_apply_fn)(node_op_t *node, void *arg);
+int stack_dyn_create(stack_dyn_t *s);
 
-int stack_dyn_data_create(stack_data_dyn_t *s);
-int stack_dyn_op_create(stack_op_dyn_t *s);
+void stack_dyn_free(stack_dyn_t *s);
 
-void stack_dyn_op_free(stack_op_dyn_t *s);
+int stack_dyn_push(stack_dyn_t *s, const void *src, size_t src_size);
 
-int stack_dyn_data_push(stack_data_dyn_t *s, data_t el);
-int stack_dyn_op_push(stack_op_dyn_t *s, math_op_t el);
+void stack_dyn_apply(stack_dyn_t *s, stack_apply_fn func, void *arg);
+int stack_dyn_peek(stack_dyn_t *s, void *dst, size_t dst_size);
 
-void stack_dyn_op_apply(stack_op_dyn_t *s, stack_apply_fn func, void *arg);
-int stack_dyn_op_peek(stack_op_dyn_t *s, math_op_t *el);
-
-int stack_dyn_data_pop(stack_data_dyn_t *s, data_t *el);
-int stack_dyn_op_pop(stack_op_dyn_t *s, math_op_t *el);
+int stack_dyn_pop(stack_dyn_t *s, void *dst, size_t dst_size);
 
 #endif // STACK_DYNAMIC_H__
