@@ -99,8 +99,8 @@ int RPN_parse_expr_ex(FILE *fp)
         rc = ERR_ALLOC;
         goto cleanup;
     }
-    printf("Orig:   %s", line);
-    printf("Parsed: ");
+
+    printf("Выражение в постфиксной форме: ");
     if ((rc = RPN_parse_expr(line)) != ERR_OK)
         goto cleanup;
 
