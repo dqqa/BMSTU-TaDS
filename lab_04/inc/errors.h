@@ -7,5 +7,6 @@
 #define ERR_STACK_UNDERFLOW 3
 #define ERR_ALLOC 4
 #define ERR_RANGE 5
+#define ERR_INVALID_EXPR 6
 
 #endif // ERRORS_H__

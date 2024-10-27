@@ -37,7 +37,8 @@ int RPN_parse_expr(const char *expr)
 {
     stack_dyn_t s;
     stack_dyn_create(&s);
-
+    int rc = ERR_OK;
+    size_t num_cnt = 0, op_cnt = 0, open_p_cnt = 0, close_p_cnt = 0;
     while (*expr)
     {
         data_t num;
@@ -46,12 +47,23 @@ int RPN_parse_expr(const char *expr)
         {
             printf("%" DATA_PRI " ", num); // 1.
             expr += nread;
+            num_cnt++;
         }
         else
         {
             math_op_ex_t cur_op_ex = operation_parse(*expr);
             if (cur_op_ex.op == MATH_UNKNOWN)
-                return ERR_IO;
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+
+            if (cur_op_ex.op == MATH_CLOSE_PAREN)
+                close_p_cnt++;
+            else if (cur_op_ex.op == MATH_OPEN_PAREN)
+                open_p_cnt++;
+            else
+                op_cnt++;
 
             if (cur_op_ex.op == MATH_CLOSE_PAREN)
                 RPN_print_until_opening(&s); // 3.
@@ -80,10 +92,17 @@ int RPN_parse_expr(const char *expr)
 
     // expr ended, need to print contents of stack
     stack_dyn_apply(&s, func, "%c ");
+
+    err:
     stack_dyn_free(&s);
+    if (rc != ERR_OK)
+        return rc;
 
     printf("\n");
-    return ERR_OK;
+    if (num_cnt && num_cnt - 1 == op_cnt && close_p_cnt == open_p_cnt)
+        return ERR_OK;
+    else
+        return ERR_INVALID_EXPR;
 }
 
 int RPN_parse_expr_ex(FILE *fp)
