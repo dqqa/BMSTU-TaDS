@@ -84,6 +84,11 @@ void dyn_stack_print(node_t *node, void *fmt)
     printf(fmt, *(int *)node->data);
 }
 
+void static_stack_print(int *data, void *fmt)
+{
+    printf(fmt, *data);
+}
+
 int stack_dyn_test(void)
 {
     printf("Проверка работы стека как Абстрактного Типа Данных, основанного на односвязном линейном списке\n"
@@ -157,6 +162,77 @@ int stack_dyn_test(void)
     return rc;
 }
 
+int stack_static_test(void)
+{
+    printf("Проверка работы стека как Абстрактного Типа Данных, основанного на односвязном линейном списке\n"
+           "Для проверки реализации, был выбран целый тип (int)\n\n");
+    bool need_exit = false;
+    int rc = ERR_OK;
+    struct timespec start, end;
+
+    stack_static_t stack = {0};
+    stack_static_create(&stack);
+
+    while (!need_exit)
+    {
+        stack_test_op_t op = get_stack_test_op();
+        if (op == TEST_OP_EOF || op == TEST_OP_EXIT)
+        {
+            need_exit = true;
+        }
+        else if (op == TEST_OP_PUSH)
+        {
+            printf("Введите число: ");
+            int number;
+            if (scanf("%d", &number) != 1)
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            rc = stack_static_push(&stack, number);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+            if (rc != ERR_OK)
+                goto err;
+
+            /* DEBUG ONLY */
+            const void *new_addr = stack.data + stack.top;
+            double elapsed = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("[ОТЛАДКА] Адрес для нового элемента в стеке: %p. Время: %.2f мкс.\n", new_addr, elapsed);
+        }
+        else if (op == TEST_OP_POP)
+        {
+            int number;
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            rc = stack_static_pop(&stack, &number);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+            if (rc != ERR_OK)
+                goto err;
+
+            printf("Значение с верхушки стека: %d\n", number);
+
+            /* DEBUG ONLY */
+            const void *new_addr = stack.data + stack.top;
+            double elapsed = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("[ОТЛАДКА] Адрес для предыдущего элемента в стеке: %p. Время: %.2f мкс.\n", new_addr, elapsed);
+        }
+        else if (op == TEST_OP_PRINT_CONTENTS)
+        {
+            printf("Содержимое стека: ");
+            stack_static_apply(&stack, static_stack_print, "%d ");
+            printf("\n");
+        }
+        err:
+        if (rc != ERR_OK)
+        {
+            printf("Ошибка (%d)\n", rc);
+            rc = ERR_OK;
+        }
+    }
+
+    return rc;
+}
+
 int main(void)
 {
     print_guide();
@@ -181,7 +257,7 @@ int main(void)
         }
         else if (cur_op == OP_STATIC_STACK_TEST)
         {
-            rc = stack_dyn_test();
+            rc = stack_static_test();
         }
 
         if (rc != ERR_OK)

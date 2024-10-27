@@ -6,25 +6,21 @@
 
 #define MAX_STACK_SIZE 100
 
-typedef struct __stack_data_static_t
+typedef struct __stack_static_t
 {
-    data_t data[MAX_STACK_SIZE];
-    size_t top;
-} stack_data_static_t;
+    // TODO: implement some universal? container
+    int data[MAX_STACK_SIZE];
+    long top;
+} stack_static_t;
 
-typedef struct __stack_op_static_t
-{
-    math_op_t ops[MAX_STACK_SIZE];
-    size_t top;
-} stack_op_static_t;
+typedef void (*stack_static_apply_fn)(int *data, void *arg);
 
-int stack_static_data_create(stack_data_static_t *s);
-int stack_static_op_create(stack_op_static_t *s);
+int stack_static_create(stack_static_t *s);
 
-int stack_static_data_push(stack_data_static_t *s, data_t el);
-int stack_static_op_push(stack_op_static_t *s, math_op_t el);
+int stack_static_push(stack_static_t *s, int el);
 
-int stack_static_data_pop(stack_data_static_t *s, data_t *el);
-int stack_static_op_pop(stack_op_static_t *s, math_op_t *el);
+int stack_static_pop(stack_static_t *s, int *el);
+
+void stack_static_apply(stack_static_t *s, stack_static_apply_fn func, void *arg);
 
 #endif // STACK_STATIC_H__

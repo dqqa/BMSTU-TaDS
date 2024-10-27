@@ -4,27 +4,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-int stack_static_op_create(stack_op_static_t *s)
+int stack_static_create(stack_static_t *s)
 {
-    memset(s->ops, 0, sizeof(s->ops));
-    s->top = 0;
+    memset(s->data, 0, sizeof(s->data));
+    s->top = -1;
     return ERR_OK;
 }
 
-int stack_static_op_push(stack_op_static_t *s, math_op_t el)
+int stack_static_push(stack_static_t *s, int el)
 {
     if (s->top == MAX_STACK_SIZE - 1)
         return ERR_STACK_OVERFLOW;
 
-    s->ops[s->top++] = el;
+    s->data[++s->top] = el;
     return ERR_OK;
 }
 
-int stack_static_op_pop(stack_op_static_t *s, math_op_t *el)
+int stack_static_pop(stack_static_t *s, int *el)
 {
-    if (s->top == 0)
+    if (s->top == -1)
         return ERR_STACK_UNDERFLOW;
 
-    *el = s->ops[--s->top];
+    *el = s->data[s->top--];
     return ERR_OK;
+}
+
+void stack_static_apply(stack_static_t *s, stack_static_apply_fn func, void *arg)
+{
+    for (long t = s->top; t > -1; t--)
+        func(s->data + t, arg);
 }
