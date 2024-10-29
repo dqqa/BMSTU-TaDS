@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/../app.exe",
-            "args": ["tests/mat2.txt", "tests/mat3.txt"],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}/../",
             "environment": [],
