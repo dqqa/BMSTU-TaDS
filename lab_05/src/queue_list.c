@@ -28,16 +28,16 @@ void queue_list_free(queue_list_t *q)
 
 int queue_list_peek(queue_list_t *q, void *dst, size_t data_size)
 {
-    if (!q->end)
+    if (!q->size)
         return ERR_UNDERFLOW;
 
     if (dst)
-        memcpy(dst, q->end->data, data_size);
+        memcpy(dst, q->head->data, data_size);
 
     return ERR_OK;
 }
 
-int queue_list_push(queue_list_t *q, const data_t *src, size_t data_size)
+int queue_list_push(queue_list_t *q, const void *src, size_t data_size)
 {
     int rc = ERR_OK;
 
@@ -49,10 +49,15 @@ int queue_list_push(queue_list_t *q, const data_t *src, size_t data_size)
         goto err;
     }
 
-    memcpy(new_node->data, src, data_size);
+    memcpy(new_data, src, data_size);
     new_node->next = NULL;
+    new_node->data = new_data;
 
-    q->end->next = new_node;
+    if (q->end)
+        q->end->next = new_node;
+    if (!q->head)
+        q->head = new_node;
+
     q->end = new_node;
     q->size++;
 
@@ -64,9 +69,31 @@ int queue_list_push(queue_list_t *q, const data_t *src, size_t data_size)
     return rc;
 }
 
-int queue_list_pop(queue_list_t *q, data_t *dst, size_t data_size)
+int queue_list_pop(queue_list_t *q, void *dst, size_t data_size)
 {
-    // TODO
+    if (!q->size)
+        return ERR_UNDERFLOW;
+
+    if (dst)
+        memcpy(dst, q->head->data, data_size);
+
+    node_t *next = q->head->next;
+
+    free(q->head->data);
+    free(q->head);
+
+    q->head = next;
+    q->size--;
+    
+    return ERR_OK;
 }
 
-int queue_list_apply(queue_list_t *q, queue_list_apply_fn_t func);
+void queue_list_apply(queue_list_t *q, queue_list_apply_fn_t func, void *arg)
+{
+    node_t *node = q->head;
+    while (node)
+    {
+        func(node, arg);
+        node = node->next;
+    }
+}
