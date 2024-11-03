@@ -3,6 +3,7 @@
 #include "queue_list.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 
 typedef enum
 {
@@ -15,14 +16,14 @@ typedef enum
     TEST_MENU_OP_EOF,
 } test_menu_t;
 
-void apply_fn_arr(data_t *node, void *fmt)
+static void print_int_el(node_t *node, void *fmt)
 {
-    printf(fmt, *node);
+    printf(fmt, *(int *)node->data);
 }
 
 test_menu_t get_test_menu_op(void)
 {
-    printf("1. Выход\n"
+    printf("\n1. Выход\n"
            "2. Добавить элемент в начало очереди\n"
            "3. Удалить элемент из конца очереди\n"
            "4. Вывести очередь\n");
@@ -44,6 +45,8 @@ int test_queue_list(void)
            "Для проверки, был выбран целый тип для хранения чисел\n");
     bool need_exit = false;
     int rc = ERR_OK;
+    struct timespec start, end;
+
     queue_list_t q = { 0 };
     queue_list_create(&q);
 
@@ -57,28 +60,39 @@ int test_queue_list(void)
         else if (op == TEST_MENU_OP_PUSH)
         {
             int num;
+            printf("Введите число: ");
             if (scanf("%d", &num) != 1)
             {
                 rc = ERR_IO;
                 goto err;
             }
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             rc = queue_list_push(&q, &num, sizeof(num));
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+            double t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+
+            /* DEBUG ONLY */
+            printf("Адрес конца очереди:  %p, время добавления: %.2f мкс.\n", (void *)q.end, t);
+            printf("Адрес начала очереди: %p\n", (void *)q.head);
         }
         else if (op == TEST_MENU_OP_POP)
         {
             int num;
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             if ((rc = queue_list_pop(&q, &num, sizeof(num))) != ERR_OK)
                 goto err;
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+            double t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
 
+            /* DEBUG ONLY */
             printf("Число: %d\n", num);
+            printf("Адрес конца очереди:  %p, время удаления: %.2f мкс.\n", (void *)q.end, t);
+            printf("Адрес начала очереди: %p\n", (void *)q.head);
         }
         else if (op == TEST_MENU_OP_SHOW)
         {
             printf("Содержимое очереди:\n");
-            int rc = ERR_OK;
-            int num;
-            while ((rc = queue_list_pop(&q, &num, sizeof(num))) == ERR_OK)
-                printf("%d ", num);
+            queue_list_apply(&q, print_int_el, "%d ");
             printf("\n");
         }
 

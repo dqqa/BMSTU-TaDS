@@ -84,7 +84,9 @@ int queue_list_pop(queue_list_t *q, void *dst, size_t data_size)
 
     q->head = next;
     q->size--;
-    
+    if (!q->size)
+        q->end = NULL;
+
     return ERR_OK;
 }
 
