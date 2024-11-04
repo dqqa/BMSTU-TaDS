@@ -2,10 +2,14 @@
 #include "menu.h"
 #include "queue_arr.h"
 #include "queue_list.h"
+#include "simulation.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#define N_APPLICATIONS 1000
 
 /* Forward declarations */
 int test_queue_list(void);
@@ -41,7 +45,7 @@ int main(void)
         }
         else if (op == MAIN_MENU_OP_SIMULATE)
         {
-            // TODO: SIMULATION
+            simulate_first_n(N_APPLICATIONS);
         }
         else if (op == MAIN_MENU_OP_MEASURE)
         {
