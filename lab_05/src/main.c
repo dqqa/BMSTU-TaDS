@@ -25,7 +25,7 @@ int main(void)
 {
     srand(time(NULL));
     print_guide();
-    
+
     bool need_exit = false;
     int rc = ERR_OK;
     while (!need_exit)
@@ -45,7 +45,12 @@ int main(void)
         }
         else if (op == MAIN_MENU_OP_SIMULATE)
         {
-            simulate_first_n(N_APPLICATIONS);
+            queue_list_t q;
+            queue_list_create(&q);
+
+            simulate_first_n(N_APPLICATIONS, (queue_base_t *)&q);
+
+            queue_list_free(&q);
         }
         else if (op == MAIN_MENU_OP_MEASURE)
         {

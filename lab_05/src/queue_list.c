@@ -14,16 +14,22 @@ static int queue_list_pop_data(void *queue, data_t *dst)
     return queue_list_pop(queue, dst, sizeof(*dst));
 }
 
+static int queue_list_peek_data(void *queue, data_t *dst)
+{
+    return queue_list_peek(queue, dst, sizeof(*dst));
+}
+
 int queue_list_create(queue_list_t *q)
 {
     q->base.push = queue_list_push_data;
     q->base.pop = queue_list_pop_data;
     q->base.is_empty = queue_list_is_empty;
+    q->base.peek = queue_list_peek_data;
 
     q->head = NULL;
     q->end = NULL;
     q->size = 0;
-
+    q->base.size=0;
     return ERR_OK;
 }
 
@@ -77,6 +83,7 @@ int queue_list_push(void *queue, const void *src, size_t data_size)
 
     q->end = new_node;
     q->size++;
+    q->base.size++;
 
     return ERR_OK;
 
@@ -103,6 +110,8 @@ int queue_list_pop(void *queue, void *dst, size_t data_size)
 
     q->head = next;
     q->size--;
+    q->base.size--;
+
     if (!q->size)
         q->end = NULL;
 

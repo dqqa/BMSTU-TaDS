@@ -9,18 +9,18 @@
 
 static void queue_list_print(node_t *node, void *fmt)
 {
-    printf(fmt, *(int *)node->data);
+    printf(fmt, ((data_t *)node->data)->test_num);
 }
 
 static void queue_arr_print(data_t *data, void *fmt)
 {
-    printf(fmt, *data);
+    printf(fmt, data->test_num);
 }
 
 int test_queue_list(void)
 {
     printf("\nПроверка реализации очереди на основе односвязного линейного списка.\n"
-           "Для проверки, был выбран целый тип для хранения чисел\n");
+           "Для проверки, был выбран вещественный тип для хранения чисел\n");
     bool need_exit = false;
     int rc = ERR_OK;
     struct timespec start, end;
@@ -37,9 +37,9 @@ int test_queue_list(void)
         }
         else if (op == TEST_MENU_OP_PUSH)
         {
-            int num;
+            data_t num;
             printf("Введите число: ");
-            if (scanf("%d", &num) != 1)
+            if (scanf("%f", &num.test_num) != 1)
             {
                 rc = ERR_IO;
                 goto err;
@@ -55,7 +55,7 @@ int test_queue_list(void)
         }
         else if (op == TEST_MENU_OP_POP)
         {
-            int num;
+            data_t num;
             clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             if ((rc = queue_list_pop(&q, &num, sizeof(num))) != ERR_OK)
                 goto err;
@@ -63,14 +63,14 @@ int test_queue_list(void)
             double t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
 
             /* DEBUG ONLY */
-            printf("Число: %d\n", num);
+            printf("Число: %f\n", num.test_num);
             printf("Адрес конца очереди:  %p, время удаления: %.2f мкс.\n", (void *)q.end, t);
             printf("Адрес начала очереди: %p\n", (void *)q.head);
         }
         else if (op == TEST_MENU_OP_SHOW)
         {
             printf("Содержимое очереди:\n");
-            queue_list_apply(&q, queue_list_print, "%d ");
+            queue_list_apply(&q, queue_list_print, "%f ");
             printf("\n");
         }
         else if (op == TEST_MENU_OP_UNKNOWN)
@@ -94,7 +94,7 @@ int test_queue_arr(void)
 {
     printf("\nПроверка реализации очереди на основе массива.\n"
            "Ограничение: максимальное количество элементов в очереди - 100\n"
-           "Для проверки, был выбран целый тип для хранения чисел\n");
+           "Для проверки, был выбран вещественный тип для хранения чисел\n");
     bool need_exit = false;
     int rc = ERR_OK;
     struct timespec start, end;
@@ -111,9 +111,9 @@ int test_queue_arr(void)
         }
         else if (op == TEST_MENU_OP_PUSH)
         {
-            int num;
+            data_t num;
             printf("Введите число: ");
-            if (scanf("%d", &num) != 1)
+            if (scanf("%f", &num.test_num) != 1)
             {
                 rc = ERR_IO;
                 goto err;
@@ -129,7 +129,7 @@ int test_queue_arr(void)
         }
         else if (op == TEST_MENU_OP_POP)
         {
-            int num;
+            data_t num;
             clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             if ((rc = queue_arr_pop(&q, &num)) != ERR_OK)
                 goto err;
@@ -137,14 +137,14 @@ int test_queue_arr(void)
             double t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
 
             /* DEBUG ONLY */
-            printf("Число: %d\n", num);
+            printf("Число: %f\n", num.test_num);
             printf("Адрес конца очереди:  %p, время добавления: %.2f мкс.\n", (void *)(q.data + q.size), t);
             printf("Адрес начала очереди: %p\n", (void *)q.data);
         }
         else if (op == TEST_MENU_OP_SHOW)
         {
             printf("Содержимое очереди:\n");
-            queue_arr_apply(&q, queue_arr_print, "%d ");
+            queue_arr_apply(&q, queue_arr_print, "%f ");
             printf("\n");
         }
         else if (op == TEST_MENU_OP_UNKNOWN)

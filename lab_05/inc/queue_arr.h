@@ -19,6 +19,7 @@ int queue_arr_create(queue_arr_t *q);
 
 int queue_arr_push(void *q, const data_t *src);
 int queue_arr_pop(void *q, data_t *dst);
+int queue_arr_peek(void *queue, data_t *dst);
 
 bool queue_arr_is_empty(const void *q);
 

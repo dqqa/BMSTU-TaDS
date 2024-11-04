@@ -3,7 +3,8 @@
 
 #include <stdbool.h>
 
-bool rand_with_probability(int prob);
-int rand_in_range(int min, int max);
+bool rand_with_probability(float prob);
+int rand_in_range_int(int min, int max);
+float rand_in_range_float(float min, float max);
 
 #endif // RAND_MANAGER_H__
