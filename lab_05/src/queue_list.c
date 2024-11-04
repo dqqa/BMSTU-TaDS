@@ -3,8 +3,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+static int queue_list_push_data(void *queue, const data_t *src)
+{
+    return queue_list_push(queue, src, sizeof(*src));
+}
+
+static int queue_list_pop_data(void *queue, data_t *dst)
+{
+    return queue_list_pop(queue, dst, sizeof(*dst));
+}
+
 int queue_list_create(queue_list_t *q)
 {
+    q->base.push = queue_list_push_data;
+    q->base.pop = queue_list_pop_data;
+    q->base.is_empty = queue_list_is_empty;
+
     q->head = NULL;
     q->end = NULL;
     q->size = 0;
@@ -37,8 +52,10 @@ int queue_list_peek(queue_list_t *q, void *dst, size_t data_size)
     return ERR_OK;
 }
 
-int queue_list_push(queue_list_t *q, const void *src, size_t data_size)
+int queue_list_push(void *queue, const void *src, size_t data_size)
 {
+    queue_list_t *q = queue;
+
     int rc = ERR_OK;
 
     void *new_data = malloc(data_size);
@@ -69,8 +86,10 @@ int queue_list_push(queue_list_t *q, const void *src, size_t data_size)
     return rc;
 }
 
-int queue_list_pop(queue_list_t *q, void *dst, size_t data_size)
+int queue_list_pop(void *queue, void *dst, size_t data_size)
 {
+    queue_list_t *q = queue;
+
     if (!q->size)
         return ERR_UNDERFLOW;
 
@@ -98,4 +117,10 @@ void queue_list_apply(queue_list_t *q, queue_list_apply_fn_t func, void *arg)
         func(node, arg);
         node = node->next;
     }
+}
+
+bool queue_list_is_empty(const void *queue)
+{
+    const queue_list_t *q = queue;
+    return q->size == 0;
 }

@@ -13,6 +13,7 @@ typedef struct __node_t
 // Universal queue type
 typedef struct __queue_list
 {
+    queue_base_t base;
     node_t *head;
     node_t *end;
     size_t size;
@@ -25,8 +26,10 @@ void queue_list_free(queue_list_t *q);
 
 int queue_list_peek(queue_list_t *q, void *dst, size_t data_size);
 
-int queue_list_push(queue_list_t *q, const void *src, size_t data_size);
-int queue_list_pop(queue_list_t *q, void *dst, size_t data_size);
+int queue_list_push(void *q, const void *src, size_t data_size);
+int queue_list_pop(void *q, void *dst, size_t data_size);
+
+bool queue_list_is_empty(const void *queue);
 
 void queue_list_apply(queue_list_t *q, queue_list_apply_fn_t func, void *arg);
 

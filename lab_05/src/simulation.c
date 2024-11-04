@@ -3,6 +3,7 @@
 #include "queue_arr.h"
 #include "queue_list.h"
 #include "rand_manager.h"
+#include <stdio.h>
 
 int simulate_first_n(size_t n)
 {
@@ -11,4 +12,6 @@ int simulate_first_n(size_t n)
     for (size_t i = 0; i < n; i++)
     {
     }
+
+    return ERR_OK;
 }
