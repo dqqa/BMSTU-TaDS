@@ -6,5 +6,6 @@
 #define ERR_ALLOC 2
 #define ERR_OVERFLOW 3
 #define ERR_UNDERFLOW 4
+#define ERR_BAD_NUM 5
 
 #endif // ERRORS_H__
