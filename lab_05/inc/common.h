@@ -7,8 +7,8 @@
 
 typedef struct __request_t
 {
-    float arrival_time;
-    float service_time;
+    float arrival_time; // Время прибытия заявки
+    float service_time; // Время обслуживания
 } request_t;
 
 typedef union __data_t

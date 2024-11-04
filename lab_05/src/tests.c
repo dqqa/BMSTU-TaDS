@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "errors.h"
 #include "menu.h"
 #include "queue_arr.h"
@@ -161,4 +163,61 @@ int test_queue_arr(void)
     }
 
     return rc;
+}
+
+void compare_queue_impl(void)
+{
+    queue_list_t queue_lst;
+    queue_arr_t queue_arr;
+
+    queue_list_create(&queue_lst);
+    queue_arr_create(&queue_arr);
+
+    data_t test_data = { .test_num = 123 };
+
+    float lst_avg_push = 0, arr_avg_push = 0;
+    float lst_avg_pop = 0, arr_avg_pop = 0;
+
+    for (size_t i = 0; i < 100; i++)
+    {
+        struct timespec start, end;
+        /* LIST IMPL */
+        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+        queue_lst.base.push(&queue_lst, &test_data);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+        lst_avg_push += (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+
+        data_t tmp;
+        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+        queue_lst.base.pop(&queue_lst, &tmp);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+        lst_avg_pop += (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+
+        /* ARRAY IMPL */
+        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+        queue_arr.base.push(&queue_arr, &test_data);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+        arr_avg_push += (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+
+        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+        queue_arr.base.pop(&queue_arr, &tmp);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+        arr_avg_pop += (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+    }
+    lst_avg_push /= 100;
+    lst_avg_pop /= 100;
+    arr_avg_push /= 110;
+    arr_avg_pop /= 110;
+
+    queue_list_free(&queue_lst);
+
+    printf("\n==== РЕЗУЛЬТАТЫ ЗАМЕРОВ ====\n");
+    printf("Очередь на основе односвязного списка:\n"
+           "  PUSH: %.2f мкс.\n"
+           "  POP: %.2f мкс.\n"
+           "Очередь на основе массива:\n"
+           "  PUSH: %.2f мкс.\n"
+           "  POP: %.2f мкс.\n",
+           lst_avg_push, lst_avg_pop,
+           arr_avg_push, arr_avg_pop);
 }

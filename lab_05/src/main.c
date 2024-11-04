@@ -14,6 +14,7 @@
 /* Forward declarations */
 int test_queue_list(void);
 int test_queue_arr(void);
+void compare_queue_impl(void);
 
 void print_guide(void)
 {
@@ -45,16 +46,27 @@ int main(void)
         }
         else if (op == MAIN_MENU_OP_SIMULATE)
         {
-            queue_list_t q;
-            queue_list_create(&q);
+            queue_list_t q1;
+            queue_arr_t q2;
+            float sim_arr, sim_list;
 
-            simulate_first_n(N_APPLICATIONS, (queue_base_t *)&q);
+            queue_list_create(&q1);
+            queue_arr_create(&q2);
 
-            queue_list_free(&q);
+            simulate_first_n(N_APPLICATIONS, (queue_base_t *)&q1, &sim_list);
+            simulate_first_n(N_APPLICATIONS, (queue_base_t *)&q2, &sim_arr);
+
+            queue_list_free(&q1);
+
+            printf("====== РЕЗУЛЬТАТЫ ======\n");
+            printf("Время выполнения симуляции:\n"
+                   "  при использовании очереди на основе списка:  %.2f мкс.\n"
+                   "  при использовании очереди на основе массива: %.2f мкс.\n",
+                   sim_list, sim_arr);
         }
         else if (op == MAIN_MENU_OP_MEASURE)
         {
-            // TODO: MEASUREMENTS
+            compare_queue_impl();
         }
         else if (op == MAIN_MENU_OP_UNKNOWN)
         {

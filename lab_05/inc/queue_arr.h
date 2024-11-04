@@ -4,7 +4,7 @@
 #include "common.h"
 #include <stddef.h>
 
-#define MAX_QUEUE_SIZE 128
+#define MAX_QUEUE_SIZE 1024
 
 typedef struct __queue_arr_t
 {

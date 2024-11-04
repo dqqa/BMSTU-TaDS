@@ -4,6 +4,6 @@
 #include <stddef.h>
 #include "common.h"
 
-int simulate_first_n(size_t n, queue_base_t *queue);
+int simulate_first_n(size_t n, queue_base_t *queue, float *time);
 
 #endif // SIMULATION_H__
