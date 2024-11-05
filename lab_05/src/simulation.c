@@ -34,6 +34,7 @@ int simulate_first_n(size_t n, queue_base_t *queue, float *time)
     float current_time = 0.0f, total_idle_time = 0.0f, total_queue_time = 0.0f, total_service_time = 0.0f;
     float next_arrival_time = rand_in_range_float(T1_LOWER, T1_UPPER); // Время прибытия следующей заявки
     float next_service_time = 0.0f;                                    // Время следющего обслуживания
+    float avg_queue = 0;
     while (left < n)
     {
         if (queue->is_empty(queue) || next_arrival_time < next_service_time)
@@ -74,6 +75,7 @@ int simulate_first_n(size_t n, queue_base_t *queue, float *time)
             else
                 printf("Warning: отрицательное время ожидания: %.2f\n", queue_time);
 
+            avg_queue += queue->size;
             activations++;
 
             if (rand_with_probability(P))
@@ -111,7 +113,7 @@ int simulate_first_n(size_t n, queue_base_t *queue, float *time)
                 prev_left = left;
                 printf("\nУшло %zu заявок\n", left);
                 printf("Длина очереди: %zu\n", queue->size);
-                printf("TODO Средняя длина очереди: %.2f\n", (float)entered / left);
+                printf("Средняя длина очереди: %.2f\n", avg_queue / left);
                 printf("Среднее время в очереди: %.2f\n", total_queue_time / left);
             }
         }
