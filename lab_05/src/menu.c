@@ -13,6 +13,13 @@ test_menu_op_t get_test_menu_op(void)
     if (rc == -1)
         return TEST_MENU_OP_EOF;
 
+    if (rc != 1)
+    {
+        while (getchar() != '\n')
+            ;
+        return TEST_MENU_OP_UNKNOWN;
+    }
+
     if (num <= 0 || num > TEST_MENU_OP_COUNT)
         return TEST_MENU_OP_UNKNOWN;
 
@@ -31,6 +38,13 @@ main_menu_op_t get_main_menu_op(void)
     int rc = scanf("%d", &num);
     if (rc == -1)
         return MAIN_MENU_OP_EOF;
+
+    if (rc != 1)
+    {
+        while (getchar() != '\n')
+            ;
+        return MAIN_MENU_OP_UNKNOWN;
+    }
 
     if (num <= 0 || num > MAIN_MENU_OP_COUNT)
         return MAIN_MENU_OP_UNKNOWN;

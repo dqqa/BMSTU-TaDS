@@ -206,8 +206,8 @@ void compare_queue_impl(void)
     }
     lst_avg_push /= 100;
     lst_avg_pop /= 100;
-    arr_avg_push /= 110;
-    arr_avg_pop /= 110;
+    arr_avg_push /= 100;
+    arr_avg_pop /= 100;
 
     queue_list_free(&queue_lst);
 
