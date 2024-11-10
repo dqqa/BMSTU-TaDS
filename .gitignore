@@ -2,3 +2,5 @@
 *.o
 *.gcda
 *.gcno
+*.d
+*.out
