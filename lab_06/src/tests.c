@@ -57,6 +57,7 @@ int test_tree(void)
         else if (op == TEST_MENU_SEARCH)
         {
             char symbol;
+            printf("Введите символ для поиска: ");
             if (scanf("%c", &symbol) != 1)
             {
                 rc = ERR_IO;

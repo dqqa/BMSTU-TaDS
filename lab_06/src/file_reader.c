@@ -36,7 +36,7 @@ int file_load(FILE *fp, tree_t **tree)
     while (line)
     {
         rc = tree_insert_str(tree, line);
-        if (rc != ERR_OK)
+        if (rc != ERR_REPEAT && rc != ERR_OK) // TODO
             goto err;
 
         free(line);
@@ -44,7 +44,7 @@ int file_load(FILE *fp, tree_t **tree)
     }
 
     err:
-    if (rc != ERR_OK)
+    if (rc != ERR_REPEAT && rc != ERR_OK)
         tree_free(*tree);
 
     return rc;
@@ -72,8 +72,9 @@ int file_search_symbol(FILE *fp, char symbol, size_t *cnt)
     {
         if (line[0] == symbol)
         {
-            printf("%s\n", line);
-            *cnt += 1;
+            // printf("%s\n", line);
+            if (cnt)
+                *cnt += 1;
         }
 
         free(line);
