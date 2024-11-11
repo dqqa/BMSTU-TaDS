@@ -9,11 +9,11 @@
 
 #define UNUSED(x) ((void)(x))
 #define NOTHING
-#define UNREACHABLE(msg)      \
-    do                        \
-    {                         \
+#define UNREACHABLE(msg)        \
+    do                          \
+    {                           \
         fprintf(stderr, (msg)); \
-        exit(1);              \
+        exit(1);                \
     } while (0)
 
 int tree_create(tree_t **t, const char *data)
@@ -29,14 +29,11 @@ int tree_create(tree_t **t, const char *data)
     tree->rhs = NULL;
     tree->data = NULL;
 
-    if (data)
+    tree->data = strdup(data);
+    if (!tree->data)
     {
-        tree->data = strdup(data);
-        if (!tree->data)
-        {
-            rc = ERR_ALLOC;
-            goto err;
-        }
+        rc = ERR_ALLOC;
+        goto err;
     }
 
     err:
@@ -90,18 +87,20 @@ void tree_apply_post(tree_t *tree, tree_apply_fn_t apply_fn, void *arg)
     apply_fn(tree, arg);
 }
 
-tree_t *tree_insert_node(tree_t *tree, tree_t *src)
+tree_t *tree_insert_node(tree_t *tree, tree_t *src, int *err)
 {
     if (!tree)
         return src;
 
+    *err = ERR_OK;
+
     int cmp_res = strcmp(tree->data, src->data);
     if (cmp_res == 0)
-        NOTHING; // assert(0 && "Yet there is no support of repeating nodes!");
+        *err = ERR_REPEAT; // assert(0 && "Yet there is no support of repeating nodes!");
     else if (cmp_res < 0)
-        tree->rhs = tree_insert_node(tree->rhs, src);
+        tree->rhs = tree_insert_node(tree->rhs, src, err);
     else
-        tree->lhs = tree_insert_node(tree->lhs, src);
+        tree->lhs = tree_insert_node(tree->lhs, src, err);
 
     return tree;
 }
@@ -113,12 +112,10 @@ int tree_insert_str(tree_t **tree, const char *src)
     if (rc != ERR_OK)
         return rc;
 
-    tree_t *newtree = tree_insert_node(*tree, subtree);
-    if (!newtree)
-    {
-        rc = ERR_ALLOC;
+    tree_t *newtree = tree_insert_node(*tree, subtree, &rc);
+    if (rc != ERR_OK)
         goto err;
-    }
+
     *tree = newtree;
 
     err:
@@ -142,6 +139,6 @@ tree_t *tree_search(tree_t *tree, const char *data)
         return tree_search(tree->lhs, data);
     else
         return tree_search(tree->rhs, data);
-    
+
     UNREACHABLE("tree_search");
 }
