@@ -23,6 +23,7 @@ static int str_input(FILE *fp, char *buf, size_t buf_size)
 
 int test_tree(void)
 {
+    printf("Проверка двоичного дерева поиска. В каждой вершине должно располагаться одно слово.\n")
     bool need_exit = false;
     int rc = ERR_OK;
     tree_t *tree = NULL;
