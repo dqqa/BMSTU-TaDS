@@ -142,3 +142,45 @@ tree_t *tree_search(tree_t *tree, const char *data)
 
     UNREACHABLE("tree_search");
 }
+
+void tree_search_symbol(const tree_t *tree, char symbol, size_t *cnt)
+{
+    if (!tree)
+        return;
+
+    if (tree->data[0] == symbol)
+    {
+        printf("%s\n", tree->data);
+        if (cnt)
+            *cnt += 1;
+
+        tree_search_symbol(tree->lhs, symbol, cnt);
+        tree_search_symbol(tree->rhs, symbol, cnt);
+    }
+    else if (tree->data[0] < symbol)
+        tree_search_symbol(tree->rhs, symbol, cnt);
+    else
+        tree_search_symbol(tree->lhs, symbol, cnt);
+}
+
+static void to_dot(tree_t *tree, void *fp)
+{
+    static int null_cnt = 0;
+
+    if (tree->lhs)
+        fprintf(fp, "  %s -> %s;\n", tree->data, tree->lhs->data);
+    else
+        fprintf(fp, "  %s -> null_%d [shape=\"point\"];\n", tree->data, null_cnt++);
+
+    if (tree->rhs)
+        fprintf(fp, "  %s -> %s;\n", tree->data, tree->rhs->data);
+    else
+        fprintf(fp, "  %s -> null_%d [shape=\"point\"];\n", tree->data, null_cnt++);
+}
+
+void tree_to_graphviz(FILE *fp, const char *tree_name, tree_t *t)
+{
+    fprintf(fp, "digraph %s {\n", tree_name);
+    tree_apply_pre(t, to_dot, fp);
+    fprintf(fp, "}\n");
+}

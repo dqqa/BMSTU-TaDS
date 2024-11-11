@@ -1,4 +1,5 @@
 #include "errors.h"
+#include "file_reader.h"
 #include "tree.h"
 #include <stdio.h>
 
@@ -6,7 +7,7 @@
     do                    \
     {                     \
         result = (num);   \
-        goto cleanup;     \
+        goto defer;       \
     } while (0)
 
 void tree_printer(tree_t *t, void *fmt)
@@ -19,16 +20,8 @@ int main(void)
     tree_t *t = NULL;
     int rc = ERR_OK, result = ERR_OK;
 
-    if ((rc = tree_insert_str(&t, "123")) != ERR_OK)
-        return_defer(rc);
-
-    if ((rc = tree_insert_str(&t, "234")) != ERR_OK)
-        return_defer(rc);
-
-    if ((rc = tree_insert_str(&t, "234")) != ERR_OK)
-        return_defer(rc);
-
-    if ((rc = tree_insert_str(&t, "0")) != ERR_OK)
+    rc = file_load_ex("tests/1.txt", &t);
+    if (rc != ERR_OK)
         return_defer(rc);
 
     printf("TREE:\n");
@@ -39,7 +32,20 @@ int main(void)
     tree_apply_post(t, tree_printer, "%s, ");
     printf("\n");
 
-    cleanup:
+    tree_to_graphviz(stdout, "tree", t);
+
+    printf("tree_search_symbol:\n");
+    size_t cnt = 0;
+    tree_search_symbol(t, '0', &cnt);
+    printf("COUNT: %zu\n\n", cnt);
+
+    printf("file_search_symbol_ex:\n");
+    cnt = 0;
+    file_search_symbol_ex("tests/1.txt", '0', &cnt);
+    printf("COUNT: %zu\n\n", cnt);
+
+    defer:
     tree_free(t);
+
     return result;
 }

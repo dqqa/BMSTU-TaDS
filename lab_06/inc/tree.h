@@ -1,6 +1,8 @@
 #ifndef TREE_H__
 #define TREE_H__
 
+#include <stdio.h>
+
 typedef char *data_t;
 
 typedef struct __tree_t
@@ -23,5 +25,8 @@ int tree_insert_str(tree_t **tree, const char *src);
 
 void tree_remove(tree_t *tree, tree_t *what);
 tree_t *tree_search(tree_t *tree, const char *data);
+
+void tree_search_symbol(const tree_t *tree, char symbol, size_t *cnt);
+void tree_to_graphviz(FILE *fp, const char *tree_name, tree_t *t);
 
 #endif // TREE_H__
