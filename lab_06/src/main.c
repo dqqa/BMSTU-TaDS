@@ -24,14 +24,6 @@ int main(void)
     if (rc != ERR_OK)
         return_defer(rc);
 
-    printf("TREE:\n");
-    tree_apply_pre(t, tree_printer, "%s, ");
-    printf("\n");
-    tree_apply_in(t, tree_printer, "%s, ");
-    printf("\n");
-    tree_apply_post(t, tree_printer, "%s, ");
-    printf("\n");
-
     tree_to_graphviz(stdout, "tree", t);
 
     printf("tree_search_symbol:\n");

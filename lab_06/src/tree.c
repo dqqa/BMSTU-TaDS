@@ -170,12 +170,20 @@ static void to_dot(tree_t *tree, void *fp)
     if (tree->lhs)
         fprintf(fp, "  %s -> %s;\n", tree->data, tree->lhs->data);
     else
-        fprintf(fp, "  %s -> null_%d [shape=\"point\"];\n", tree->data, null_cnt++);
+    {
+        fprintf(fp, "  %s -> null_%d;\n", tree->data, null_cnt);
+        fprintf(fp, "  null_%d [color=\"red\"];\n", null_cnt);
+        null_cnt++;
+    }
 
     if (tree->rhs)
         fprintf(fp, "  %s -> %s;\n", tree->data, tree->rhs->data);
     else
-        fprintf(fp, "  %s -> null_%d [shape=\"point\"];\n", tree->data, null_cnt++);
+    {
+        fprintf(fp, "  %s -> null_%d;\n", tree->data, null_cnt);
+        fprintf(fp, "  null_%d [color=\"red\"];\n", null_cnt);
+        null_cnt++;
+    }
 }
 
 void tree_to_graphviz(FILE *fp, const char *tree_name, tree_t *t)
