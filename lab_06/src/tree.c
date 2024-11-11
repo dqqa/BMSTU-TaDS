@@ -25,6 +25,7 @@ int tree_create(tree_t **t, const char *data)
     if (!tree)
         return ERR_ALLOC;
 
+    tree->is_repeated = false;
     tree->lhs = NULL;
     tree->rhs = NULL;
     tree->data = NULL;
@@ -125,7 +126,62 @@ int tree_insert_str(tree_t **tree, const char *src)
     return rc;
 }
 
-void tree_remove(tree_t *tree, tree_t *what);
+static tree_t *tree_min_node(tree_t *node)
+{
+    tree_t *current = node;
+    while (current && current->lhs != NULL)
+    {
+        current = current->lhs;
+    }
+    return current;
+}
+
+int tree_remove(tree_t **tree, tree_t *what)
+{
+    if (*tree == NULL)
+        return ERR_PARAM;
+
+    int cmp = strcmp((*tree)->data, what->data);
+    if (cmp > 0)
+        return tree_remove(&(*tree)->lhs, what);
+    else if (cmp < 0)
+        return tree_remove(&(*tree)->rhs, what);
+    else
+    {
+        if ((*tree)->lhs == NULL)
+        {
+            tree_t *temp = (*tree)->rhs;
+            free((*tree)->data);
+            free(*tree);
+            *tree = temp;
+        }
+        else if ((*tree)->rhs == NULL)
+        {
+            tree_t *temp = (*tree)->lhs;
+            free((*tree)->data);
+            free(*tree);
+            *tree = temp;
+        }
+        else
+        {
+            tree_t *temp = tree_min_node((*tree)->rhs);
+            free((*tree)->data);
+            (*tree)->data = strdup(temp->data);
+            (*tree)->is_repeated = temp->is_repeated;
+            tree_remove(&(*tree)->rhs, temp);
+        }
+        return ERR_OK;
+    }
+}
+
+int tree_remove_str(tree_t **tree, const char *what)
+{
+    tree_t *node_to_remove = tree_search(*tree, what);
+    if (!node_to_remove)
+        return ERR_NOT_FOUND;
+
+    return tree_remove(tree, node_to_remove);
+}
 
 tree_t *tree_search(tree_t *tree, const char *data)
 {
@@ -143,14 +199,15 @@ tree_t *tree_search(tree_t *tree, const char *data)
     UNREACHABLE("tree_search");
 }
 
-void tree_search_symbol(const tree_t *tree, char symbol, size_t *cnt)
+void tree_search_symbol(tree_t *tree, char symbol, size_t *cnt)
 {
     if (!tree)
         return;
 
     if (tree->data[0] == symbol)
     {
-        printf("%s\n", tree->data);
+        // printf("%s\n", tree->data);
+        tree->is_repeated = true;
         if (cnt)
             *cnt += 1;
 
@@ -166,6 +223,9 @@ void tree_search_symbol(const tree_t *tree, char symbol, size_t *cnt)
 static void to_dot(tree_t *tree, void *fp)
 {
     static int null_cnt = 0;
+
+    if (tree->is_repeated)
+        fprintf(fp, "  %s [color=\"green\"];\n", tree->data);
 
     if (tree->lhs)
         fprintf(fp, "  %s -> %s;\n", tree->data, tree->lhs->data);
@@ -191,4 +251,14 @@ void tree_to_graphviz(FILE *fp, const char *tree_name, tree_t *t)
     fprintf(fp, "digraph %s {\n", tree_name);
     tree_apply_pre(t, to_dot, fp);
     fprintf(fp, "}\n");
+}
+
+void tree_repeat_reset(tree_t *tree)
+{
+    if (!tree)
+        return;
+
+    tree->is_repeated = false;
+    tree_repeat_reset(tree->lhs);
+    tree_repeat_reset(tree->rhs);
 }
