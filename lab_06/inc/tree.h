@@ -14,9 +14,9 @@ typedef void (*tree_apply_fn_t)(tree_t *subtree, void *arg);
 int tree_create(tree_t **t, const char *data);
 void tree_free(tree_t *tree);
 
-void tree_apply_pre(const tree_t *tree, tree_apply_fn_t apply_fn, void *arg);
-void tree_apply_in(const tree_t *tree, tree_apply_fn_t apply_fn, void *arg);
-void tree_apply_post(const tree_t *tree, tree_apply_fn_t apply_fn, void *arg);
+void tree_apply_pre(tree_t *tree, tree_apply_fn_t apply_fn, void *arg);
+void tree_apply_in(tree_t *tree, tree_apply_fn_t apply_fn, void *arg);
+void tree_apply_post(tree_t *tree, tree_apply_fn_t apply_fn, void *arg);
 
 tree_t *tree_insert_node(tree_t *tree, tree_t *src);
 int tree_insert_str(tree_t **tree, const char *src);
