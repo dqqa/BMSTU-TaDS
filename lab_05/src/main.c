@@ -15,6 +15,7 @@
 int test_queue_list(void);
 int test_queue_arr(void);
 void compare_queue_impl(void);
+int edit_params(void);
 
 void print_guide(void)
 {
@@ -68,12 +69,15 @@ int main(void)
         {
             compare_queue_impl();
         }
+        else if (op == MAIN_MENU_OP_EDIT)
+        {
+            rc = edit_params();
+        }
         else if (op == MAIN_MENU_OP_UNKNOWN)
         {
             rc = ERR_BAD_NUM;
         }
 
-        out:
         if (rc != ERR_OK)
         {
             printf("Ошибка!");
