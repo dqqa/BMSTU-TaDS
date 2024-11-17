@@ -16,7 +16,8 @@ main_menu_op_t get_main_menu_op(void)
         return MAIN_MENU_EOF;
     if (rc == 0)
     {
-        fflush(stdin);
+        while (getchar() != '\n')
+            ;
         return MAIN_MENU_UNKNOWN;
     }
 
@@ -43,7 +44,9 @@ test_menu_op_t get_test_menu_op(void)
         return TEST_MENU_EOF;
     if (rc == 0)
     {
-        fflush(stdin);
+        while (getchar() != '\n')
+            ;
+
         return TEST_MENU_UNKNOWN;
     }
 

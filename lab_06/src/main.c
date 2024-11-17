@@ -134,8 +134,9 @@ int main(void)
             tree_search_symbol(tree, symbol, &cnt);
 
             printf("Количество найденных элементов, начинающиеся на букву '%c': %zu\n", symbol, cnt);
-            printf("Описание графа на языке DOT:\n");
-            tree_to_graphviz(stdout, "tree", tree);
+            // printf("Описание графа на языке DOT:\n");
+            // tree_to_graphviz(stdout, "tree", tree);
+            rc = tree_save_tmp_open(tree);
             tree_repeat_reset(tree);
         }
         else if (op == MAIN_MENU_PERFORMANCE_CMP)

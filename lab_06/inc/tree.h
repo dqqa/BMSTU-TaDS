@@ -34,4 +34,6 @@ void tree_search_symbol(tree_t *tree, char symbol, size_t *cnt);
 void tree_repeat_reset(tree_t *tree);
 void tree_to_graphviz(FILE *fp, const char *tree_name, tree_t *t);
 
+int tree_save_tmp_open(tree_t *t);
+
 #endif // TREE_H__

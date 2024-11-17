@@ -23,7 +23,7 @@ static int str_input(FILE *fp, char *buf, size_t buf_size)
 
 int test_tree(void)
 {
-    printf("Проверка двоичного дерева поиска. В каждой вершине должно располагаться одно слово.\n")
+    printf("Проверка двоичного дерева поиска. В каждой вершине должно располагаться одно слово.\n");
     bool need_exit = false;
     int rc = ERR_OK;
     tree_t *tree = NULL;
@@ -68,13 +68,15 @@ int test_tree(void)
             tree_search_symbol(tree, symbol, &cnt);
 
             printf("Количество найденных элементов, начинающиеся на букву '%c': %zu\n", symbol, cnt);
-            printf("Описание графа на языке DOT:\n");
-            tree_to_graphviz(stdout, "tree", tree);
+            // printf("Описание графа на языке DOT:\n");
+            // tree_to_graphviz(stdout, "tree", tree);
+            rc = tree_save_tmp_open(tree);
             tree_repeat_reset(tree);
         }
         else if (op == TEST_MENU_SHOW)
         {
-            tree_to_graphviz(stdout, "tree", tree);
+            rc = tree_save_tmp_open(tree);
+            // tree_to_graphviz(stdout, "tree", tree);
         }
 
         loc_err:

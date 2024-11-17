@@ -8,5 +8,6 @@
 #define ERR_OVERFLOW 4
 #define ERR_PARAM 5
 #define ERR_NOT_FOUND 6
+#define ERR_FORK 7
 
 #endif // ERRORS_H__

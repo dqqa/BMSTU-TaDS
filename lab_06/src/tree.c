@@ -3,9 +3,12 @@
 #include "tree.h"
 #include "errors.h"
 #include <assert.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define UNUSED(x) ((void)(x))
 #define NOTHING
@@ -261,4 +264,71 @@ void tree_repeat_reset(tree_t *tree)
     tree->is_repeated = false;
     tree_repeat_reset(tree->lhs);
     tree_repeat_reset(tree->rhs);
+}
+
+static int open_img(const char *img)
+{
+    pid_t pid = fork();
+    if (pid == -1)
+        return ERR_FORK;
+
+    if (pid == 0)
+    {
+        int stdout_file = open("/dev/null", O_RDWR);
+        int rc = ERR_OK;
+        if (dup2(stdout_file, STDERR_FILENO) == -1) // redirect fork'ed process stderr to /dev/null
+        {
+            rc = ERR_IO;
+            goto err;
+        }
+        //     |> exec_name
+        //     |       |> argv      |> it's necessary
+        execlp("open", "open", img, NULL);
+
+        err:
+        close(stdout_file);
+
+        perror("execlp");
+        return rc;
+    }
+    else
+    {
+        int ret_code;
+        waitpid(pid, &ret_code, 0);
+        if (WEXITSTATUS(ret_code) != 0)
+            return ERR_FORK;
+    }
+    return ERR_OK;
+}
+
+int tree_save_tmp_open(tree_t *t)
+{
+    const char *gp = "temp.gp";
+    const char *img = "tmp.png";
+
+    FILE *fp = fopen(gp, "w");
+    if (!fp)
+        return ERR_IO;
+
+    tree_to_graphviz(fp, "tree", t);
+
+    fclose(fp);
+
+    pid_t pid = fork();
+    if (pid == -1)
+        return ERR_FORK;
+
+    if (pid == 0)
+    {
+        execlp("dot", "dot", "-Tpng", gp, "-o", img, NULL);
+        perror("execlp");
+    }
+    else
+    {
+        int ret_code;
+        waitpid(pid, &ret_code, 0);
+        if (WEXITSTATUS(ret_code) != 0)
+            return ERR_FORK;
+    }
+    return open_img(img);
 }
