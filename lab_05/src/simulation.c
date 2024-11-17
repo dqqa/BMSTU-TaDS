@@ -97,7 +97,7 @@ int simulate_first_n(size_t n, queue_base_t *queue, float *time)
 
     double calculated_time = 0;
 
-    if ((double)(T1_UPPER + T1_LOWER) / 2 > (double)(T2_UPPER + T2_LOWER) / 2)
+    if ((double)(T1_UPPER + T1_LOWER) / 2 > (double)(T2_UPPER + T2_LOWER) / 2 / (1-P))
         calculated_time = ((double)(T1_UPPER + T1_LOWER) / 2) * n;
     else
         calculated_time = (double)(T2_UPPER + T2_LOWER) / 2 * n * (1 / (1 - P));
