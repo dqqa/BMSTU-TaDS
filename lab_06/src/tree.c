@@ -16,7 +16,7 @@
     do                          \
     {                           \
         fprintf(stderr, (msg)); \
-        exit(1);                \
+        exit(EXIT_FAILURE);     \
     } while (0)
 
 int tree_create(tree_t **t, const char *data)
@@ -286,7 +286,7 @@ static int open_img(const char *img)
         close(stdout_file);
 
         perror("execlp");
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     }
     else
     {
@@ -319,7 +319,7 @@ int tree_save_tmp_open(tree_t *t)
     {
         execlp("dot", "dot", "-Tpng", gp, "-o", img, NULL);
         perror("execlp");
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     }
     else
     {
