@@ -275,12 +275,9 @@ static int open_img(const char *img)
     if (pid == 0)
     {
         int stdout_file = open("/dev/null", O_RDWR);
-        int rc = ERR_OK;
         if (dup2(stdout_file, STDERR_FILENO) == -1) // redirect fork'ed process stderr to /dev/null
-        {
-            rc = ERR_IO;
             goto err;
-        }
+
         //     |> exec_name
         //     |       |> argv      |> it's necessary
         execlp("open", "open", img, NULL);
@@ -289,7 +286,7 @@ static int open_img(const char *img)
         close(stdout_file);
 
         perror("execlp");
-        return rc;
+        exit(EXIT_FAILURE);
     }
     else
     {
@@ -322,6 +319,7 @@ int tree_save_tmp_open(tree_t *t)
     {
         execlp("dot", "dot", "-Tpng", gp, "-o", img, NULL);
         perror("execlp");
+        exit(EXIT_FAILURE);
     }
     else
     {
