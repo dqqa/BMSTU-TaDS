@@ -235,7 +235,7 @@ static void to_dot(tree_t *tree, void *fp)
     else
     {
         fprintf(fp, "  %s -> null_%d;\n", tree->data, null_cnt);
-        fprintf(fp, "  null_%d [color=\"red\"];\n", null_cnt);
+        fprintf(fp, "  null_%d [shape=\"point\", color=\"red\"];\n", null_cnt);
         null_cnt++;
     }
 
@@ -244,7 +244,7 @@ static void to_dot(tree_t *tree, void *fp)
     else
     {
         fprintf(fp, "  %s -> null_%d;\n", tree->data, null_cnt);
-        fprintf(fp, "  null_%d [color=\"red\"];\n", null_cnt);
+        fprintf(fp, "  null_%d [shape=\"point\", color=\"red\"];\n", null_cnt);
         null_cnt++;
     }
 }
