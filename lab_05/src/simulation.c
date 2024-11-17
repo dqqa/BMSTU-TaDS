@@ -29,89 +29,60 @@ int simulate_first_n(size_t n, queue_base_t *queue, float *time)
     int rc = ERR_OK;
     printf("Симуляция первых %zu заявок обслуживающего аппарата\n", n);
 
-    size_t entered = 0, left = 0, prev_left = 0;
+    size_t entered = 0, left = 0;
     size_t act = 0;
-    float current_time = 0.0f, total_idle_time = 0.0f, total_queue_time = 0.0f, total_service_time = 0.0f;
-    float next_arrival_time = rand_in_range_float(T1_LOWER, T1_UPPER); // Время прибытия следующей заявки
-    float next_service_time = 0.0f;                                    // Время следющего обслуживания
+    float current_time = 0.0f, total_idle_time = 0.0f;
+    float next_arrival_time = 0.0f; // Время прибытия следующей заявки
+    float state = 0.0f;
     while (left < n)
     {
-        if (queue->is_empty(queue) || next_arrival_time < next_service_time)
+        while (queue->is_empty(queue) || current_time > next_arrival_time)
         {
-            // if (queue->is_empty(queue))
-            // {
-            if (next_arrival_time < next_service_time)
+            next_arrival_time += rand_in_range_float(T1_LOWER, T1_UPPER);
+            if (queue->is_empty(queue) && next_arrival_time > current_time)
+            {
                 total_idle_time += next_arrival_time - current_time;
-            // }
-
-            // Обработка прибытия заявки
-            current_time = next_arrival_time;
-            data_t req = { .req = { .arrival_time = current_time, .service_time = rand_in_range_float(T2_LOWER, T2_UPPER) } };
-            if ((rc = queue->push(queue, &req) != ERR_OK))
-                goto exit;
-
+                current_time = next_arrival_time;
+            }
             entered++;
-            next_arrival_time = current_time + rand_in_range_float(T1_LOWER, T1_UPPER);
+            data_t req = { .req = { .arrival_time = next_arrival_time } };
+            if ((rc = queue->push(queue, &req)) != ERR_OK)
+                goto exit;
+        }
 
-            if (queue->size != 0) // Автомат простаивает
-                next_service_time = current_time + req.req.service_time;
+        int f = 0;
+        state += queue->size;
+        act++;
+        current_time += rand_in_range_float(T2_LOWER, T2_UPPER);
+
+        data_t req = { 0 };
+        if ((rc = queue->pop(queue, &req)) != ERR_OK)
+            goto exit;
+
+        if (rand_with_probability(P))
+        {
+            req.req.arrival_time = current_time;
+            // Возвращается в конец очереди
+            if ((rc = queue->push(queue, &req)) != ERR_OK)
+                goto exit;
         }
         else
         {
-            // Обработка завершения обслуживания
-            data_t req;
-            if ((rc = queue->pop(queue, &req)) != ERR_OK)
-                goto exit;
-
-            // Обновляем текущее время до момента завершения обслуживания
-            current_time = next_service_time;
-
-            float queue_time = current_time - req.req.arrival_time;
-            if (queue_time >= 0)
-                total_queue_time += queue_time;
-            else
-                printf("Warning: отрицательное время ожидания: %.2f\n", queue_time);
-
-            act++;
-            if (rand_with_probability(P))
-            {
-                // Возвращаем заявку в конец очереди
-                // entered++; // не нужно
-                req.req.arrival_time = current_time;
-                // req.req.service_time = rand_in_range_float(T2_LOWER, T2_UPPER); // Генерация нового времени обслуживания не требуется
-                if ((rc = queue->push(queue, &req)) != ERR_OK)
-                    goto exit;
-            }
-            else
-            {
-                total_service_time += req.req.service_time;
-                left++; // Заявка вышла
-            }
-
-            // Устанавливаем время следующего обслуживания
-            if (!queue->is_empty(queue))
-            {
-                data_t next_req;
-                if ((rc = queue->peek(queue, &next_req)) != ERR_OK)
-                    goto exit;
-                next_service_time = current_time + next_req.req.service_time;
-            }
-            else
-            {
-                next_service_time = next_arrival_time; // Если очередь пуста, ждем следующую заявку
-            }
-
-            // next_service_time = current_time + rand_in_range_float(T2_LOWER, T2_UPPER);
-
-            if (left && left % REPORT_INTERVAL == 0 && left != prev_left)
-            {
-                prev_left = left;
-                printf("\nУшло %zu заявок\n", left);
-                printf("Длина очереди: %zu\n", queue->size);
-                printf("Средняя длина очереди: %.2f\n", (float)entered / left);
-                printf("Среднее время в очереди: %.2f\n", total_queue_time / left / T1_UPPER);
-            }
+            // Выходит из очереди
+            // total_idle_time += current_time - req.req.arrival_time;
+            left++;
+            f = 1;
         }
+        /* END PROCESSING */
+
+        if (f && left % REPORT_INTERVAL == 0)
+        {
+            printf("Количетсво заявок: %zu\n", left);
+            printf("Текущая длина очереди: %zu\n", queue->size);
+            printf("Средняя длина очереди: %.2f\n\n", state / act);
+        }
+        if (f)
+            f = 0;
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
@@ -119,25 +90,28 @@ int simulate_first_n(size_t n, queue_base_t *queue, float *time)
 
     printf("\nОбщее время моделирования: %.2f\n"
            "Время простоя ОА: %.2f\n"
-           "Время обслуживания ОА: %.2f\n"
            "Кол-во вошедших заявок: %zu\n"
            "Кол-во вышедших заявок: %zu\n"
            "Кол-во срабатываний ОА: %zu\n",
-           current_time, total_idle_time, total_service_time, entered, left, act);
+           current_time, total_idle_time, entered, left, act);
 
-    float t_avg_wait_req = (float)(T1_UPPER - T1_LOWER) / 2;
-    float t_avg_serv_req = (float)(T2_UPPER - T2_LOWER) / 2;
+    double calculated_time = 0;
+
+    if ((double)(T1_UPPER + T1_LOWER) / 2 > (double)(T2_UPPER + T2_LOWER) / 2)
+        calculated_time = ((double)(T1_UPPER + T1_LOWER) / 2) * n;
+    else
+        calculated_time = (double)(T2_UPPER + T2_LOWER) / 2 * n * (1 / (1 - P));
+
+    float t_avg_wait_req = (float)(T1_UPPER + T1_LOWER) / 2;
+    // float t_avg_serv_req = (float)(T2_UPPER + T2_LOWER) / 2;
     float calculated_req_cnt = current_time / t_avg_wait_req;
-    float calculated_time = act * t_avg_serv_req + total_idle_time;
     printf("\nВычисление погрешностей.\n"
            "Вычисленное кол-во заявок: %.2f, имеем: %zu, погрешность: %.2f%%\n"
            "Аппарат работал: %zu, простаивал: %.2f\n"
-           "Значит время моделирования должно быть: %.2f, имеем %.2f\n"
-           "Вычисляем погрешность: %.2f%%\n",
+           "Значит время моделирования должно быть: %.2f, имеем %.2f, погрешность: %.2f%%\n",
            calculated_req_cnt, entered, ABS((entered - calculated_req_cnt) / calculated_req_cnt * 100),
            act, total_idle_time,
-           calculated_time, current_time,
-           ABS((current_time - calculated_time) / calculated_time * 100));
+           calculated_time, current_time, ABS((current_time - calculated_time) / calculated_time * 100));
 
     exit:
     return rc;

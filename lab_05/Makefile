@@ -6,7 +6,7 @@ $(shell mkdir -p out/)
 EXE := app.exe
 
 CC := gcc
-CFLAGS += -Wstrict-prototypes -Wall -Wextra -Wpedantic -MMD -std=gnu99 -I./inc/
+CFLAGS += -Werror -Wstrict-prototypes -Wall -Wextra -Wpedantic -MMD -std=gnu99 -I./inc/
 
 all: release
 
