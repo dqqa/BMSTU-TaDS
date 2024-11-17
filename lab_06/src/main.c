@@ -19,11 +19,6 @@
 int perf_cmp(void);
 int test_tree(void);
 
-void tree_printer(tree_t *t, void *fmt)
-{
-    printf(fmt, t->data);
-}
-
 int main2(void)
 {
     tree_t *t = NULL;
@@ -142,6 +137,10 @@ int main(void)
         else if (op == MAIN_MENU_PERFORMANCE_CMP)
         {
             rc = perf_cmp();
+        }
+        else
+        {
+            printf("Ошибка!\n");
         }
 
         err:
