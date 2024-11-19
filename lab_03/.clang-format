@@ -1,0 +1,14 @@
+BasedOnStyle: Microsoft
+IndentCaseLabels: true
+SeparateDefinitionBlocks: Always
+InsertNewlineAtEOF: true
+IndentWidth: 4
+TabWidth: 4
+AccessModifierOffset: -4
+BraceWrapping:
+    AfterClass: true
+    AfterStruct: true
+    AfterUnion: true
+    AfterCaseLabel: true
+ColumnLimit: 0
+IndentGotoLabels: true
