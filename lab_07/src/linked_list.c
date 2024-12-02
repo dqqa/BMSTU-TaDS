@@ -1,5 +1,5 @@
 #include "linked_list.h"
-#include "associative_array.h"
+#include "errors.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,13 +12,12 @@
  * @param val Значение
  * @return assoc_array_error_t Код ошибки
  */
-assoc_array_error_t push_back(node_t **head, const char *key, int val)
+int push_back(node_t **head, const char *key, int val)
 {
     node_t *new_node = node_create();
     if (new_node == NULL)
-        return ASSOC_ARRAY_MEM;
+        return ERR_ALLOC;
 
-    new_node->key = key;
     new_node->value = val;
 
     if (*head == NULL)
@@ -34,7 +33,7 @@ assoc_array_error_t push_back(node_t **head, const char *key, int val)
         tmp->next = new_node;
     }
 
-    return ASSOC_ARRAY_OK;
+    return ERR_OK;
 }
 
 /**
