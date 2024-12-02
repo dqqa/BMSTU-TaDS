@@ -1,7 +1,7 @@
 #ifndef AVL_TREE_H__
 #define AVL_TREE_H__
 
-#include "associative_array.h"
+#include "errors.h"
 
 typedef struct node node_t;
 
@@ -18,7 +18,7 @@ typedef void (*avl_apply_fn_t)(const char *key, int *num, void *param);
 
 node_t *node_create(void);
 
-assoc_array_error_t avl_insert(node_t **head, node_t *new_node);
+int avl_insert(node_t **head, node_t *new_node);
 void avl_free(node_t **head);
 
 const node_t *avl_search(const node_t *head, const char *key);

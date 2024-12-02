@@ -1,11 +1,12 @@
 #include "avl_tree.h"
+#include "errors.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 /**
  * @brief Создает узел АВЛ-дерева
- * 
+ *
  * @return node_t* Новый узел
  */
 node_t *node_create(void)
@@ -21,12 +22,12 @@ node_t *node_create(void)
 
 /**
  * @brief Вставляет узел в АВЛ-дерево
- * 
+ *
  * @param head Двойной указатель на голову
  * @param new_node Узел, который требуется вставить
  * @return assoc_array_error_t Код оишбки
  */
-assoc_array_error_t avl_insert(node_t **head, node_t *new_node)
+int avl_insert(node_t **head, node_t *new_node)
 {
     assert(head);
     assert(new_node);
@@ -34,20 +35,20 @@ assoc_array_error_t avl_insert(node_t **head, node_t *new_node)
     if (*head == NULL)
     {
         *head = new_node;
-        return ASSOC_ARRAY_OK;
+        return ERR_OK;
     }
 
     int cmp = strcmp((*head)->key, new_node->key);
     if (cmp == 0)
-        return ASSOC_ARRAY_KEY_EXISTS;
+        return ERR_REPEAT;
 
-    int rc = ASSOC_ARRAY_OK;
+    int rc = ERR_OK;
     if (cmp > 0)
         rc = avl_insert(&(*head)->rhs, new_node);
     else
         rc = avl_insert(&(*head)->lhs, new_node);
 
-    if (rc == ASSOC_ARRAY_OK)
+    if (rc == ERR_OK)
         *head = avl_node_balance(*head);
 
     return rc;
@@ -55,7 +56,7 @@ assoc_array_error_t avl_insert(node_t **head, node_t *new_node)
 
 /**
  * @brief Освобождает память из-под АВЛ-дерева
- * 
+ *
  * @param head Двойной указатель на голову
  */
 void avl_free(node_t **head)
@@ -73,7 +74,7 @@ void avl_free(node_t **head)
 
 /**
  * @brief Ищет узел в АВЛ-дереве по ключу
- * 
+ *
  * @param head Указатель на голову
  * @param key Ключ
  * @return const node_t* Указатель на искомый узел
@@ -94,7 +95,7 @@ const node_t *avl_search(const node_t *head, const char *key)
 
 /**
  * @brief Удаляет узел с минимальным ключом в АВЛ-дереве
- * 
+ *
  * @param head Указтель на голову
  * @return node_t* Указатель на голову
  */
@@ -111,7 +112,7 @@ node_t *avl_remove_min(node_t *head)
 
 /**
  * @brief Удаляет узел АВЛ-дерева по ключу
- * 
+ *
  * @param head Указатель на голову
  * @param key Ключ
  * @return node_t* Указатель на голову
@@ -147,7 +148,7 @@ node_t *avl_remove(node_t *head, const char *key)
 
 /**
  * @brief Применяет callback-функцию к каждому узлу АВЛ-дерева
- * 
+ *
  * @param head Указатель на голову
  * @param func Callback-функция
  * @param param Необязательный параметр для callback функции
@@ -164,7 +165,7 @@ void avl_apply(node_t *head, avl_apply_fn_t func, void *param)
 
 /**
  * @brief Ищет узел с минимальным ключом
- * 
+ *
  * @param head Указатель на голову
  * @return const node_t* Узел с минимальным ключом
  */
@@ -179,7 +180,7 @@ const node_t *avl_find_min(const node_t *head)
 
 /**
  * @brief Ищет узел с максимальным ключом
- * 
+ *
  * @param head Указатель на голову
  * @return const node_t* Узел с максимальным ключом
  */
@@ -194,7 +195,7 @@ const node_t *avl_find_max(const node_t *head)
 
 /**
  * @brief Поворачивает поддерево влево
- * 
+ *
  * @param head Указатель на голову
  * @return node_t* Указатель на голову
  */
@@ -212,7 +213,7 @@ node_t *avl_rotate_left(node_t *head)
 
 /**
  * @brief Поворачивает поддерево вправо
- * 
+ *
  * @param head Указатель на голову
  * @return node_t* Указатель на голову
  */
@@ -230,9 +231,9 @@ node_t *avl_rotate_right(node_t *head)
 
 /**
  * @brief Восстанавливает корректное значение высоты узла
- * 
+ *
  * Ограничение: высоты правого и левого поддерева должны быть также корректными
- * 
+ *
  * @param head Указатель на узел
  */
 void avl_fix_height(node_t *head)
@@ -247,7 +248,7 @@ void avl_fix_height(node_t *head)
 
 /**
  * @brief Балансирует АВЛ-дерево
- * 
+ *
  * @param head Указатель на голову
  * @return node_t* Указатель на голову
  */
@@ -275,7 +276,7 @@ node_t *avl_node_balance(node_t *head)
 
 /**
  * @brief Получает высоту узла АВЛ-дерева
- * 
+ *
  * @param head Укзаатель на узел
  * @return char Высота узла
  */
@@ -289,7 +290,7 @@ char avl_get_height(const node_t *head)
 
 /**
  * @brief Считает сбалансированность для узла
- * 
+ *
  * @param head Указатель на узел
  * @return int Сбалансированность узла
  */
