@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include "tree.h"
+#include "dyn_array.h"
 #include "errors.h"
 #include <assert.h>
 #include <fcntl.h>
@@ -329,4 +330,23 @@ int tree_save_tmp_open(tree_t *t)
             return ERR_FORK;
     }
     return open_img(img);
+}
+
+struct __node_data
+{
+    const char **items;
+    size_t count;
+    size_t capacity;
+};
+
+static void store_values(tree_t *tree, void *nodes)
+{
+    dyn_arr_append(*(struct __node_data *)nodes, tree->data);
+}
+
+void tree_balance(tree_t **tree)
+{
+    struct __node_data nodes = { 0 };
+
+    tree_apply_in(*tree, store_values, &nodes);
 }

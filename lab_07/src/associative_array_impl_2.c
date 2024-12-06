@@ -22,7 +22,7 @@ assoc_array_t assoc_array_create(void)
 
 void assoc_array_destroy(assoc_array_t *arr)
 {
-    if (*arr == NULL)
+    if (arr == NULL || *arr == NULL)
         return;
 
     for (size_t i = 0; i < HT_SIZE; i++)
@@ -35,7 +35,10 @@ void assoc_array_destroy(assoc_array_t *arr)
 
 assoc_array_error_t assoc_array_insert(assoc_array_t arr, const char *key, int num)
 {
-    if (arr == NULL)
+    if (arr == NULL || key == NULL)
+        return ASSOC_ARRAY_INVALID_PARAM;
+
+    if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     size_t hash = calc_hash_str(key);
@@ -49,7 +52,10 @@ assoc_array_error_t assoc_array_insert(assoc_array_t arr, const char *key, int n
 
 assoc_array_error_t assoc_array_find(const assoc_array_t arr, const char *key, int **num)
 {
-    if (arr == NULL)
+    if (arr == NULL || key == NULL || num == NULL)
+        return ASSOC_ARRAY_INVALID_PARAM;
+
+    if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     size_t hash = calc_hash_str(key);
@@ -65,7 +71,10 @@ assoc_array_error_t assoc_array_find(const assoc_array_t arr, const char *key, i
 
 assoc_array_error_t assoc_array_remove(assoc_array_t arr, const char *key)
 {
-    if (arr == NULL)
+    if (arr == NULL || key == NULL)
+        return ASSOC_ARRAY_INVALID_PARAM;
+
+    if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     size_t hash = calc_hash_str(key);
@@ -87,7 +96,7 @@ assoc_array_error_t assoc_array_clear(assoc_array_t arr)
 
 assoc_array_error_t assoc_array_each(const assoc_array_t arr, void (*action)(const char *key, int *num, void *param), void *param)
 {
-    if (arr == NULL)
+    if (arr == NULL || action == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     for (size_t i = 0; i < HT_SIZE; i++)
@@ -98,7 +107,7 @@ assoc_array_error_t assoc_array_each(const assoc_array_t arr, void (*action)(con
 
 assoc_array_error_t assoc_array_min(const assoc_array_t arr, int **num)
 {
-    if (arr == NULL)
+    if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     node_t *min = NULL;
@@ -126,7 +135,7 @@ assoc_array_error_t assoc_array_min(const assoc_array_t arr, int **num)
 
 assoc_array_error_t assoc_array_max(const assoc_array_t arr, int **num)
 {
-    if (arr == NULL)
+    if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     node_t *max = NULL;

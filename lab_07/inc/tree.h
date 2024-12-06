@@ -28,6 +28,8 @@ int tree_insert_str(tree_t **tree, const char *src);
 int tree_remove(tree_t **tree, tree_t *what);
 int tree_remove_str(tree_t **tree, const char *what);
 
+void tree_balance(tree_t **tree);
+
 tree_t *tree_search(tree_t *tree, const char *data);
 void tree_search_symbol(tree_t *tree, char symbol, size_t *cnt);
 

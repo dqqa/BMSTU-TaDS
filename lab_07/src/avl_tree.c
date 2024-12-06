@@ -1,5 +1,4 @@
 #include "avl_tree.h"
-#include "errors.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +14,23 @@ node_t *node_create(void)
     if (node)
     {
         memset(node, 0, sizeof(*node));
+        node->height = 1;
     }
 
     return node;
+}
+
+/**
+ * @brief Освобождает память из-под узла
+ *
+ * @param node Двойной указатель на узел
+ */
+void node_free(node_t **node)
+{
+    free((*node)->key);
+    free(*node);
+
+    *node = NULL;
 }
 
 /**
@@ -25,12 +38,12 @@ node_t *node_create(void)
  *
  * @param head Двойной указатель на голову
  * @param new_node Узел, который требуется вставить
- * @return assoc_array_error_t Код оишбки
+ * @return int Код оишбки
  */
 int avl_insert(node_t **head, node_t *new_node)
 {
-    assert(head);
-    assert(new_node);
+    if (head == NULL || new_node == NULL)
+        return ERR_PARAM;
 
     if (*head == NULL)
     {
@@ -44,9 +57,9 @@ int avl_insert(node_t **head, node_t *new_node)
 
     int rc = ERR_OK;
     if (cmp > 0)
-        rc = avl_insert(&(*head)->rhs, new_node);
-    else
         rc = avl_insert(&(*head)->lhs, new_node);
+    else
+        rc = avl_insert(&(*head)->rhs, new_node);
 
     if (rc == ERR_OK)
         *head = avl_node_balance(*head);
@@ -61,15 +74,13 @@ int avl_insert(node_t **head, node_t *new_node)
  */
 void avl_free(node_t **head)
 {
-    assert(head);
-    if (*head == NULL)
+    if (head == NULL || *head == NULL)
         return;
 
     avl_free(&(*head)->lhs);
     avl_free(&(*head)->rhs);
 
-    free(*head);
-    *head = NULL;
+    node_free(head);
 }
 
 /**
@@ -101,7 +112,9 @@ const node_t *avl_search(const node_t *head, const char *key)
  */
 node_t *avl_remove_min(node_t *head)
 {
-    assert(head);
+    if (head == NULL)
+        return NULL;
+
     if (head->lhs == NULL)
         return head->rhs;
 
@@ -132,13 +145,16 @@ node_t *avl_remove(node_t *head, const char *key)
         node_t *lhs = head->lhs;
         node_t *rhs = head->rhs;
 
+        free(head->key);
         free(head);
         if (rhs == NULL)
             return lhs;
 
         node_t *min = (node_t *)avl_find_min(rhs);
-        min->lhs = lhs;
+        // Сначала удалить минимальный элемент в правом поддереве, после чего
+        // присвоить левое поддерево
         min->rhs = avl_remove_min(rhs);
+        min->lhs = lhs;
 
         head = min;
     }
@@ -171,7 +187,9 @@ void avl_apply(node_t *head, avl_apply_fn_t func, void *param)
  */
 const node_t *avl_find_min(const node_t *head)
 {
-    assert(head);
+    if (head == NULL)
+        return NULL;
+
     if (head->lhs != NULL)
         return avl_find_min(head->lhs);
 
@@ -186,7 +204,9 @@ const node_t *avl_find_min(const node_t *head)
  */
 const node_t *avl_find_max(const node_t *head)
 {
-    assert(head);
+    if (head == NULL)
+        return NULL;
+
     if (head->rhs != NULL)
         return avl_find_max(head->rhs);
 

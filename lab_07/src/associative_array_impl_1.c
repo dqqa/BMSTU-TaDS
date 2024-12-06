@@ -1,7 +1,10 @@
+#define _GNU_SOURCE
+
 #include "associative_array.h"
 #include "avl_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct assoc_array_type
 {
@@ -19,7 +22,7 @@ assoc_array_t assoc_array_create(void)
 
 void assoc_array_destroy(assoc_array_t *arr)
 {
-    if (*arr == NULL)
+    if (arr == NULL || *arr == NULL)
         return;
 
     avl_free(&(*arr)->head);
@@ -29,26 +32,45 @@ void assoc_array_destroy(assoc_array_t *arr)
 
 assoc_array_error_t assoc_array_insert(assoc_array_t arr, const char *key, int num)
 {
-    if (arr == NULL)
+    if (arr == NULL || key == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
+
+    if (strlen(key) == 0)
+        return ASSOC_ARRAY_INVALID_PARAM;
+
+    assoc_array_error_t rc = ASSOC_ARRAY_OK;
 
     node_t *newnode = node_create();
     if (newnode == NULL)
         return ASSOC_ARRAY_MEM;
 
-    newnode->key = key;
+    char *key_dup = strdup(key);
+    if (key_dup == NULL)
+    {
+        rc = ASSOC_ARRAY_MEM;
+        goto err;
+    }
+    newnode->key = key_dup;
     newnode->value = num;
 
-    assoc_array_error_t err = avl_insert(&arr->head, newnode);
-    if (err != ASSOC_ARRAY_OK)
-        free(newnode);
+    rc = avl_insert(&arr->head, newnode);
 
-    return err;
+    err:
+    if (rc != ASSOC_ARRAY_OK)
+    {
+        free(newnode);
+        free(key_dup);
+    }
+
+    return rc;
 }
 
 assoc_array_error_t assoc_array_find(const assoc_array_t arr, const char *key, int **num)
 {
-    if (arr == NULL)
+    if (arr == NULL || key == NULL || num == NULL)
+        return ASSOC_ARRAY_INVALID_PARAM;
+
+    if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     node_t *node = (node_t *)avl_search(arr->head, key);
@@ -61,7 +83,10 @@ assoc_array_error_t assoc_array_find(const assoc_array_t arr, const char *key, i
 
 assoc_array_error_t assoc_array_remove(assoc_array_t arr, const char *key)
 {
-    if (arr == NULL)
+    if (arr == NULL || key == NULL)
+        return ASSOC_ARRAY_INVALID_PARAM;
+
+    if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     node_t *new_head = avl_remove(arr->head, key);
@@ -84,7 +109,7 @@ assoc_array_error_t assoc_array_clear(assoc_array_t arr)
 
 assoc_array_error_t assoc_array_each(const assoc_array_t arr, void (*action)(const char *key, int *num, void *param), void *param)
 {
-    if (arr == NULL)
+    if (arr == NULL || action == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     avl_apply(arr->head, action, param);
@@ -93,7 +118,7 @@ assoc_array_error_t assoc_array_each(const assoc_array_t arr, void (*action)(con
 
 assoc_array_error_t assoc_array_min(const assoc_array_t arr, int **num)
 {
-    if (arr == NULL)
+    if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     node_t *node = (node_t *)avl_find_min(arr->head);
@@ -106,7 +131,7 @@ assoc_array_error_t assoc_array_min(const assoc_array_t arr, int **num)
 
 assoc_array_error_t assoc_array_max(const assoc_array_t arr, int **num)
 {
-    if (arr == NULL)
+    if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
     node_t *node = (node_t *)avl_find_max(arr->head);

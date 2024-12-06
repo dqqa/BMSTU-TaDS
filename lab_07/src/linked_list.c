@@ -10,7 +10,7 @@
  * @param head Двойной указатель на голову
  * @param key Ключ
  * @param val Значение
- * @return assoc_array_error_t Код ошибки
+ * @return int Код ошибки
  */
 int push_back(node_t **head, const char *key, int val)
 {
@@ -18,6 +18,7 @@ int push_back(node_t **head, const char *key, int val)
     if (new_node == NULL)
         return ERR_ALLOC;
 
+    new_node->key = key;
     new_node->value = val;
 
     if (*head == NULL)
@@ -99,9 +100,9 @@ const node_t *list_search_by_key(const node_t *head, const char *key)
  *
  * @param head Указатель на голову списка
  * @param key Ключ
- * @return assoc_array_error_t Код ошибки
+ * @return int Код ошибки
  */
-assoc_array_error_t list_remove_by_key(node_t **head, const char *key)
+int list_remove_by_key(node_t **head, const char *key)
 {
     if (*head == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
