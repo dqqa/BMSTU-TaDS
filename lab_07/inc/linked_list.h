@@ -6,17 +6,17 @@
 
 typedef void (*list_apply_fn_t)(const char *key, int *num, void *param);
 
-void list_free(avl_node_t **head);
+void list_free(avl_tree_t **head);
 
-int push_back(avl_node_t **head, const char *key, int val);
+int push_back(avl_tree_t **head, const char *key, int val);
 
-void list_apply(avl_node_t *head, list_apply_fn_t func, void *arg);
+void list_apply(avl_tree_t *head, list_apply_fn_t func, void *arg);
 
-const avl_node_t *list_search_by_key(const avl_node_t *head, const char *key);
+const avl_tree_t *list_search_by_key(const avl_tree_t *head, const char *key);
 
-int list_remove_by_key(avl_node_t **head, const char *key);
+int list_remove_by_key(avl_tree_t **head, const char *key);
 
-const avl_node_t *list_find_min(const avl_node_t *head);
-const avl_node_t *list_find_max(const avl_node_t *head);
+const avl_tree_t *list_find_min(const avl_tree_t *head);
+const avl_tree_t *list_find_max(const avl_tree_t *head);
 
 #endif // LINKED_LIST_H__

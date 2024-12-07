@@ -8,11 +8,11 @@
  *
  * @return node_t* Новый узел
  */
-int avl_create(avl_node_t **t, const char *data)
+int avl_create(avl_tree_t **t, const char *data)
 {
     int rc = ERR_OK;
     *t = NULL;
-    avl_node_t *tree = malloc(sizeof(*tree));
+    avl_tree_t *tree = malloc(sizeof(*tree));
     if (!tree)
         return ERR_ALLOC;
 
@@ -45,7 +45,7 @@ int avl_create(avl_node_t **t, const char *data)
  *
  * @param node Двойной указатель на узел
  */
-void avl_node_free(avl_node_t **node)
+void avl_node_free(avl_tree_t **node)
 {
     free((*node)->key);
     free(*node);
@@ -60,7 +60,7 @@ void avl_node_free(avl_node_t **node)
  * @param new_node Узел, который требуется вставить
  * @return int Код оишбки
  */
-int avl_insert_node(avl_node_t **head, avl_node_t *new_node)
+int avl_insert_node(avl_tree_t **head, avl_tree_t *new_node)
 {
     if (head == NULL || new_node == NULL)
         return ERR_PARAM;
@@ -92,7 +92,7 @@ int avl_insert_node(avl_node_t **head, avl_node_t *new_node)
  *
  * @param head Двойной указатель на голову
  */
-void avl_free(avl_node_t **head)
+void avl_free(avl_tree_t **head)
 {
     if (head == NULL || *head == NULL)
         return;
@@ -110,7 +110,7 @@ void avl_free(avl_node_t **head)
  * @param key Ключ
  * @return const node_t* Указатель на искомый узел
  */
-const avl_node_t *avl_search(const avl_node_t *head, const char *key)
+const avl_tree_t *avl_search(const avl_tree_t *head, const char *key)
 {
     if (head == NULL)
         return NULL;
@@ -130,7 +130,7 @@ const avl_node_t *avl_search(const avl_node_t *head, const char *key)
  * @param head Указтель на голову
  * @return node_t* Указатель на голову
  */
-avl_node_t *avl_remove_min(avl_node_t *head)
+avl_tree_t *avl_remove_min(avl_tree_t *head)
 {
     if (head == NULL)
         return NULL;
@@ -150,7 +150,7 @@ avl_node_t *avl_remove_min(avl_node_t *head)
  * @param key Ключ
  * @return node_t* Указатель на голову
  */
-avl_node_t *avl_remove(avl_node_t *head, const char *key)
+avl_tree_t *avl_remove(avl_tree_t *head, const char *key)
 {
     if (head == NULL)
         return NULL;
@@ -162,15 +162,15 @@ avl_node_t *avl_remove(avl_node_t *head, const char *key)
         head->rhs = avl_remove(head->rhs, key);
     else
     {
-        avl_node_t *lhs = head->lhs;
-        avl_node_t *rhs = head->rhs;
+        avl_tree_t *lhs = head->lhs;
+        avl_tree_t *rhs = head->rhs;
 
         free(head->key);
         free(head);
         if (rhs == NULL)
             return lhs;
 
-        avl_node_t *min = (avl_node_t *)avl_find_min(rhs);
+        avl_tree_t *min = (avl_tree_t *)avl_find_min(rhs);
         // Сначала удалить минимальный элемент в правом поддереве, после чего
         // присвоить левое поддерево
         min->rhs = avl_remove_min(rhs);
@@ -189,7 +189,7 @@ avl_node_t *avl_remove(avl_node_t *head, const char *key)
  * @param func Callback-функция
  * @param param Необязательный параметр для callback функции
  */
-void avl_apply_pre(avl_node_t *head, avl_apply_fn_t func, void *param)
+void avl_apply_pre(avl_tree_t *head, avl_apply_fn_t func, void *param)
 {
     if (head == NULL)
         return;
@@ -205,7 +205,7 @@ void avl_apply_pre(avl_node_t *head, avl_apply_fn_t func, void *param)
  * @param head Указатель на голову
  * @return const node_t* Узел с минимальным ключом
  */
-const avl_node_t *avl_find_min(const avl_node_t *head)
+const avl_tree_t *avl_find_min(const avl_tree_t *head)
 {
     if (head == NULL)
         return NULL;
@@ -222,7 +222,7 @@ const avl_node_t *avl_find_min(const avl_node_t *head)
  * @param head Указатель на голову
  * @return const node_t* Узел с максимальным ключом
  */
-const avl_node_t *avl_find_max(const avl_node_t *head)
+const avl_tree_t *avl_find_max(const avl_tree_t *head)
 {
     if (head == NULL)
         return NULL;
@@ -239,9 +239,9 @@ const avl_node_t *avl_find_max(const avl_node_t *head)
  * @param head Указатель на голову
  * @return node_t* Указатель на голову
  */
-avl_node_t *avl_rotate_left(avl_node_t *head)
+avl_tree_t *avl_rotate_left(avl_tree_t *head)
 {
-    avl_node_t *tmp = head->rhs;
+    avl_tree_t *tmp = head->rhs;
     head->rhs = tmp->lhs;
     tmp->lhs = head;
 
@@ -257,9 +257,9 @@ avl_node_t *avl_rotate_left(avl_node_t *head)
  * @param head Указатель на голову
  * @return node_t* Указатель на голову
  */
-avl_node_t *avl_rotate_right(avl_node_t *head)
+avl_tree_t *avl_rotate_right(avl_tree_t *head)
 {
-    avl_node_t *tmp = head->lhs;
+    avl_tree_t *tmp = head->lhs;
     head->lhs = tmp->rhs;
     tmp->rhs = head;
 
@@ -276,7 +276,7 @@ avl_node_t *avl_rotate_right(avl_node_t *head)
  *
  * @param head Указатель на узел
  */
-void avl_fix_height(avl_node_t *head)
+void avl_fix_height(avl_tree_t *head)
 {
     char lhs_height = avl_get_height(head->lhs);
     char rhs_height = avl_get_height(head->rhs);
@@ -292,7 +292,7 @@ void avl_fix_height(avl_node_t *head)
  * @param head Указатель на голову
  * @return node_t* Указатель на голову
  */
-avl_node_t *avl_node_balance(avl_node_t *head)
+avl_tree_t *avl_node_balance(avl_tree_t *head)
 {
     avl_fix_height(head);
 
@@ -320,7 +320,7 @@ avl_node_t *avl_node_balance(avl_node_t *head)
  * @param head Укзаатель на узел
  * @return char Высота узла
  */
-char avl_get_height(const avl_node_t *head)
+char avl_get_height(const avl_tree_t *head)
 {
     if (head != NULL)
         return head->height;
@@ -334,7 +334,7 @@ char avl_get_height(const avl_node_t *head)
  * @param head Указатель на узел
  * @return int Сбалансированность узла
  */
-int avl_calc_balance_factor(const avl_node_t *head)
+int avl_calc_balance_factor(const avl_tree_t *head)
 {
     assert(head);
     return avl_get_height(head->rhs) - avl_get_height(head->lhs);

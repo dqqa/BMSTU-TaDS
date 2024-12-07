@@ -8,7 +8,7 @@
 
 struct assoc_array_type
 {
-    avl_node_t *head;
+    avl_tree_t *head;
 };
 
 assoc_array_t assoc_array_create(void)
@@ -40,7 +40,7 @@ assoc_array_error_t assoc_array_insert(assoc_array_t arr, const char *key, int n
 
     assoc_array_error_t rc = ASSOC_ARRAY_OK;
 
-    avl_node_t *newnode = avl_node_create();
+    avl_tree_t *newnode = avl_node_create();
     if (newnode == NULL)
         return ASSOC_ARRAY_MEM;
 
@@ -73,7 +73,7 @@ assoc_array_error_t assoc_array_find(const assoc_array_t arr, const char *key, i
     if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
-    avl_node_t *node = (avl_node_t *)avl_search(arr->head, key);
+    avl_tree_t *node = (avl_tree_t *)avl_search(arr->head, key);
     if (node == NULL)
         return ASSOC_ARRAY_NOT_FOUND;
 
@@ -89,7 +89,7 @@ assoc_array_error_t assoc_array_remove(assoc_array_t arr, const char *key)
     if (strlen(key) == 0)
         return ASSOC_ARRAY_INVALID_PARAM;
 
-    avl_node_t *new_head = avl_remove(arr->head, key);
+    avl_tree_t *new_head = avl_remove(arr->head, key);
     if (new_head == NULL)
         return ASSOC_ARRAY_MEM;
 
@@ -121,7 +121,7 @@ assoc_array_error_t assoc_array_min(const assoc_array_t arr, int **num)
     if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
-    avl_node_t *node = (avl_node_t *)avl_find_min(arr->head);
+    avl_tree_t *node = (avl_tree_t *)avl_find_min(arr->head);
     if (node == NULL)
         return ASSOC_ARRAY_NOT_FOUND;
 
@@ -134,7 +134,7 @@ assoc_array_error_t assoc_array_max(const assoc_array_t arr, int **num)
     if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
-    avl_node_t *node = (avl_node_t *)avl_find_max(arr->head);
+    avl_tree_t *node = (avl_tree_t *)avl_find_max(arr->head);
     if (node == NULL)
         return ASSOC_ARRAY_NOT_FOUND;
 
