@@ -6,9 +6,9 @@
  * 
  * @return node_t* Указатель на узел
  */
-node_t *node_create(void)
+avl_node_t *avl_node_create(void)
 {
-    node_t *new_node = malloc(sizeof(*new_node));
+    avl_node_t *new_node = malloc(sizeof(*new_node));
     if (new_node)
     {
         new_node->key = NULL;

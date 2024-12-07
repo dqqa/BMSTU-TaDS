@@ -10,7 +10,7 @@
 // Хэш таблица (метод цепочек - массив списков)
 struct assoc_array_type
 {
-    node_t *table[HT_SIZE];
+    avl_node_t *table[HT_SIZE];
 };
 
 assoc_array_t assoc_array_create(void)
@@ -61,7 +61,7 @@ assoc_array_error_t assoc_array_find(const assoc_array_t arr, const char *key, i
     size_t hash = calc_hash_str(key);
     size_t index = hash % HT_SIZE;
 
-    node_t *node = (node_t *)list_search_by_key(arr->table[index], key);
+    avl_node_t *node = (avl_node_t *)list_search_by_key(arr->table[index], key);
     if (node == NULL)
         return ASSOC_ARRAY_NOT_FOUND;
 
@@ -110,17 +110,17 @@ assoc_array_error_t assoc_array_min(const assoc_array_t arr, int **num)
     if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
-    node_t *min = NULL;
+    avl_node_t *min = NULL;
 
     for (size_t i = 0; i < HT_SIZE; i++)
     {
         if (min == NULL)
         {
-            min = (node_t *)list_find_min(arr->table[i]);
+            min = (avl_node_t *)list_find_min(arr->table[i]);
         }
         else
         {
-            node_t *new_min = (node_t *)list_find_min(arr->table[i]);
+            avl_node_t *new_min = (avl_node_t *)list_find_min(arr->table[i]);
             if (new_min != NULL && strcmp(min->key, new_min->key) > 0)
                 min = new_min;
         }
@@ -138,17 +138,17 @@ assoc_array_error_t assoc_array_max(const assoc_array_t arr, int **num)
     if (arr == NULL || num == NULL)
         return ASSOC_ARRAY_INVALID_PARAM;
 
-    node_t *max = NULL;
+    avl_node_t *max = NULL;
 
     for (size_t i = 0; i < HT_SIZE; i++)
     {
         if (max == NULL)
         {
-            max = (node_t *)list_find_max(arr->table[i]);
+            max = (avl_node_t *)list_find_max(arr->table[i]);
         }
         else
         {
-            node_t *new_max = (node_t *)list_find_max(arr->table[i]);
+            avl_node_t *new_max = (avl_node_t *)list_find_max(arr->table[i]);
             if (new_max != NULL && strcmp(max->key, new_max->key) < 0)
                 max = new_max;
         }
