@@ -183,7 +183,7 @@ avl_tree_t *avl_remove(avl_tree_t *head, const char *key)
 }
 
 /**
- * @brief Применяет callback-функцию к каждому узлу АВЛ-дерева
+ * @brief Применяет callback-функцию к каждому узлу АВЛ-дерева префиксно
  *
  * @param head Указатель на голову
  * @param func Callback-функция
@@ -194,9 +194,43 @@ void avl_apply_pre(avl_tree_t *head, avl_apply_fn_t func, void *param)
     if (head == NULL)
         return;
 
-    func(head->key, &head->value, param);
+    func(head, param);
     avl_apply_pre(head->lhs, func, param);
     avl_apply_pre(head->rhs, func, param);
+}
+
+/**
+ * @brief Применяет callback-функцию к каждому узлу АВЛ-дерева инфиксно
+ *
+ * @param head Указатель на голову
+ * @param func Callback-функция
+ * @param param Необязательный параметр для callback функции
+ */
+void avl_apply_in(avl_tree_t *head, avl_apply_fn_t func, void *param)
+{
+    if (head == NULL)
+        return;
+
+    avl_apply_pre(head->lhs, func, param);
+    func(head, param);
+    avl_apply_pre(head->rhs, func, param);
+}
+
+/**
+ * @brief Применяет callback-функцию к каждому узлу АВЛ-дерева постфиксно
+ *
+ * @param head Указатель на голову
+ * @param func Callback-функция
+ * @param param Необязательный параметр для callback функции
+ */
+void avl_apply_post(avl_tree_t *head, avl_apply_fn_t func, void *param)
+{
+    if (head == NULL)
+        return;
+
+    avl_apply_pre(head->lhs, func, param);
+    avl_apply_pre(head->rhs, func, param);
+    func(head, param);
 }
 
 /**

@@ -4,9 +4,9 @@
 #include "errors.h"
 #include <stdbool.h>
 
-typedef struct node avl_tree_t;
+typedef struct __avl_node avl_tree_t;
 
-struct node
+struct __avl_node
 {
     avl_tree_t *lhs, *rhs;
     char height;

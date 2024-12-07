@@ -5,6 +5,23 @@
 #include <string.h>
 
 /**
+ * @brief Создает узел односвязного списка
+ * 
+ * @return list_t* Указатель на узел
+ */
+list_t *list_node_create(void)
+{
+    list_t *new_node = malloc(sizeof(*new_node));
+    if (new_node)
+    {
+        new_node->key = NULL;
+        new_node->next = NULL;
+    }
+
+    return new_node;
+}
+
+/**
  * @brief Добавляет в конец списка элемент
  *
  * @param head Двойной указатель на голову
@@ -12,14 +29,13 @@
  * @param val Значение
  * @return int Код ошибки
  */
-int push_back(avl_tree_t **head, const char *key, int val)
+int list_push_back(list_t **head, const char *key)
 {
-    avl_tree_t *new_node = avl_node_create();
+    list_t *new_node = list_node_create();
     if (new_node == NULL)
         return ERR_ALLOC;
 
     new_node->key = key;
-    new_node->value = val;
 
     if (*head == NULL)
     {
@@ -27,7 +43,7 @@ int push_back(avl_tree_t **head, const char *key, int val)
     }
     else
     {
-        avl_tree_t *tmp = *head;
+        list_t *tmp = *head;
         while (tmp->next != NULL)
             tmp = tmp->next;
 
@@ -42,12 +58,12 @@ int push_back(avl_tree_t **head, const char *key, int val)
  *
  * @param head Двойной указатель на голову
  */
-void list_free(avl_tree_t **head)
+void list_free(list_t **head)
 {
-    avl_tree_t *tmp = *head;
+    list_t *tmp = *head;
     while (tmp)
     {
-        avl_tree_t *next = tmp->next;
+        list_t *next = tmp->next;
         free(tmp);
         tmp = next;
     }
@@ -62,12 +78,12 @@ void list_free(avl_tree_t **head)
  * @param func Указатель на функцию
  * @param arg Параметр для функции
  */
-void list_apply(avl_tree_t *head, list_apply_fn_t func, void *arg)
+void list_apply(list_t *head, list_apply_fn_t func, void *arg)
 {
-    avl_tree_t *tmp = head;
+    list_t *tmp = head;
     while (tmp != NULL)
     {
-        func(tmp->key, &tmp->value, arg);
+        func(tmp, arg);
         tmp = tmp->next;
     }
 }
@@ -79,12 +95,12 @@ void list_apply(avl_tree_t *head, list_apply_fn_t func, void *arg)
  * @param key Ключ
  * @return const node_t* Найденный узел
  */
-const avl_tree_t *list_search_by_key(const avl_tree_t *head, const char *key)
+const list_t *list_search_by_key(const list_t *head, const char *key)
 {
     if (head == NULL)
         return NULL;
 
-    const avl_tree_t *tmp = head;
+    const list_t *tmp = head;
     while (tmp != NULL)
     {
         if (strcmp(tmp->key, key) == 0)
@@ -102,36 +118,36 @@ const avl_tree_t *list_search_by_key(const avl_tree_t *head, const char *key)
  * @param key Ключ
  * @return int Код ошибки
  */
-int list_remove_by_key(avl_tree_t **head, const char *key)
+int list_remove_by_key(list_t **head, const char *key)
 {
     if (*head == NULL)
-        return ASSOC_ARRAY_INVALID_PARAM;
+        return ERR_PARAM;
 
     if (strcmp((*head)->key, key) == 0)
     {
-        avl_tree_t *next = (*head)->next;
+        list_t *next = (*head)->next;
         free(*head);
         *head = next;
 
-        return ASSOC_ARRAY_OK;
+        return ERR_OK;
     }
 
-    avl_tree_t *tmp = *head;
-    avl_tree_t *prev = *head;
+    list_t *tmp = *head;
+    list_t *prev = *head;
     while (tmp != NULL)
     {
         if (strcmp(tmp->key, key) == 0)
         {
-            avl_tree_t *next = tmp->next;
+            list_t *next = tmp->next;
             free(tmp);
             prev->next = next;
-            return ASSOC_ARRAY_OK;
+            return ERR_OK;
         }
         prev = tmp;
         tmp = tmp->next;
     }
 
-    return ASSOC_ARRAY_NOT_FOUND;
+    return ERR_NOT_FOUND;
 }
 
 /**
@@ -140,13 +156,13 @@ int list_remove_by_key(avl_tree_t **head, const char *key)
  * @param head Указатель на голову списка
  * @return const node_t* Указатель на узел с минимальным ключом
  */
-const avl_tree_t *list_find_min(const avl_tree_t *head)
+const list_t *list_find_min(const list_t *head)
 {
     if (head == NULL)
         return NULL;
 
-    const avl_tree_t *tmp = head;
-    const avl_tree_t *min = tmp;
+    const list_t *tmp = head;
+    const list_t *min = tmp;
     tmp = tmp->next;
 
     while (tmp)
@@ -166,13 +182,13 @@ const avl_tree_t *list_find_min(const avl_tree_t *head)
  * @param head Указатель на голову списка
  * @return const node_t* Указатель на узел с максимальным ключом
  */
-const avl_tree_t *list_find_max(const avl_tree_t *head)
+const list_t *list_find_max(const list_t *head)
 {
     if (head == NULL)
         return NULL;
 
-    const avl_tree_t *tmp = head;
-    const avl_tree_t *max = tmp;
+    const list_t *tmp = head;
+    const list_t *max = tmp;
     tmp = tmp->next;
 
     while (tmp)
