@@ -4,20 +4,40 @@
 #include <string.h>
 
 /**
- * @brief Создает узел АВЛ-дерева
+ * @brief Создает АВЛ-дерево
  *
  * @return node_t* Новый узел
  */
-avl_node_t *avl_node_create(void)
+int avl_create(avl_node_t **t, const char *data)
 {
-    avl_node_t *node = malloc(sizeof(*node));
-    if (node)
+    int rc = ERR_OK;
+    *t = NULL;
+    avl_node_t *tree = malloc(sizeof(*tree));
+    if (!tree)
+        return ERR_ALLOC;
+
+    tree->is_repeated = false;
+    tree->lhs = NULL;
+    tree->rhs = NULL;
+    tree->key = NULL;
+
+    tree->key = strdup(data);
+    if (!tree->key)
     {
-        memset(node, 0, sizeof(*node));
-        node->height = 1;
+        rc = ERR_ALLOC;
+        goto err;
     }
 
-    return node;
+    err:
+    if (rc != ERR_OK)
+    {
+        free(tree->key);
+        free(tree);
+    }
+    else
+        *t = tree;
+
+    return rc;
 }
 
 /**
@@ -40,7 +60,7 @@ void avl_node_free(avl_node_t **node)
  * @param new_node Узел, который требуется вставить
  * @return int Код оишбки
  */
-int avl_insert(avl_node_t **head, avl_node_t *new_node)
+int avl_insert_node(avl_node_t **head, avl_node_t *new_node)
 {
     if (head == NULL || new_node == NULL)
         return ERR_PARAM;
@@ -57,9 +77,9 @@ int avl_insert(avl_node_t **head, avl_node_t *new_node)
 
     int rc = ERR_OK;
     if (cmp > 0)
-        rc = avl_insert(&(*head)->lhs, new_node);
+        rc = avl_insert_node(&(*head)->lhs, new_node);
     else
-        rc = avl_insert(&(*head)->rhs, new_node);
+        rc = avl_insert_node(&(*head)->rhs, new_node);
 
     if (rc == ERR_OK)
         *head = avl_node_balance(*head);

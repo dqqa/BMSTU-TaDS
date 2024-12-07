@@ -2,6 +2,7 @@
 #define AVL_TREE_H__
 
 #include "errors.h"
+#include <stdbool.h>
 
 typedef struct node avl_node_t;
 
@@ -11,15 +12,16 @@ struct node
     char height;
 
     const char *key;
-    int value;
+    bool is_repeated;
 };
 
 typedef void (*avl_apply_fn_t)(const char *key, int *num, void *param);
 
-avl_node_t *avl_node_create(void);
-
-int avl_insert(avl_node_t **head, avl_node_t *new_node);
+int avl_create(avl_node_t **t, const char *data);
 void avl_free(avl_node_t **head);
+
+int avl_insert_node(avl_node_t **head, avl_node_t *new_node);
+int avl_insert_str(avl_node_t **head, const char *src);
 
 const avl_node_t *avl_search(const avl_node_t *head, const char *key);
 avl_node_t *avl_remove(avl_node_t *head, const char *key);

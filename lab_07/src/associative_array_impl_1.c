@@ -53,7 +53,7 @@ assoc_array_error_t assoc_array_insert(assoc_array_t arr, const char *key, int n
     newnode->key = key_dup;
     newnode->value = num;
 
-    rc = avl_insert(&arr->head, newnode);
+    rc = avl_insert_node(&arr->head, newnode);
 
     err:
     if (rc != ASSOC_ARRAY_OK)
