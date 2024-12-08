@@ -31,10 +31,76 @@ void ht_closed_free(ht_closed_t **arr)
     if (arr == NULL || *arr == NULL)
         return;
 
+    for (size_t i = 0; i < (*arr)->size; i++)
+        if ((*arr)->table[i].state == STATE_BUSY)
+            free((*arr)->table[i].data);
+
     free((*arr)->table);
     free(*arr);
 
     *arr = NULL;
+}
+
+int ht_closed_restruct(ht_closed_t **ht, size_t prev_size)
+{
+    int rc = ERR_OK;
+    size_t new_size = calc_next_prime_num(prev_size);
+    ht_closed_t *new_ht = ht_closed_create(new_size);
+
+    bool restruct_needed = false;
+    for (size_t i = 0; !restruct_needed && i < (*ht)->size; i++)
+    {
+        if ((*ht)->table[i].state == STATE_EMPTY)
+            continue;
+
+        size_t hash = calc_hash_str((*ht)->table[i].data);
+        size_t index = hash % new_ht->size;
+        size_t new_ind = index;
+        size_t collisions = 0;
+
+        while ((new_ht->table[new_ind].state == STATE_REMOVED ||
+                (new_ht->table[new_ind].state == STATE_BUSY &&
+                 strcmp((*ht)->table[i].data, new_ht->table[new_ind].data) != 0)) &&
+               !restruct_needed)
+        {
+            new_ind = (new_ind + 1) % new_ht->size;
+            if (collisions > g_max_collisions)
+                restruct_needed = true;
+
+            collisions++;
+        }
+
+        if (restruct_needed)
+            goto restruct;
+
+        char *key_dup = strdup((*ht)->table[i].data);
+        if (key_dup == NULL)
+        {
+            rc = ERR_ALLOC;
+            goto err;
+        }
+
+        new_ht->table[new_ind].state = STATE_BUSY;
+        new_ht->table[new_ind].data = key_dup;
+    }
+
+    err:
+    if (rc != ERR_OK)
+    {
+        ht_closed_free(&new_ht);
+        return rc;
+    }
+
+    restruct:
+    if (restruct_needed)
+    {
+        ht_closed_free(&new_ht);
+        return ht_closed_restruct(ht, new_size);
+    }
+
+    ht_closed_free(ht);
+    *ht = new_ht;
+    return ERR_OK;
 }
 
 int ht_closed_insert(ht_closed_t **arr, const char *key, bool *is_restructured)
@@ -46,44 +112,53 @@ int ht_closed_insert(ht_closed_t **arr, const char *key, bool *is_restructured)
     if (strlen(key) == 0)
         return ERR_PARAM;
 
+    int rc = ERR_OK;
     size_t hash = calc_hash_str(key);
-    size_t index = hash % (*arr)->size;
-    size_t i = index;
 
-    bool restruct_needed;
-    do
+    // Реструктуризация и перехеширование
+    while (true)
     {
-        // Реструктуризация и перехеширование
-        restruct_needed = false;
+        bool restruct_needed = false;
+        size_t index = hash % (*arr)->size;
+        size_t i = index;
+        size_t collisions = 0;
         while (((*arr)->table[i].state == STATE_REMOVED ||
                 ((*arr)->table[i].state == STATE_BUSY &&
                  strcmp(key, (*arr)->table[i].data) != 0)) &&
                !restruct_needed)
         {
             i = (i + 1) % (*arr)->size;
-            if (index - i > g_max_collisions)
+            if (collisions > g_max_collisions)
                 restruct_needed = true;
+            collisions++;
         }
-        i = index;
-    } while (restruct_needed);
 
-    // if (list_search_by_key((*arr)->table[index], key) != NULL)
-    //     return ERR_REPEAT;
+        if (!restruct_needed && (*arr)->table[i].state == STATE_BUSY)
+            return ERR_REPEAT;
 
-    // int rc = list_push_back(&(*arr)->table[index], key);
-    // if (rc != ERR_OK)
-    //     return rc;
+        if (restruct_needed)
+        {
+            if (is_restructured)
+                *is_restructured = true;
+            if ((rc = ht_closed_restruct(arr, (*arr)->size)) != ERR_OK)
+                goto err;
+        }
+        else
+        {
+            char *key_dup = strdup(key);
+            if (!key_dup)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
 
-    // if (is_restructured)
-    //     *is_restructured = false;
+            (*arr)->table[i].state = STATE_BUSY;
+            (*arr)->table[i].data = key_dup;
+            break;
+        }
+    }
 
-    // rc = ht_closed_restruct(arr);
-    // if (is_restructured && rc == ERR_OK)
-    //     *is_restructured = true;
-
-    // if (rc == ERR_NO_NEED_RESTRUCT)
-    //     rc = ERR_OK;
-    *is_restructured = false;
+    err:
     return ERR_OK;
 }
 
@@ -135,6 +210,7 @@ int ht_closed_remove(ht_closed_t *arr, const char *key)
         return ERR_NOT_FOUND;
 
     arr->table[i].state = STATE_REMOVED;
+    free(arr->table[i].data);
     return ERR_OK;
 }
 

@@ -9,7 +9,7 @@ def main():
 
     cnt = int(sys.argv[1])
     for _ in range(cnt):
-        length = rnd.randint(1, 4)
+        length = rnd.randint(1, 10)
         s = ""
         for _ in range(length):
             s += rnd.choice(string.ascii_lowercase)

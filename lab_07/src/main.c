@@ -50,7 +50,7 @@ int main(void)
         }
         else if (act == MAIN_CHECK_HASH_CLOSED)
         {
-            // rc = check_ht_closed();
+            rc = check_ht_closed();
         }
         else if (act == MAIN_PERF_CMP)
         {

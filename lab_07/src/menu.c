@@ -323,7 +323,7 @@ int check_ht_open(void)
 void ht_closed_show_callback(struct __ht_closed_item *item, void *arg)
 {
     (void)arg;
-    printf("%p => %s", (void *)item, item->data);
+    printf("%p => %s\n", (void *)item, item->data);
 }
 
 int check_ht_closed(void)
