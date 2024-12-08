@@ -24,10 +24,10 @@ $(EXE): $(OBJS)
 
 .PHONY: clean release debug
 
-debug: CFLAGS += -O0 -g3
+debug: CFLAGS += -O0 -ggdb
 debug: $(EXE)
 
-release: CFLAGS += -O2 -DRELEASE
+release: CFLAGS += -s -O2 -DRELEASE
 release: $(EXE)
 
 clean:
