@@ -83,8 +83,43 @@ int avl_insert_node(avl_tree_t **head, avl_tree_t *new_node)
     else
         rc = avl_insert_node(&(*head)->rhs, new_node);
 
-    if (rc == ERR_OK)
-        *head = avl_node_balance(*head);
+    // if (rc == ERR_OK)
+    //     *head = avl_node_balance(*head);
+
+    avl_fix_height(*head);
+
+    int balance = avl_calc_balance_factor(*head);
+    if (balance > 1)
+    {
+        int left_cmp = strcmp(new_node->key, (*head)->lhs->key);
+        if (left_cmp < 0)
+        {
+            *head = avl_rotate_right(*head);
+            return ERR_OK;
+        }
+        else if (left_cmp > 0)
+        {
+            (*head)->lhs = avl_rotate_left((*head)->lhs);
+            *head = avl_rotate_right(*head);
+            return ERR_OK;
+        }
+    }
+
+    if (balance < -1)
+    {
+        int right_cmp = strcmp(new_node->key, (*head)->rhs->key);
+        if (right_cmp > 0)
+        {
+            *head = avl_rotate_left(*head);
+            return ERR_OK;
+        }
+        else if (right_cmp < 0)
+        {
+            (*head)->rhs = avl_rotate_right((*head)->rhs);
+            *head = avl_rotate_left(*head);
+            return ERR_OK;
+        }
+    }
 
     return rc;
 }
@@ -350,6 +385,9 @@ void avl_fix_height(avl_tree_t *head)
  */
 avl_tree_t *avl_node_balance(avl_tree_t *head)
 {
+    if (head == NULL)
+        return NULL;
+
     avl_fix_height(head);
 
     int factor = avl_calc_balance_factor(head);
@@ -447,6 +485,8 @@ int avl_remove_nodes_starting_with(avl_tree_t **tree, char c)
 
     if (rc == ERR_OK && (*tree)->key[0] == c)
         *tree = avl_remove(*tree, (*tree)->key);
+
+    *tree = avl_node_balance(*tree);
 
     return rc;
 }
