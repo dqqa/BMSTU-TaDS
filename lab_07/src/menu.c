@@ -2,6 +2,7 @@
 #include "avl_tree.h"
 #include "bst_tree.h"
 #include "ht_chain.h"
+#include "ht_closed.h"
 #include "str.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -302,6 +303,10 @@ int check_ht_open(void)
         {
             ht_chain_each(ht, ht_open_show_callback, NULL);
         }
+        else
+        {
+            rc = ERR_PARAM;
+        }
 
         err:
         if (rc != ERR_OK)
@@ -315,5 +320,100 @@ int check_ht_open(void)
     return rc;
 }
 
-int check_ht_closed(void);
+void ht_closed_show_callback(struct __ht_closed_item *item, void *arg)
+{
+    (void)arg;
+    printf("%p => %s", (void *)item, item->data);
+}
+
+int check_ht_closed(void)
+{
+    ht_closed_t *ht = NULL;
+    char *filepath = NULL;
+    int rc = ERR_OK;
+
+    bool should_exit = false;
+    while (!should_exit)
+    {
+        ht_action_t act = get_ht_menu_act();
+        if (act == HT_ACT_EXIT)
+        {
+            should_exit = true;
+        }
+        else if (act == HT_ACT_LOAD_FILE)
+        {
+            if (ht != NULL)
+            {
+                rc = ERR_REPEAT;
+                goto err;
+            }
+
+            printf("Введите путь до файла: ");
+            filepath = get_str(stdin, NULL);
+            if (filepath == NULL)
+            {
+                rc = ERR_ALLOC;
+                goto load_err;
+            }
+
+            rc = ht_closed_load_file_ex(filepath, &ht);
+
+            printf("Размер хэш-таблицы: %zu\n", ht->size);
+
+            load_err:
+            free(filepath);
+            filepath = NULL;
+        }
+        else if (act == HT_ACT_REMOVE)
+        {
+            printf("Введите строку для удаления: ");
+            char *remove_term = get_str(stdin, NULL);
+            if (remove_term == NULL)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            rc = ht_closed_remove(ht, remove_term);
+            free(remove_term);
+
+            if (rc == ERR_OK)
+                printf("Успешно удалено!\n");
+        }
+        else if (act == HT_ACT_SEARCH)
+        {
+            printf("Введите строку для поиска: ");
+            char *search_term = get_str(stdin, NULL);
+            if (search_term == NULL)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            rc = ht_closed_find(ht, search_term);
+            free(search_term);
+            if (rc == ERR_OK)
+                printf("Значение найдено!\n");
+        }
+        else if (act == HT_ACT_SHOW)
+        {
+            ht_closed_each(ht, ht_closed_show_callback, NULL);
+        }
+        else
+        {
+            rc = ERR_PARAM;
+        }
+
+        err:
+        if (rc != ERR_OK)
+        {
+            printf("Ошибка!\n");
+            rc = ERR_OK;
+        }
+    }
+
+    ht_closed_free(&ht);
+    return rc;
+}
+
 int perf_cmp(void);
