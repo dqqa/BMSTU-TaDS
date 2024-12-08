@@ -10,7 +10,7 @@ typedef struct __avl_node avl_tree_t;
 struct __avl_node
 {
     avl_tree_t *lhs, *rhs;
-    char height;
+    int height;
 
     char *key;
     bool is_repeated;
@@ -41,7 +41,7 @@ const avl_tree_t *avl_find_max(const avl_tree_t *head);
 
 avl_tree_t *avl_node_balance(avl_tree_t *head);
 
-char avl_get_height(const avl_tree_t *head);
+int avl_get_height(const avl_tree_t *head);
 int avl_calc_balance_factor(const avl_tree_t *head);
 
 avl_tree_t *avl_rotate_left(avl_tree_t *head);

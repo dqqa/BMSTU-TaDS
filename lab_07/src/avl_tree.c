@@ -334,8 +334,8 @@ avl_tree_t *avl_rotate_right(avl_tree_t *head)
  */
 void avl_fix_height(avl_tree_t *head)
 {
-    char lhs_height = avl_get_height(head->lhs);
-    char rhs_height = avl_get_height(head->rhs);
+    int lhs_height = avl_get_height(head->lhs);
+    int rhs_height = avl_get_height(head->rhs);
     if (lhs_height > rhs_height)
         head->height = lhs_height + 1;
     else
@@ -374,9 +374,9 @@ avl_tree_t *avl_node_balance(avl_tree_t *head)
  * @brief Получает высоту узла АВЛ-дерева
  *
  * @param head Укзаатель на узел
- * @return char Высота узла
+ * @return int Высота узла
  */
-char avl_get_height(const avl_tree_t *head)
+int avl_get_height(const avl_tree_t *head)
 {
     if (head != NULL)
         return head->height;
