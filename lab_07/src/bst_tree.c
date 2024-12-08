@@ -2,6 +2,7 @@
 
 #include "bst_tree.h"
 #include "dyn_array.h"
+#include "str.h"
 #include "errors.h"
 #include <assert.h>
 #include <fcntl.h>
@@ -330,4 +331,57 @@ int bst_save_tmp_open(bst_tree_t *t)
             return ERR_FORK;
     }
     return open_img(img);
+}
+
+int bst_load_file(FILE *fp, bst_tree_t **tree)
+{
+    *tree = NULL;
+    int rc = ERR_OK;
+
+    char *line = get_str(fp, NULL);
+    if (!line)
+        return ERR_IO;
+    while (line)
+    {
+        rc = bst_insert_str(tree, line);
+        free(line);
+        if (rc != ERR_REPEAT && rc != ERR_OK) // TODO
+            goto err;
+
+        line = get_str(fp, NULL);
+    }
+
+    err:
+    if (rc != ERR_REPEAT && rc != ERR_OK)
+        bst_free(*tree);
+
+    return rc;
+}
+
+int bst_load_file_ex(const char *filename, bst_tree_t **tree)
+{
+    FILE *fp = fopen(filename, "r");
+    if (!fp)
+        return ERR_IO;
+
+    int rc = bst_load_file(fp, tree);
+
+    fclose(fp);
+    return rc;
+}
+
+int bst_remove_nodes_starting_with(bst_tree_t **tree, char c)
+{
+    if (*tree == NULL)
+        return ERR_OK;
+
+    int rc ;
+    rc = bst_remove_nodes_starting_with(&(*tree)->lhs, c);
+    if (rc == ERR_OK)
+        rc = bst_remove_nodes_starting_with(&(*tree)->rhs, c);
+
+    if (rc == ERR_OK && (*tree)->data[0] == c)
+        rc = bst_remove_str(tree, (*tree)->data);
+
+    return rc;
 }

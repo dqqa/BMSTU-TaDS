@@ -14,6 +14,9 @@ typedef struct __bst_tree_t
 
 typedef void (*bst_apply_fn_t)(bst_tree_t *subtree, void *arg);
 
+int bst_load_file(FILE *fp, bst_tree_t **tree);
+int bst_load_file_ex(const char *filename, bst_tree_t **tree);
+
 int bst_create(bst_tree_t **t, const char *data);
 void bst_free(bst_tree_t *tree);
 
@@ -26,6 +29,8 @@ int bst_insert_str(bst_tree_t **tree, const char *src);
 
 int bst_remove(bst_tree_t **tree, bst_tree_t *what);
 int bst_remove_str(bst_tree_t **tree, const char *what);
+
+int bst_remove_nodes_starting_with(bst_tree_t **tree, char c);
 
 void bst_balance(bst_tree_t **tree);
 

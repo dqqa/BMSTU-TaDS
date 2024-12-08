@@ -14,7 +14,7 @@ ht_chain_t *ht_chain_create(void);
 void ht_chain_destroy(ht_chain_t **arr);
 int ht_chain_clear(ht_chain_t *arr);
 
-int ht_chain_insert(ht_chain_t *arr, const char *key, int num);
+int ht_chain_insert(ht_chain_t *arr, const char *key);
 int ht_chain_remove(ht_chain_t *arr, const char *key);
 
 int ht_chain_find(const ht_chain_t *arr, const char *key);

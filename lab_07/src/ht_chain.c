@@ -24,7 +24,7 @@ void ht_chain_destroy(ht_chain_t **arr)
     *arr = NULL;
 }
 
-int ht_chain_insert(ht_chain_t *arr, const char *key, int num)
+int ht_chain_insert(ht_chain_t *arr, const char *key)
 {
     if (arr == NULL || key == NULL)
         return ERR_PARAM;
@@ -38,7 +38,7 @@ int ht_chain_insert(ht_chain_t *arr, const char *key, int num)
     if (list_search_by_key(arr->table[index], key) != NULL)
         return ERR_REPEAT;
 
-    return push_back(&arr->table[index], key, num);
+    return list_push_back(&arr->table[index], key);
 }
 
 int ht_chain_find(const ht_chain_t *arr, const char *key)

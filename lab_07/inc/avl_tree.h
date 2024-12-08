@@ -3,6 +3,7 @@
 
 #include "errors.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 typedef struct __avl_node avl_tree_t;
 
@@ -11,20 +12,25 @@ struct __avl_node
     avl_tree_t *lhs, *rhs;
     char height;
 
-    const char *key;
+    char *key;
     bool is_repeated;
 };
 
 typedef void (*avl_apply_fn_t)(avl_tree_t *node, void *param);
 
-int avl_create(avl_tree_t **t, const char *data);
+int avl_load_file(FILE *fp, avl_tree_t **tree);
+int avl_load_file_ex(const char *filename, avl_tree_t **tree);
+
+avl_tree_t *avl_create(const char *data);
 void avl_free(avl_tree_t **head);
 
 int avl_insert_node(avl_tree_t **head, avl_tree_t *new_node);
-int avl_insert_str(avl_tree_t **head, const char *src);
+int avl_insert_str(avl_tree_t **head, const char *key);
 
 const avl_tree_t *avl_search(const avl_tree_t *head, const char *key);
 avl_tree_t *avl_remove(avl_tree_t *head, const char *key);
+
+int avl_remove_nodes_starting_with(avl_tree_t **tree, char c);
 
 void avl_apply_pre(avl_tree_t *head, avl_apply_fn_t func, void *param);
 void avl_apply_in(avl_tree_t *head, avl_apply_fn_t func, void *param);
@@ -42,5 +48,8 @@ avl_tree_t *avl_rotate_left(avl_tree_t *head);
 avl_tree_t *avl_rotate_right(avl_tree_t *head);
 
 void avl_fix_height(avl_tree_t *head);
+
+void avl_to_graphviz(FILE *fp, const char *tree_name, avl_tree_t *t);
+int avl_save_tmp_open(avl_tree_t *t);
 
 #endif // AVL_TREE_H__

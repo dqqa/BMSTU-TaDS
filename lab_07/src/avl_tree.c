@@ -1,25 +1,27 @@
 #include "avl_tree.h"
+#include "str.h"
 #include <assert.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 /**
  * @brief Создает АВЛ-дерево
  *
  * @return node_t* Новый узел
  */
-int avl_create(avl_tree_t **t, const char *data)
+avl_tree_t *avl_create(const char *data)
 {
     int rc = ERR_OK;
-    *t = NULL;
     avl_tree_t *tree = malloc(sizeof(*tree));
     if (!tree)
-        return ERR_ALLOC;
+        return NULL;
 
-    tree->is_repeated = false;
-    tree->lhs = NULL;
-    tree->rhs = NULL;
-    tree->key = NULL;
+    memset(tree, 0, sizeof(*tree));
+    tree->height = 1;
 
     tree->key = strdup(data);
     if (!tree->key)
@@ -33,11 +35,11 @@ int avl_create(avl_tree_t **t, const char *data)
     {
         free(tree->key);
         free(tree);
-    }
-    else
-        *t = tree;
 
-    return rc;
+        tree = NULL;
+    }
+
+    return tree;
 }
 
 /**
@@ -83,6 +85,26 @@ int avl_insert_node(avl_tree_t **head, avl_tree_t *new_node)
 
     if (rc == ERR_OK)
         *head = avl_node_balance(*head);
+
+    return rc;
+}
+
+int avl_insert_str(avl_tree_t **head, const char *key)
+{
+    if (head == NULL || key == NULL)
+        return ERR_PARAM;
+
+    if (strlen(key) == 0)
+        return ERR_PARAM;
+
+    avl_tree_t *newnode = avl_create(key);
+    if (newnode == NULL)
+        return ERR_ALLOC;
+
+    int rc = avl_insert_node(head, newnode);
+
+    if (rc != ERR_OK)
+        free(newnode);
 
     return rc;
 }
@@ -211,9 +233,9 @@ void avl_apply_in(avl_tree_t *head, avl_apply_fn_t func, void *param)
     if (head == NULL)
         return;
 
-    avl_apply_pre(head->lhs, func, param);
+    avl_apply_in(head->lhs, func, param);
     func(head, param);
-    avl_apply_pre(head->rhs, func, param);
+    avl_apply_in(head->rhs, func, param);
 }
 
 /**
@@ -228,8 +250,8 @@ void avl_apply_post(avl_tree_t *head, avl_apply_fn_t func, void *param)
     if (head == NULL)
         return;
 
-    avl_apply_pre(head->lhs, func, param);
-    avl_apply_pre(head->rhs, func, param);
+    avl_apply_post(head->lhs, func, param);
+    avl_apply_post(head->rhs, func, param);
     func(head, param);
 }
 
@@ -331,18 +353,18 @@ avl_tree_t *avl_node_balance(avl_tree_t *head)
     avl_fix_height(head);
 
     int factor = avl_calc_balance_factor(head);
-    if (factor == 2)
+    if (factor > 1)
     {
-        if (avl_calc_balance_factor(head->rhs) < 0)
-            head->rhs = avl_rotate_right(head->rhs);
-        return avl_rotate_left(head);
-    }
-
-    if (factor == -2)
-    {
-        if (avl_calc_balance_factor(head->lhs) > 0)
+        if (avl_calc_balance_factor(head->lhs) < 0)
             head->lhs = avl_rotate_left(head->lhs);
         return avl_rotate_right(head);
+    }
+
+    if (factor < -1)
+    {
+        if (avl_calc_balance_factor(head->rhs) > 0)
+            head->rhs = avl_rotate_right(head->rhs);
+        return avl_rotate_left(head);
     }
 
     return head;
@@ -370,6 +392,159 @@ char avl_get_height(const avl_tree_t *head)
  */
 int avl_calc_balance_factor(const avl_tree_t *head)
 {
-    assert(head);
-    return avl_get_height(head->rhs) - avl_get_height(head->lhs);
+    if (head == NULL)
+        return 0;
+
+    return avl_get_height(head->lhs) - avl_get_height(head->rhs);
+}
+
+int avl_load_file(FILE *fp, avl_tree_t **tree)
+{
+    *tree = NULL;
+    int rc = ERR_OK;
+
+    char *line = get_str(fp, NULL);
+    if (!line)
+        return ERR_IO;
+    while (line)
+    {
+        rc = avl_insert_str(tree, line);
+        free(line);
+        if (rc != ERR_REPEAT && rc != ERR_OK) // TODO
+            goto err;
+
+        line = get_str(fp, NULL);
+    }
+
+    err:
+    if (rc != ERR_REPEAT && rc != ERR_OK)
+        avl_free(tree);
+
+    return rc;
+}
+
+int avl_load_file_ex(const char *filename, avl_tree_t **tree)
+{
+    FILE *fp = fopen(filename, "r");
+    if (!fp)
+        return ERR_IO;
+
+    int rc = avl_load_file(fp, tree);
+
+    fclose(fp);
+    return rc;
+}
+
+int avl_remove_nodes_starting_with(avl_tree_t **tree, char c)
+{
+    if (*tree == NULL)
+        return ERR_OK;
+
+    int rc;
+    rc = avl_remove_nodes_starting_with(&(*tree)->lhs, c);
+    if (rc == ERR_OK)
+        rc = avl_remove_nodes_starting_with(&(*tree)->rhs, c);
+
+    if (rc == ERR_OK && (*tree)->key[0] == c)
+        *tree = avl_remove(*tree, (*tree)->key);
+
+    return rc;
+}
+
+static int open_img(const char *img)
+{
+    pid_t pid = fork();
+    if (pid == -1)
+        return ERR_FORK;
+
+    if (pid == 0)
+    {
+        int stdout_file = open("/dev/null", O_RDWR);
+        if (dup2(stdout_file, STDERR_FILENO) == -1) // redirect fork'ed process stderr to /dev/null
+            goto err;
+
+        //     |> exec_name
+        //     |       |> argv      |> it's necessary
+        execlp("open", "open", img, NULL);
+
+        err:
+        close(stdout_file);
+
+        perror("execlp");
+        _exit(EXIT_FAILURE);
+    }
+    else
+    {
+        int ret_code;
+        waitpid(pid, &ret_code, 0);
+        if (WEXITSTATUS(ret_code) != 0)
+            return ERR_FORK;
+    }
+    return ERR_OK;
+}
+
+static void to_dot(avl_tree_t *tree, void *fp)
+{
+    static int null_cnt = 0;
+
+    if (tree->is_repeated)
+        fprintf(fp, "  %s [color=\"green\"];\n", tree->key);
+
+    if (tree->lhs)
+        fprintf(fp, "  %s -> %s;\n", tree->key, tree->lhs->key);
+    else
+    {
+        fprintf(fp, "  %s -> null_%d;\n", tree->key, null_cnt);
+        fprintf(fp, "  null_%d [shape=\"point\", color=\"red\"];\n", null_cnt);
+        null_cnt++;
+    }
+
+    if (tree->rhs)
+        fprintf(fp, "  %s -> %s;\n", tree->key, tree->rhs->key);
+    else
+    {
+        fprintf(fp, "  %s -> null_%d;\n", tree->key, null_cnt);
+        fprintf(fp, "  null_%d [shape=\"point\", color=\"red\"];\n", null_cnt);
+        null_cnt++;
+    }
+}
+
+void avl_to_graphviz(FILE *fp, const char *tree_name, avl_tree_t *t)
+{
+    fprintf(fp, "digraph %s {\n", tree_name);
+    avl_apply_pre(t, to_dot, fp);
+    fprintf(fp, "}\n");
+}
+
+int avl_save_tmp_open(avl_tree_t *t)
+{
+    const char *gp = "temp.gp";
+    const char *img = "tmp.png";
+
+    FILE *fp = fopen(gp, "w");
+    if (!fp)
+        return ERR_IO;
+
+    avl_to_graphviz(fp, "tree", t);
+
+    fclose(fp);
+
+    pid_t pid = fork();
+    if (pid == -1)
+        return ERR_FORK;
+
+    if (pid == 0)
+    {
+        execlp("dot", "dot", "-Tpng", gp, "-o", img, NULL);
+        perror("execlp");
+        _exit(EXIT_FAILURE);
+    }
+    else
+    {
+        int ret_code;
+        waitpid(pid, &ret_code, 0);
+        if (WEXITSTATUS(ret_code) != 0)
+            return ERR_FORK;
+    }
+    return open_img(img);
 }

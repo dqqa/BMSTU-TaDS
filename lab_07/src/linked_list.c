@@ -29,26 +29,26 @@ list_t *list_node_create(void)
  * @param val Значение
  * @return int Код ошибки
  */
-int list_push_back(list_t **head, const char *key)
+int list_push_back(list_t **head __attribute_maybe_unused__, const char *key __attribute_maybe_unused__)
 {
-    list_t *new_node = list_node_create();
-    if (new_node == NULL)
-        return ERR_ALLOC;
+    // list_t *new_node = list_node_create();
+    // if (new_node == NULL)
+    //     return ERR_ALLOC;
 
-    new_node->key = key;
+    // new_node->key = key;
 
-    if (*head == NULL)
-    {
-        *head = new_node;
-    }
-    else
-    {
-        list_t *tmp = *head;
-        while (tmp->next != NULL)
-            tmp = tmp->next;
+    // if (*head == NULL)
+    // {
+    //     *head = new_node;
+    // }
+    // else
+    // {
+    //     list_t *tmp = *head;
+    //     while (tmp->next != NULL)
+    //         tmp = tmp->next;
 
-        tmp->next = new_node;
-    }
+    //     tmp->next = new_node;
+    // }
 
     return ERR_OK;
 }
