@@ -12,8 +12,8 @@ main_menu_action_t get_main_menu_act(void)
     printf("1. Выход\n"
            "2. Проверка работы ДДП\n"
            "3. Проверка работы АВЛ-дерева\n"
-           "4. Проверка работы хэш таблицы с открытой адресацией\n"
-           "5. Проверка работы хэш таблицы с закрытой адресацией\n"
+           "4. Проверка работы хэш таблицы с открытым хешированием\n"
+           "5. Проверка работы хэш таблицы с закрытым хешированием\n"
            "6. Сравнение производительности\n");
     printf("Введите операцию: ");
 
@@ -218,10 +218,102 @@ int check_avl(void)
 
     free(filepath);
     avl_free(&tree);
-    
+
     return rc;
 }
 
-int check_ht_open(void);
+static void ht_open_show_callback(list_t *node, void *ind)
+{
+    // printf("ind: %zu, list addr: %p => %s\n", *(size_t *)ind, (void *)node, node->key);
+    printf("list addr: %p => %s\n", (void *)node, node->key);
+    (void)ind;
+}
+
+int check_ht_open(void)
+{
+    ht_chain_t *ht = NULL;
+    char *filepath = NULL;
+    int rc = ERR_OK;
+
+    bool should_exit = false;
+    while (!should_exit)
+    {
+        ht_action_t act = get_ht_menu_act();
+        if (act == HT_ACT_EXIT)
+        {
+            should_exit = true;
+        }
+        else if (act == HT_ACT_LOAD_FILE)
+        {
+            if (ht != NULL)
+            {
+                rc = ERR_REPEAT;
+                goto err;
+            }
+
+            printf("Введите путь до файла: ");
+            filepath = get_str(stdin, NULL);
+            if (filepath == NULL)
+            {
+                rc = ERR_ALLOC;
+                goto load_err;
+            }
+
+            rc = ht_chain_load_file_ex(filepath, &ht);
+
+            printf("Размер хэш-таблицы: %zu\n", ht->size);
+
+            load_err:
+            free(filepath);
+            filepath = NULL;
+        }
+        else if (act == HT_ACT_REMOVE)
+        {
+            printf("Введите строку для удаления: ");
+            char *remove_term = get_str(stdin, NULL);
+            if (remove_term == NULL)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            rc = ht_chain_remove(ht, remove_term);
+            free(remove_term);
+
+            if (rc == ERR_OK)
+                printf("Успешно удалено!\n");
+        }
+        else if (act == HT_ACT_SEARCH)
+        {
+            printf("Введите строку для поиска: ");
+            char *search_term = get_str(stdin, NULL);
+            if (search_term == NULL)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            rc = ht_chain_find(ht, search_term);
+            free(search_term);
+            if (rc == ERR_OK)
+                printf("Значение найдено!\n");
+        }
+        else if (act == HT_ACT_SHOW)
+        {
+            ht_chain_each(ht, ht_open_show_callback, NULL);
+        }
+
+        err:
+        if (rc != ERR_OK)
+        {
+            printf("Ошибка!\n");
+            rc = ERR_OK;
+        }
+    }
+
+    ht_chain_free(&ht);
+    return rc;
+}
+
 int check_ht_closed(void);
 int perf_cmp(void);

@@ -3,6 +3,7 @@
 
 #include "errors.h"
 #include "common.h"
+#include <stddef.h>
 
 typedef struct __linked_list_node list_t;
 
@@ -28,5 +29,7 @@ int list_remove_by_key(list_t **head, const char *key);
 
 const list_t *list_find_min(const list_t *head);
 const list_t *list_find_max(const list_t *head);
+
+size_t list_size(const list_t *head);
 
 #endif // LINKED_LIST_H__

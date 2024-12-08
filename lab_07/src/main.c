@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+size_t g_max_collisions = 4;
+
 void print_guide(void)
 {
     printf("Задание: Построить дерево поиска из слов текстового файла (задача №6), сбалансировать\n"
@@ -44,7 +46,7 @@ int main(void)
         }
         else if (act == MAIN_CHECK_HASH_OPEN)
         {
-            // rc = check_ht_open();
+            rc = check_ht_open();
         }
         else if (act == MAIN_CHECK_HASH_CLOSED)
         {

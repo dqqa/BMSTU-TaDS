@@ -6,7 +6,7 @@
 
 /**
  * @brief Создает узел односвязного списка
- * 
+ *
  * @return list_t* Указатель на узел
  */
 list_t *list_node_create(void)
@@ -29,26 +29,31 @@ list_t *list_node_create(void)
  * @param val Значение
  * @return int Код ошибки
  */
-int list_push_back(list_t **head __attribute_maybe_unused__, const char *key __attribute_maybe_unused__)
+int list_push_back(list_t **head, const char *key)
 {
-    // list_t *new_node = list_node_create();
-    // if (new_node == NULL)
-    //     return ERR_ALLOC;
+    list_t *new_node = list_node_create();
+    if (new_node == NULL)
+        return ERR_ALLOC;
 
-    // new_node->key = key;
+    new_node->key = strdup(key);
+    if (new_node->key == NULL)
+    {
+        list_free(&new_node);
+        return ERR_ALLOC;
+    }
 
-    // if (*head == NULL)
-    // {
-    //     *head = new_node;
-    // }
-    // else
-    // {
-    //     list_t *tmp = *head;
-    //     while (tmp->next != NULL)
-    //         tmp = tmp->next;
+    if (*head == NULL)
+    {
+        *head = new_node;
+    }
+    else
+    {
+        list_t *tmp = *head;
+        while (tmp->next != NULL)
+            tmp = tmp->next;
 
-    //     tmp->next = new_node;
-    // }
+        tmp->next = new_node;
+    }
 
     return ERR_OK;
 }
@@ -64,6 +69,7 @@ void list_free(list_t **head)
     while (tmp)
     {
         list_t *next = tmp->next;
+        free(tmp->key);
         free(tmp);
         tmp = next;
     }
@@ -126,6 +132,7 @@ int list_remove_by_key(list_t **head, const char *key)
     if (strcmp((*head)->key, key) == 0)
     {
         list_t *next = (*head)->next;
+        free((*head)->key);
         free(*head);
         *head = next;
 
@@ -139,6 +146,7 @@ int list_remove_by_key(list_t **head, const char *key)
         if (strcmp(tmp->key, key) == 0)
         {
             list_t *next = tmp->next;
+            free(tmp->key);
             free(tmp);
             prev->next = next;
             return ERR_OK;
@@ -152,7 +160,7 @@ int list_remove_by_key(list_t **head, const char *key)
 
 /**
  * @brief Ищет в односвязном списке узел с минимальным ключом
- * 
+ *
  * @param head Указатель на голову списка
  * @return const node_t* Указатель на узел с минимальным ключом
  */
@@ -178,7 +186,7 @@ const list_t *list_find_min(const list_t *head)
 
 /**
  * @brief Ищет в односвязном списке узел с максимальным ключом
- * 
+ *
  * @param head Указатель на голову списка
  * @return const node_t* Указатель на узел с максимальным ключом
  */
@@ -200,4 +208,17 @@ const list_t *list_find_max(const list_t *head)
     }
 
     return max;
+}
+
+size_t list_size(const list_t *head)
+{
+    const list_t *tmp = head;
+    size_t cnt = 0;
+    while (tmp != NULL)
+    {
+        cnt++;
+        tmp = tmp->next;
+    }
+
+    return cnt;
 }

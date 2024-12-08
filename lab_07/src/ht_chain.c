@@ -1,17 +1,90 @@
 #include "ht_chain.h"
 #include "hasher.h"
 #include "linked_list.h"
+#include "prime_gen.h"
+#include "str.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-ht_chain_t *ht_chain_create(void)
+#define INITIAL_HT_SIZE 1
+
+ht_chain_t *ht_chain_create(size_t size)
 {
-    ht_chain_t *arr = calloc(1, sizeof(*arr));
+    ht_chain_t *arr = malloc(sizeof(*arr));
+    if (arr == NULL)
+        return NULL;
+
+    arr->size = size ? size : INITIAL_HT_SIZE;
+    arr->table = calloc(arr->size, sizeof(*arr->table));
+    if (arr->table == NULL)
+    {
+        free(arr);
+        return NULL;
+    }
 
     return arr;
 }
 
-void ht_chain_destroy(ht_chain_t **arr)
+bool ht_chain_check_need_restruct(const ht_chain_t *ht)
+{
+    assert(ht);
+    for (size_t i = 0; i < ht->size; i++)
+        if (list_size(ht->table[i]) > g_max_collisions)
+            return true;
+
+    return false;
+}
+
+int ht_chain_restruct(ht_chain_t **ht)
+{
+    if (!ht_chain_check_need_restruct(*ht))
+        return ERR_NO_NEED_RESTRUCT;
+
+    ht_chain_t *new_ht = NULL;
+    size_t cur_size = (*ht)->size;
+    int rc = ERR_OK;
+    do
+    {
+        size_t new_size = calc_next_prime_num(cur_size);
+        ht_chain_free(&new_ht);
+        new_ht = ht_chain_create(new_size);
+        if (new_ht == NULL)
+        {
+            rc = ERR_ALLOC;
+            goto err;
+        }
+
+        for (size_t i = 0; i < (*ht)->size; i++)
+        {
+            list_t *cur = (*ht)->table[i];
+            while (cur != NULL)
+            {
+                size_t hash = calc_hash_str(cur->key);
+                size_t ind = hash % new_ht->size;
+                if ((rc = list_push_back(&new_ht->table[ind], cur->key)) != ERR_OK)
+                    goto err;
+                cur = cur->next;
+            }
+        }
+
+        cur_size = new_size;
+    } while (ht_chain_check_need_restruct(new_ht));
+
+    err:
+    if (rc != ERR_OK)
+    {
+        ht_chain_free(&new_ht);
+    }
+    else
+    {
+        ht_chain_free(ht);
+        *ht = new_ht;
+    }
+    return rc;
+}
+
+void ht_chain_free(ht_chain_t **arr)
 {
     if (arr == NULL || *arr == NULL)
         return;
@@ -19,12 +92,13 @@ void ht_chain_destroy(ht_chain_t **arr)
     for (size_t i = 0; i < (*arr)->size; i++)
         list_free((*arr)->table + i);
 
+    free((*arr)->table);
     free(*arr);
 
     *arr = NULL;
 }
 
-int ht_chain_insert(ht_chain_t *arr, const char *key)
+int ht_chain_insert(ht_chain_t **arr, const char *key, bool *is_restructured)
 {
     if (arr == NULL || key == NULL)
         return ERR_PARAM;
@@ -33,12 +107,26 @@ int ht_chain_insert(ht_chain_t *arr, const char *key)
         return ERR_PARAM;
 
     size_t hash = calc_hash_str(key);
-    size_t index = hash % arr->size;
+    size_t index = hash % (*arr)->size;
 
-    if (list_search_by_key(arr->table[index], key) != NULL)
+    if (list_search_by_key((*arr)->table[index], key) != NULL)
         return ERR_REPEAT;
 
-    return list_push_back(&arr->table[index], key);
+    int rc = list_push_back(&(*arr)->table[index], key);
+    if (rc != ERR_OK)
+        return rc;
+
+    if (is_restructured)
+        *is_restructured = false;
+
+    rc = ht_chain_restruct(arr);
+    if (is_restructured && rc == ERR_OK)
+        *is_restructured = true;
+
+    if (rc == ERR_NO_NEED_RESTRUCT)
+        rc = ERR_OK;
+
+    return rc;
 }
 
 int ht_chain_find(const ht_chain_t *arr, const char *key)
@@ -56,7 +144,6 @@ int ht_chain_find(const ht_chain_t *arr, const char *key)
     if (node == NULL)
         return ERR_NOT_FOUND;
 
-    // *num = &node->value;
     return ERR_OK;
 }
 
@@ -91,7 +178,48 @@ int ht_chain_each(const ht_chain_t *arr, list_apply_fn_t func, void *param)
         return ERR_PARAM;
 
     for (size_t i = 0; i < arr->size; i++)
-        list_apply(arr->table[i], func, param);
+        if (arr->table[i])
+            list_apply(arr->table[i], func, param);
 
     return ERR_OK;
+}
+
+int ht_chain_load_file(FILE *fp, ht_chain_t **ht)
+{
+    *ht = ht_chain_create(0);
+    if (*ht == NULL)
+        return ERR_ALLOC;
+
+    int rc = ERR_OK;
+
+    char *line = get_str(fp, NULL);
+    if (!line)
+        return ERR_IO;
+    while (line)
+    {
+        rc = ht_chain_insert(ht, line, NULL);
+        free(line);
+        if (rc != ERR_REPEAT && rc != ERR_OK) // TODO
+            goto err;
+
+        line = get_str(fp, NULL);
+    }
+
+    err:
+    if (rc != ERR_REPEAT && rc != ERR_OK)
+        ht_chain_free(ht);
+
+    return rc;
+}
+
+int ht_chain_load_file_ex(const char *filename, ht_chain_t **ht)
+{
+    FILE *fp = fopen(filename, "r");
+    if (!fp)
+        return ERR_IO;
+
+    int rc = ht_chain_load_file(fp, ht);
+
+    fclose(fp);
+    return rc;
 }
