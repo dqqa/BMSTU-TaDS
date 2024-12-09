@@ -1,7 +1,11 @@
 #include "graph.h"
+#include "errors.h"
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define INF INT_MAX // Используем для обозначения бесконечности
 
@@ -75,6 +79,56 @@ size_t find_best_city(int **dist, size_t vertices)
     return best_city;
 }
 
+int graph_render_open(const char *gp_fname, const char *png_fname)
+{
+    pid_t pid = fork();
+    if (pid == -1)
+        return ERR_FORK;
+
+    if (pid == 0)
+    {
+        execlp("dot", "dot", "-Tpng", gp_fname, "-o", png_fname, NULL);
+        perror("execlp");
+        _exit(EXIT_FAILURE);
+    }
+    else
+    {
+        int ret_code;
+        wait(&ret_code);
+
+        if (WEXITSTATUS(ret_code) != 0)
+            return ERR_FORK;
+    }
+
+    pid = fork();
+    if (pid == -1)
+        return ERR_FORK;
+
+    if (pid == 0)
+    {
+        int new_stderr = open("/dev/null", O_WRONLY);
+        if (new_stderr < 0)
+            return ERR_FORK;
+
+        dup2(new_stderr, STDERR_FILENO);
+
+        execlp("open", "open", png_fname, NULL);
+        perror("execlp");
+        close(new_stderr);
+        _exit(EXIT_FAILURE);
+    }
+    else
+    {
+        int ret_code;
+        wait(&ret_code);
+
+        if (WEXITSTATUS(ret_code) != 0)
+            return ERR_FORK;
+    }
+
+    return ERR_OK;
+}
+
 // Функция для генерации исходного текста для Graphviz
 void generate_graphviz(graph_t *graph, size_t best_city, const char *filename)
 {
@@ -97,4 +151,54 @@ void generate_graphviz(graph_t *graph, size_t best_city, const char *filename)
     fprintf(file, "}\n");
 
     fclose(file);
+}
+
+int graph_load(FILE *fp, graph_t **graph)
+{
+    int rc = ERR_OK;
+    size_t verts;
+    if (fscanf(fp, "%zu", &verts) != 1)
+        return ERR_IO;
+
+    *graph = create_graph(verts);
+    if (*graph == NULL)
+        return ERR_ALLOC;
+
+    for (size_t i = 0; i < verts; i++)
+    {
+        for (size_t j = 0; j < verts; j++)
+        {
+            int weight;
+            if (fscanf(fp, "%d", &weight) != 1)
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+            add_edge(*graph, j, i, weight);
+        }
+    }
+
+    err:
+    if (rc != ERR_OK)
+        free_graph(*graph);
+
+    return rc;
+}
+
+int graph_load_ex(const char *filename, graph_t **graph)
+{
+    FILE *fp = fopen(filename, "r");
+
+    int rc = graph_load(fp, graph);
+
+    fclose(fp);
+    return rc;
+}
+
+size_t graph_calc_ram_usage(const graph_t *graph)
+{
+    if (graph == NULL)
+        return 0;
+
+    return graph->vertices_cnt * graph->vertices_cnt * sizeof(**graph->matrix) + sizeof(*graph);
 }
