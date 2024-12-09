@@ -24,6 +24,7 @@ typedef enum
     TREE_ACT_SEARCH_STARTING,
     TREE_ACT_ADD,
     TREE_ACT_AVG_CMP,
+    TREE_ACT_CALC_SIZE,
     TREE_ACT_COUNT,
     TREE_ACT_UNKNOWN
 } tree_action_t;
@@ -37,6 +38,7 @@ typedef enum
     HT_ACT_REMOVE,
     HT_ACT_ADD,
     HT_ACT_AVG_CMP,
+    HT_ACT_CALC_SIZE,
     HT_ACT_COUNT,
     HT_ACT_UNKNOWN
 } ht_action_t;

@@ -31,6 +31,7 @@ int ht_chain_each(const ht_chain_t *arr, list_apply_fn_t func, void *param);
 bool ht_chain_check_need_restruct(const ht_chain_t *ht);
 
 float ht_chain_calc_avg_cmp(ht_chain_t *ht);
+void ht_chain_calc_ram_usage(ht_chain_t *ht, size_t *bytes);
 
 extern size_t g_max_collisions;
 

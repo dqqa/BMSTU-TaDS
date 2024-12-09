@@ -41,6 +41,7 @@ int ht_closed_find(const ht_closed_t *arr, const char *key, size_t *cmps);
 int ht_closed_each(const ht_closed_t *arr, ht_closed_apply_fn_t func, void *param);
 
 float ht_closed_calc_avg_cmp(ht_closed_t *ht);
+void ht_closed_calc_ram_usage(ht_closed_t *ht, size_t *bytes);
 
 extern size_t g_max_collisions;
 

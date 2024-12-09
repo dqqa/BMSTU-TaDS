@@ -48,7 +48,8 @@ tree_action_t get_tree_menu_act(void)
            "5. Поиск в дереве слова\n"
            "6. Поиск в дереве слов, начинающихся на букву\n"
            "7. Добавление элемента в дерево\n"
-           "8. Подсчитать среднее кол-во сравнений\n");
+           "8. Подсчитать среднее кол-во сравнений\n"
+           "9. Подсчитать размер дерева в байтах\n");
     printf("Введите операцию: ");
 
     int act;
@@ -78,7 +79,8 @@ ht_action_t get_ht_menu_act(void)
            "4. Поиск слова в хэш-таблице\n"
            "5. Удаление слова из хэш-таблицы\n"
            "6. Добавить элемент в хэш-таблицу\n"
-           "7. Подсчитать среднее кол-во сравнений\n");
+           "7. Подсчитать среднее кол-во сравнений\n"
+           "8. Подсчитать размер таблицы в байтах\n");
     printf("Введите операцию: ");
 
     int act;
@@ -147,8 +149,12 @@ int check_bst(void)
                 rc = ERR_IO;
                 goto err;
             }
-
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             rc = bst_remove_nodes_starting_with(&tree, s);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на операцию: %.2f мкс.\n", t);
         }
         else if (act == TREE_ACT_SHOW)
         {
@@ -223,6 +229,12 @@ int check_bst(void)
             }
             printf("Среднее количество сравнений: %.2f\n", bst_calc_avg_cmp(tree));
         }
+        else if (act == TREE_ACT_CALC_SIZE)
+        {
+            size_t size = 0;
+            bst_calc_ram_usage(tree, &size);
+            printf("Размер: %zu байт\n", size);
+        }
         else
         {
             rc = ERR_PARAM;
@@ -288,7 +300,12 @@ int check_avl(void)
                 goto err;
             }
 
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             rc = avl_remove_nodes_starting_with(&tree, s);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на операцию: %.2f мкс.\n", t);
         }
         else if (act == TREE_ACT_SHOW)
         {
@@ -362,6 +379,12 @@ int check_avl(void)
                 goto err;
             }
             printf("Среднее количество сравнений: %.2f\n", avl_calc_avg_cmp(tree));
+        }
+        else if (act == TREE_ACT_CALC_SIZE)
+        {
+            size_t size = 0;
+            avl_calc_ram_usage(tree, &size);
+            printf("Размер: %zu байт\n", size);
         }
         else
         {
@@ -438,11 +461,16 @@ int check_ht_open(void)
                 goto err;
             }
 
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             rc = ht_chain_remove(ht, remove_term);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
             free(remove_term);
 
             if (rc == ERR_OK)
                 printf("Успешно удалено!\n");
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на удаление: %.2f мкс.\n", t);
         }
         else if (act == HT_ACT_SEARCH)
         {
@@ -501,6 +529,12 @@ int check_ht_open(void)
                 goto err;
             }
             printf("Среднее количество сравнений: %.2f\n", ht_chain_calc_avg_cmp(ht));
+        }
+        else if (act == HT_ACT_CALC_SIZE)
+        {
+            size_t size = 0;
+            ht_chain_calc_ram_usage(ht, &size);
+            printf("Размер: %zu байт\n", size);
         }
         else
         {
@@ -574,11 +608,16 @@ int check_ht_closed(void)
                 goto err;
             }
 
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
             rc = ht_closed_remove(ht, remove_term);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
             free(remove_term);
 
             if (rc == ERR_OK)
                 printf("Успешно удалено!\n");
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на удаление: %.2f мкс.\n", t);
         }
         else if (act == HT_ACT_SEARCH)
         {
@@ -635,6 +674,12 @@ int check_ht_closed(void)
                 goto err;
             }
             printf("Среднее количество сравнений: %.2f\n", ht_closed_calc_avg_cmp(ht));
+        }
+        else if (act == HT_ACT_CALC_SIZE)
+        {
+            size_t size = 0;
+            ht_closed_calc_ram_usage(ht, &size);
+            printf("Размер: %zu байт\n", size);
         }
         else
         {

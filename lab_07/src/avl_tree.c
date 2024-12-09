@@ -650,3 +650,13 @@ float avl_calc_avg_cmp(avl_tree_t *root)
 
     return (float)total_depth / total_nodes;
 }
+
+void avl_calc_ram_usage(avl_tree_t *tree, size_t *bytes)
+{
+    if (tree == NULL)
+        return;
+
+    (*bytes) += sizeof(avl_tree_t);
+    avl_calc_ram_usage(tree->lhs, bytes);
+    avl_calc_ram_usage(tree->rhs, bytes);
+}

@@ -290,3 +290,8 @@ float ht_closed_calc_avg_cmp(ht_closed_t *ht)
 
     return res / count;
 }
+
+void ht_closed_calc_ram_usage(ht_closed_t *ht, size_t *bytes)
+{
+    (*bytes) = sizeof(ht_closed_t) + sizeof(*ht->table) * ht->size;
+}

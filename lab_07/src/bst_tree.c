@@ -416,3 +416,13 @@ float bst_calc_avg_cmp(bst_tree_t *root)
 
     return (float)total_depth / total_nodes;
 }
+
+void bst_calc_ram_usage(bst_tree_t *tree, size_t *bytes)
+{
+    if (tree == NULL)
+        return;
+
+    (*bytes) += sizeof(bst_tree_t);
+    bst_calc_ram_usage(tree->lhs, bytes);
+    bst_calc_ram_usage(tree->rhs, bytes);
+}

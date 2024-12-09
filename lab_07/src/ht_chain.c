@@ -247,3 +247,10 @@ float ht_chain_calc_avg_cmp(ht_chain_t *ht)
 
     return res / count;
 }
+
+void ht_chain_calc_ram_usage(ht_chain_t *ht, size_t *bytes)
+{
+    (*bytes) = sizeof(ht_chain_t);
+    for (size_t i = 0; i < ht->size; i++)
+        (*bytes) += list_size(ht->table[i]) * sizeof(**ht->table);
+}

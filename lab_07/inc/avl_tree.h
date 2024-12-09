@@ -56,5 +56,6 @@ void avl_repeat_reset(avl_tree_t *tree);
 void avl_search_symbol(avl_tree_t *tree, char symbol, size_t *cnt);
 
 float avl_calc_avg_cmp(avl_tree_t *root);
+void avl_calc_ram_usage(avl_tree_t *tree, size_t *bytes);
 
 #endif // AVL_TREE_H__
