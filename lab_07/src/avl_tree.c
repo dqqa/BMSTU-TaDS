@@ -139,7 +139,7 @@ int avl_insert_str(avl_tree_t **head, const char *key)
     int rc = avl_insert_node(head, newnode);
 
     if (rc != ERR_OK)
-        free(newnode);
+        avl_node_free(&newnode);
 
     return rc;
 }
@@ -167,14 +167,17 @@ void avl_free(avl_tree_t **head)
  * @param key Ключ
  * @return const node_t* Указатель на искомый узел
  */
-const avl_tree_t *avl_search(const avl_tree_t *head, const char *key)
+avl_tree_t *avl_search(avl_tree_t *head, const char *key)
 {
     if (head == NULL)
         return NULL;
 
     int cmp = strcmp(head->key, key);
     if (cmp == 0)
+    {
+        head->is_repeated=true;
         return head;
+    }
     else if (cmp > 0)
         return avl_search(head->lhs, key);
     else
@@ -587,4 +590,35 @@ int avl_save_tmp_open(avl_tree_t *t)
             return ERR_FORK;
     }
     return open_img(img);
+}
+
+void avl_repeat_reset(avl_tree_t *tree)
+{
+    if (!tree)
+        return;
+
+    tree->is_repeated = false;
+    avl_repeat_reset(tree->lhs);
+    avl_repeat_reset(tree->rhs);
+}
+
+void avl_search_symbol(avl_tree_t *tree, char symbol, size_t *cnt)
+{
+    if (!tree)
+        return;
+
+    if (tree->key[0] == symbol)
+    {
+        // printf("%s\n", tree->data);
+        tree->is_repeated = true;
+        if (cnt)
+            *cnt += 1;
+
+        avl_search_symbol(tree->lhs, symbol, cnt);
+        avl_search_symbol(tree->rhs, symbol, cnt);
+    }
+    else if (tree->key[0] < symbol)
+        avl_search_symbol(tree->rhs, symbol, cnt);
+    else
+        avl_search_symbol(tree->lhs, symbol, cnt);
 }

@@ -112,6 +112,9 @@ int ht_closed_insert(ht_closed_t **arr, const char *key, bool *is_restructured)
     if (strlen(key) == 0)
         return ERR_PARAM;
 
+    if (is_restructured)
+        *is_restructured = false;
+
     int rc = ERR_OK;
     size_t hash = calc_hash_str(key);
 

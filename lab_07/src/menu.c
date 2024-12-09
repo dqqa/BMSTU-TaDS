@@ -7,15 +7,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 main_menu_action_t get_main_menu_act(void)
 {
-    printf("1. Выход\n"
+    printf("\n1. Выход\n"
            "2. Проверка работы ДДП\n"
            "3. Проверка работы АВЛ-дерева\n"
            "4. Проверка работы хэш таблицы с открытым хешированием\n"
            "5. Проверка работы хэш таблицы с закрытым хешированием\n"
-           "6. Сравнение производительности\n");
+           "6. Сравнение производительности\n"
+           "7. Изменение параметров\n");
     printf("Введите операцию: ");
 
     int act;
@@ -39,10 +41,13 @@ main_menu_action_t get_main_menu_act(void)
 
 tree_action_t get_tree_menu_act(void)
 {
-    printf("1. Выход\n"
+    printf("\n1. Выход\n"
            "2. Загрузить слова из файла\n"
            "3. Удалить слова, начинающиеся на указанную букву\n"
-           "4. Вывести дерево на экран\n");
+           "4. Вывести дерево на экран\n"
+           "5. Поиск в дереве слова\n"
+           "6. Поиск в дереве слов, начинающихся на букву\n"
+           "7. Добавление элемента в дерево\n");
     printf("Введите операцию: ");
 
     int act;
@@ -66,11 +71,12 @@ tree_action_t get_tree_menu_act(void)
 
 ht_action_t get_ht_menu_act(void)
 {
-    printf("1. Выход\n"
+    printf("\n1. Выход\n"
            "2. Загрузить слова из файла\n"
            "3. Вывести хэш-таблицу на экран\n"
            "4. Поиск слова в хэш-таблице\n"
-           "5. Удаление слова из хэш-таблицы\n");
+           "5. Удаление слова из хэш-таблицы\n"
+           "6. Добавить элемент в хэш-таблицу\n");
     printf("Введите операцию: ");
 
     int act;
@@ -144,6 +150,63 @@ int check_bst(void)
         {
             rc = bst_save_tmp_open(tree);
         }
+        else if (act == TREE_ACT_SEARCH_WORD)
+        {
+            printf("Введите строку для поиска: ");
+            char *search_term = get_str(stdin, NULL);
+            if (!search_term)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            bst_tree_t *node = bst_search(tree, search_term);
+            free(search_term);
+
+            if (node != NULL)
+                printf("Строка найдена!\n");
+            else
+                printf("Строка не найдена!\n");
+
+            bst_save_tmp_open(tree);
+            bst_repeat_reset(tree);
+        }
+        else if (act == TREE_ACT_SEARCH_STARTING)
+        {
+            char search_term;
+            size_t cnt = 0;
+
+            printf("Введите символ для поиска: ");
+            if (scanf("%c", &search_term) != 1)
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+
+            bst_search_symbol(tree, search_term, &cnt);
+            printf("Найдено %zu слов\n", cnt);
+
+            bst_save_tmp_open(tree);
+            bst_repeat_reset(tree);
+        }
+        else if (act == TREE_ACT_ADD)
+        {
+            printf("Введите строку для добавления: ");
+            char *add_term = get_str(stdin, NULL);
+            if (!add_term)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            rc = bst_insert_str(&tree, add_term);
+            free(add_term);
+        }
+        else
+        {
+            rc = ERR_PARAM;
+        }
+
         err:
         if (rc != ERR_OK)
         {
@@ -209,6 +272,63 @@ int check_avl(void)
         {
             rc = avl_save_tmp_open(tree);
         }
+        else if (act == TREE_ACT_SEARCH_WORD)
+        {
+            printf("Введите строку для поиска: ");
+            char *search_term = get_str(stdin, NULL);
+            if (!search_term)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            avl_tree_t *node = avl_search(tree, search_term);
+            free(search_term);
+
+            if (node != NULL)
+                printf("Строка найдена!\n");
+            else
+                printf("Строка не найдена!\n");
+
+            avl_save_tmp_open(tree);
+            avl_repeat_reset(tree);
+        }
+        else if (act == TREE_ACT_SEARCH_STARTING)
+        {
+            char search_term;
+            size_t cnt = 0;
+
+            printf("Введите символ для поиска: ");
+            if (scanf("%c", &search_term) != 1)
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+
+            avl_search_symbol(tree, search_term, &cnt);
+            printf("Найдено %zu слов\n", cnt);
+
+            avl_save_tmp_open(tree);
+            avl_repeat_reset(tree);
+        }
+        else if (act == TREE_ACT_ADD)
+        {
+            printf("Введите строку для добавления: ");
+            char *add_term = get_str(stdin, NULL);
+            if (!add_term)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            rc = avl_insert_str(&tree, add_term);
+            free(add_term);
+        }
+        else
+        {
+            rc = ERR_PARAM;
+        }
+
         err:
         if (rc != ERR_OK)
         {
@@ -262,7 +382,7 @@ int check_ht_open(void)
 
             rc = ht_chain_load_file_ex(filepath, &ht);
 
-            printf("Размер хэш-таблицы: %zu\n", ht->size);
+            printf("Размер хэш-таблицы (количество списков): %zu\n", ht->size);
 
             load_err:
             free(filepath);
@@ -302,6 +422,22 @@ int check_ht_open(void)
         else if (act == HT_ACT_SHOW)
         {
             ht_chain_each(ht, ht_open_show_callback, NULL);
+        }
+        else if (act == HT_ACT_ADD)
+        {
+            printf("Введите строку для добавления: ");
+            char *add_term = get_str(stdin, NULL);
+            if (!add_term)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            bool is_restruct;
+            rc = ht_chain_insert(&ht, add_term, &is_restruct);
+            free(add_term);
+
+            printf(is_restruct ? "Понадобилась реструктуризация\n" : "Реструктуризаця не понадобилась\n");
         }
         else
         {
@@ -398,6 +534,22 @@ int check_ht_closed(void)
         else if (act == HT_ACT_SHOW)
         {
             ht_closed_each(ht, ht_closed_show_callback, NULL);
+        }
+        else if (act == HT_ACT_ADD)
+        {
+            printf("Введите строку для добавления: ");
+            char *add_term = get_str(stdin, NULL);
+            if (!add_term)
+            {
+                rc = ERR_ALLOC;
+                goto err;
+            }
+
+            bool is_restruct;
+            rc = ht_closed_insert(&ht, add_term, &is_restruct);
+            free(add_term);
+
+            printf(is_restruct ? "Понадобилась реструктуризация" : "Реструктуризаця не понадобилась");
         }
         else
         {

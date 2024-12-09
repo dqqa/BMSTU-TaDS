@@ -2,8 +2,8 @@
 
 #include "bst_tree.h"
 #include "dyn_array.h"
-#include "str.h"
 #include "errors.h"
+#include "str.h"
 #include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -195,7 +195,10 @@ bst_tree_t *bst_search(bst_tree_t *tree, const char *data)
 
     int cmp_res = strcmp(data, tree->data);
     if (cmp_res == 0)
+    {
+        tree->is_repeated = true;
         return tree;
+    }
     else if (cmp_res < 0)
         return bst_search(tree->lhs, data);
     else
@@ -375,7 +378,7 @@ int bst_remove_nodes_starting_with(bst_tree_t **tree, char c)
     if (*tree == NULL)
         return ERR_OK;
 
-    int rc ;
+    int rc;
     rc = bst_remove_nodes_starting_with(&(*tree)->lhs, c);
     if (rc == ERR_OK)
         rc = bst_remove_nodes_starting_with(&(*tree)->rhs, c);

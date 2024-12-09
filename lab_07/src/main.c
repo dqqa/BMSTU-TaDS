@@ -56,11 +56,23 @@ int main(void)
         {
             // rc = perf_cmp();
         }
+        else if (act == MAIN_EDIT_PARAM)
+        {
+            printf("Введите максимальное количество коллизий для реструктуризации: ");
+            size_t new_cnt;
+            if (scanf("%zu", &new_cnt) != 1)
+            {
+                rc = ERR_IO;
+                goto err;
+            }
+            g_max_collisions = new_cnt;
+        }
         else
         {
             rc = ERR_PARAM;
         }
 
+        err:
         if (rc != ERR_OK)
         {
             printf("Ошибка!\n");

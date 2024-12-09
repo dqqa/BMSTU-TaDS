@@ -32,8 +32,6 @@ int bst_remove_str(bst_tree_t **tree, const char *what);
 
 int bst_remove_nodes_starting_with(bst_tree_t **tree, char c);
 
-void bst_balance(bst_tree_t **tree);
-
 bst_tree_t *bst_search(bst_tree_t *tree, const char *data);
 void bst_search_symbol(bst_tree_t *tree, char symbol, size_t *cnt);
 
