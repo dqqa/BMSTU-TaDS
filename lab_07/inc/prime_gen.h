@@ -10,7 +10,7 @@ inline size_t calc_next_prime_num(size_t num)
     while (true)
     {
         bool ok = true;
-        for (size_t i = 2; ok && i < new_num / 2; i++)
+        for (size_t i = 2; ok && i < new_num / 2 + 1; i++)
         {
             if (new_num % i == 0)
                 ok = false;

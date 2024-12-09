@@ -101,14 +101,18 @@ void list_apply(list_t *head, list_apply_fn_t func, void *arg)
  * @param key Ключ
  * @return const node_t* Найденный узел
  */
-const list_t *list_search_by_key(const list_t *head, const char *key)
+const list_t *list_search_by_key(const list_t *head, const char *key, size_t *cmps)
 {
     if (head == NULL)
         return NULL;
 
+    if (cmps)
+        (*cmps) = 0;
     const list_t *tmp = head;
     while (tmp != NULL)
     {
+        if (cmps)
+            (*cmps)++;
         if (strcmp(tmp->key, key) == 0)
             return tmp;
         tmp = tmp->next;

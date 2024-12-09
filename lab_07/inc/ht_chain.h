@@ -24,11 +24,13 @@ int ht_chain_restruct(ht_chain_t **ht);
 int ht_chain_insert(ht_chain_t **arr, const char *key, bool *is_restructured);
 int ht_chain_remove(ht_chain_t *arr, const char *key);
 
-int ht_chain_find(const ht_chain_t *arr, const char *key);
+int ht_chain_find(const ht_chain_t *arr, const char *key, size_t *cmps);
 
 int ht_chain_each(const ht_chain_t *arr, list_apply_fn_t func, void *param);
 
 bool ht_chain_check_need_restruct(const ht_chain_t *ht);
+
+float ht_chain_calc_avg_cmp(ht_chain_t *ht);
 
 extern size_t g_max_collisions;
 

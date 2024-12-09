@@ -109,7 +109,7 @@ int ht_chain_insert(ht_chain_t **arr, const char *key, bool *is_restructured)
     size_t hash = calc_hash_str(key);
     size_t index = hash % (*arr)->size;
 
-    if (list_search_by_key((*arr)->table[index], key) != NULL)
+    if (list_search_by_key((*arr)->table[index], key, NULL) != NULL)
         return ERR_REPEAT;
 
     int rc = list_push_back(&(*arr)->table[index], key);
@@ -129,7 +129,7 @@ int ht_chain_insert(ht_chain_t **arr, const char *key, bool *is_restructured)
     return rc;
 }
 
-int ht_chain_find(const ht_chain_t *arr, const char *key)
+int ht_chain_find(const ht_chain_t *arr, const char *key, size_t *cmps)
 {
     if (arr == NULL || key == NULL)
         return ERR_PARAM;
@@ -140,7 +140,7 @@ int ht_chain_find(const ht_chain_t *arr, const char *key)
     size_t hash = calc_hash_str(key);
     size_t index = hash % arr->size;
 
-    list_t *node = (list_t *)list_search_by_key(arr->table[index], key);
+    list_t *node = (list_t *)list_search_by_key(arr->table[index], key, cmps);
     if (node == NULL)
         return ERR_NOT_FOUND;
 
@@ -222,4 +222,28 @@ int ht_chain_load_file_ex(const char *filename, ht_chain_t **ht)
 
     fclose(fp);
     return rc;
+}
+
+static size_t calc_sum_1_to_num(size_t num)
+{
+    size_t sum = 0;
+    for (size_t i = 0; i <= num; i++)
+        sum += i;
+
+    return sum;
+}
+
+float ht_chain_calc_avg_cmp(ht_chain_t *ht)
+{
+    float res = 0;
+    size_t count = 0;
+    for (size_t i = 0; i < ht->size; i++)
+    {
+        size_t size = list_size(ht->table[i]);
+        size_t sum = calc_sum_1_to_num(size);
+        res += sum;
+        count += size;
+    }
+
+    return res / count;
 }

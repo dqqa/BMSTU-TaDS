@@ -23,7 +23,7 @@ int list_push_back(list_t **head, const char *key);
 
 void list_apply(list_t *head, list_apply_fn_t func, void *arg);
 
-const list_t *list_search_by_key(const list_t *head, const char *key);
+const list_t *list_search_by_key(const list_t *head, const char *key, size_t *cmps);
 
 int list_remove_by_key(list_t **head, const char *key);
 

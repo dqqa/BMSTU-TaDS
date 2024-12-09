@@ -36,6 +36,7 @@ typedef enum
     HT_ACT_SEARCH,
     HT_ACT_REMOVE,
     HT_ACT_ADD,
+    HT_ACT_AVG_CMP,
     HT_ACT_COUNT,
     HT_ACT_UNKNOWN
 } ht_action_t;

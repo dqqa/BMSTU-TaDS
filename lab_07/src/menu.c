@@ -77,7 +77,8 @@ ht_action_t get_ht_menu_act(void)
            "3. Вывести хэш-таблицу на экран\n"
            "4. Поиск слова в хэш-таблице\n"
            "5. Удаление слова из хэш-таблицы\n"
-           "6. Добавить элемент в хэш-таблицу\n");
+           "6. Добавить элемент в хэш-таблицу\n"
+           "7. Подсчитать среднее кол-во сравнений\n");
     printf("Введите операцию: ");
 
     int act;
@@ -101,6 +102,8 @@ ht_action_t get_ht_menu_act(void)
 
 int check_bst(void)
 {
+    struct timespec start, end;
+
     bst_tree_t *tree = NULL;
     char *filepath = NULL;
     int rc = ERR_OK;
@@ -155,19 +158,27 @@ int check_bst(void)
         {
             printf("Введите строку для поиска: ");
             char *search_term = get_str(stdin, NULL);
+            size_t cmps = 0;
             if (!search_term)
             {
                 rc = ERR_ALLOC;
                 goto err;
             }
 
-            bst_tree_t *node = bst_search(tree, search_term);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            bst_tree_t *node = bst_search(tree, search_term, &cmps);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
             free(search_term);
 
             if (node != NULL)
                 printf("Строка найдена!\n");
             else
                 printf("Строка не найдена!\n");
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на поиск: %.2f мкс.\n", t);
+            printf("Количество сравнений: %zu\n", cmps);
 
             bst_save_tmp_open(tree);
             bst_repeat_reset(tree);
@@ -232,6 +243,7 @@ int check_bst(void)
 
 int check_avl(void)
 {
+    struct timespec start, end;
     avl_tree_t *tree = NULL;
     char *filepath = NULL;
     int rc = ERR_OK;
@@ -286,19 +298,27 @@ int check_avl(void)
         {
             printf("Введите строку для поиска: ");
             char *search_term = get_str(stdin, NULL);
+            size_t cmps = 0;
             if (!search_term)
             {
                 rc = ERR_ALLOC;
                 goto err;
             }
 
-            avl_tree_t *node = avl_search(tree, search_term);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            avl_tree_t *node = avl_search(tree, search_term, &cmps);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
             free(search_term);
 
             if (node != NULL)
                 printf("Строка найдена!\n");
             else
                 printf("Строка не найдена!\n");
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на поиск: %.2f мкс.\n", t);
+            printf("Количество сравнений: %zu\n", cmps);
 
             avl_save_tmp_open(tree);
             avl_repeat_reset(tree);
@@ -371,6 +391,7 @@ static void ht_open_show_callback(list_t *node, void *ind)
 
 int check_ht_open(void)
 {
+    struct timespec start, end;
     ht_chain_t *ht = NULL;
     char *filepath = NULL;
     int rc = ERR_OK;
@@ -427,19 +448,30 @@ int check_ht_open(void)
         {
             printf("Введите строку для поиска: ");
             char *search_term = get_str(stdin, NULL);
+            size_t cmps = 0;
             if (search_term == NULL)
             {
                 rc = ERR_ALLOC;
                 goto err;
             }
 
-            rc = ht_chain_find(ht, search_term);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            rc = ht_chain_find(ht, search_term, &cmps);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
             free(search_term);
+
             if (rc == ERR_OK)
                 printf("Значение найдено!\n");
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на поиск: %.2f мкс.\n", t);
+            printf("Количество сравнений: %zu\n", cmps);
         }
         else if (act == HT_ACT_SHOW)
         {
+            printf("Размер таблицы: %zu\n", ht->size);
+
             ht_chain_each(ht, ht_open_show_callback, NULL);
         }
         else if (act == HT_ACT_ADD)
@@ -456,7 +488,19 @@ int check_ht_open(void)
             rc = ht_chain_insert(&ht, add_term, &is_restruct);
             free(add_term);
 
-            printf(is_restruct ? "Понадобилась реструктуризация\n" : "Реструктуризаця не понадобилась\n");
+            if (is_restruct)
+                printf("Понадобилась реструктуризация. Новый размер %zu\n", ht->size);
+            else
+                printf("Реструктуризаця не понадобилась\n");
+        }
+        else if (act == HT_ACT_AVG_CMP)
+        {
+            if (!ht)
+            {
+                rc = ERR_PARAM;
+                goto err;
+            }
+            printf("Среднее количество сравнений: %.2f\n", ht_chain_calc_avg_cmp(ht));
         }
         else
         {
@@ -483,6 +527,7 @@ void ht_closed_show_callback(struct __ht_closed_item *item, void *arg)
 
 int check_ht_closed(void)
 {
+    struct timespec start, end;
     ht_closed_t *ht = NULL;
     char *filepath = NULL;
     int rc = ERR_OK;
@@ -539,19 +584,28 @@ int check_ht_closed(void)
         {
             printf("Введите строку для поиска: ");
             char *search_term = get_str(stdin, NULL);
+            size_t cmps = 0;
             if (search_term == NULL)
             {
                 rc = ERR_ALLOC;
                 goto err;
             }
 
-            rc = ht_closed_find(ht, search_term);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+            rc = ht_closed_find(ht, search_term, &cmps);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
             free(search_term);
             if (rc == ERR_OK)
                 printf("Значение найдено!\n");
+
+            float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+            printf("Время, затраченное на поиск: %.2f мкс.\n", t);
+            printf("Количество сравнений: %zu\n", cmps);
         }
         else if (act == HT_ACT_SHOW)
         {
+            printf("Размер таблицы: %zu\n", ht->size);
             ht_closed_each(ht, ht_closed_show_callback, NULL);
         }
         else if (act == HT_ACT_ADD)
@@ -568,7 +622,19 @@ int check_ht_closed(void)
             rc = ht_closed_insert(&ht, add_term, &is_restruct);
             free(add_term);
 
-            printf(is_restruct ? "Понадобилась реструктуризация" : "Реструктуризаця не понадобилась");
+            if (is_restruct)
+                printf("Понадобилась реструктуризация. Новый размер %zu\n", ht->size);
+            else
+                printf("Реструктуризаця не понадобилась\n");
+        }
+        else if (act == HT_ACT_AVG_CMP)
+        {
+            if (!ht)
+            {
+                rc = ERR_PARAM;
+                goto err;
+            }
+            printf("Среднее количество сравнений: %.2f\n", ht_closed_calc_avg_cmp(ht));
         }
         else
         {

@@ -27,7 +27,7 @@ void avl_free(avl_tree_t **head);
 int avl_insert_node(avl_tree_t **head, avl_tree_t *new_node);
 int avl_insert_str(avl_tree_t **head, const char *key);
 
-avl_tree_t *avl_search(avl_tree_t *head, const char *key);
+avl_tree_t *avl_search(avl_tree_t *head, const char *key, size_t *cmps);
 avl_tree_t *avl_remove(avl_tree_t *head, const char *key);
 
 int avl_remove_nodes_starting_with(avl_tree_t **tree, char c);

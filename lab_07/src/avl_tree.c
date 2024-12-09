@@ -167,10 +167,13 @@ void avl_free(avl_tree_t **head)
  * @param key Ключ
  * @return const node_t* Указатель на искомый узел
  */
-avl_tree_t *avl_search(avl_tree_t *head, const char *key)
+avl_tree_t *avl_search(avl_tree_t *head, const char *key, size_t *cmps)
 {
     if (head == NULL)
         return NULL;
+
+    if (cmps)
+        (*cmps)++;
 
     int cmp = strcmp(head->key, key);
     if (cmp == 0)
@@ -179,9 +182,9 @@ avl_tree_t *avl_search(avl_tree_t *head, const char *key)
         return head;
     }
     else if (cmp > 0)
-        return avl_search(head->lhs, key);
+        return avl_search(head->lhs, key, cmps);
     else
-        return avl_search(head->rhs, key);
+        return avl_search(head->rhs, key, cmps);
 }
 
 /**

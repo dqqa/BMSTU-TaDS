@@ -181,17 +181,20 @@ int bst_remove(bst_tree_t **tree, bst_tree_t *what)
 
 int bst_remove_str(bst_tree_t **tree, const char *what)
 {
-    bst_tree_t *node_to_remove = bst_search(*tree, what);
+    bst_tree_t *node_to_remove = bst_search(*tree, what, NULL);
     if (!node_to_remove)
         return ERR_NOT_FOUND;
 
     return bst_remove(tree, node_to_remove);
 }
 
-bst_tree_t *bst_search(bst_tree_t *tree, const char *data)
+bst_tree_t *bst_search(bst_tree_t *tree, const char *data, size_t *cmps)
 {
     if (!tree)
         return NULL;
+
+    if (cmps)
+        (*cmps)++;
 
     int cmp_res = strcmp(data, tree->data);
     if (cmp_res == 0)
@@ -200,9 +203,9 @@ bst_tree_t *bst_search(bst_tree_t *tree, const char *data)
         return tree;
     }
     else if (cmp_res < 0)
-        return bst_search(tree->lhs, data);
+        return bst_search(tree->lhs, data, cmps);
     else
-        return bst_search(tree->rhs, data);
+        return bst_search(tree->rhs, data, cmps);
 
     UNREACHABLE("bst_search");
 }
@@ -388,7 +391,6 @@ int bst_remove_nodes_starting_with(bst_tree_t **tree, char c)
 
     return rc;
 }
-
 
 static void calc_depth_sum(bst_tree_t *root, int current_depth, int *total_depth, int *total_nodes)
 {

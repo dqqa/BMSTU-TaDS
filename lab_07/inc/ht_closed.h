@@ -36,9 +36,11 @@ void ht_closed_free(ht_closed_t **arr);
 int ht_closed_insert(ht_closed_t **arr, const char *key, bool *is_restructured);
 int ht_closed_remove(ht_closed_t *arr, const char *key);
 
-int ht_closed_find(const ht_closed_t *arr, const char *key);
+int ht_closed_find(const ht_closed_t *arr, const char *key, size_t *cmps);
 
 int ht_closed_each(const ht_closed_t *arr, ht_closed_apply_fn_t func, void *param);
+
+float ht_closed_calc_avg_cmp(ht_closed_t *ht);
 
 extern size_t g_max_collisions;
 

@@ -165,7 +165,7 @@ int ht_closed_insert(ht_closed_t **arr, const char *key, bool *is_restructured)
     return ERR_OK;
 }
 
-int ht_closed_find(const ht_closed_t *arr, const char *key)
+int ht_closed_find(const ht_closed_t *arr, const char *key, size_t *cmps)
 {
     if (arr == NULL || key == NULL)
         return ERR_PARAM;
@@ -173,6 +173,8 @@ int ht_closed_find(const ht_closed_t *arr, const char *key)
     if (strlen(key) == 0)
         return ERR_PARAM;
 
+    if (cmps)
+        (*cmps) = 1;
     size_t hash = calc_hash_str(key);
     size_t index = hash % arr->size;
     size_t i = index;
@@ -181,6 +183,8 @@ int ht_closed_find(const ht_closed_t *arr, const char *key)
            (arr->table[i].state == STATE_BUSY &&
             strcmp(key, arr->table[i].data) != 0))
     {
+        if (cmps)
+            (*cmps)++;
         i = (i + 1) % arr->size;
     }
 
@@ -267,4 +271,22 @@ int ht_closed_load_file_ex(const char *filename, ht_closed_t **ht)
 
     fclose(fp);
     return rc;
+}
+
+float ht_closed_calc_avg_cmp(ht_closed_t *ht)
+{
+    float res = 0;
+    size_t count = 0;
+    for (size_t i = 0; i < ht->size; i++)
+    {
+        if (ht->table[i].state == STATE_EMPTY || ht->table[i].state == STATE_REMOVED)
+            continue;
+
+        count++;
+        size_t cmps = 0;
+        ht_closed_find(ht, ht->table[i].data, &cmps);
+        res += cmps;
+    }
+
+    return res / count;
 }
