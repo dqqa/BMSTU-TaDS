@@ -6,6 +6,7 @@
         "string_view": "c"
     },
     "C_Cpp.default.includePath": [
-        "/home/nik/Documents/BMSTU-TaDS/lab_07/inc"
+        "/home/nik/Documents/BMSTU-TaDS/lab_07/inc",
+        "/home/nik/Documents/BMSTU-TaDS/lab_05/inc"
     ]
 }
