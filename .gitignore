@@ -2,3 +2,6 @@
 *.o
 *.gcda
 *.gcno
+*.d
+*.png
+*.gp
