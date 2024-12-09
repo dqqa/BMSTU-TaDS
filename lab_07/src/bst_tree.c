@@ -388,3 +388,29 @@ int bst_remove_nodes_starting_with(bst_tree_t **tree, char c)
 
     return rc;
 }
+
+
+static void calc_depth_sum(bst_tree_t *root, int current_depth, int *total_depth, int *total_nodes)
+{
+    if (root == NULL)
+        return;
+
+    *total_depth += current_depth;
+    (*total_nodes)++;
+
+    calc_depth_sum(root->lhs, current_depth + 1, total_depth, total_nodes);
+    calc_depth_sum(root->rhs, current_depth + 1, total_depth, total_nodes);
+}
+
+float bst_calc_avg_cmp(bst_tree_t *root)
+{
+    if (root == NULL)
+        return 0.0f;
+
+    int total_depth = 0;
+    int total_nodes = 0;
+
+    calc_depth_sum(root, 1, &total_depth, &total_nodes);
+
+    return (float)total_depth / total_nodes;
+}

@@ -47,7 +47,8 @@ tree_action_t get_tree_menu_act(void)
            "4. Вывести дерево на экран\n"
            "5. Поиск в дереве слова\n"
            "6. Поиск в дереве слов, начинающихся на букву\n"
-           "7. Добавление элемента в дерево\n");
+           "7. Добавление элемента в дерево\n"
+           "8. Подсчитать среднее кол-во сравнений\n");
     printf("Введите операцию: ");
 
     int act;
@@ -202,6 +203,15 @@ int check_bst(void)
             rc = bst_insert_str(&tree, add_term);
             free(add_term);
         }
+        else if (act == TREE_ACT_AVG_CMP)
+        {
+            if (!tree)
+            {
+                rc = ERR_PARAM;
+                goto err;
+            }
+            printf("Среднее количество сравнений: %.2f\n", bst_calc_avg_cmp(tree));
+        }
         else
         {
             rc = ERR_PARAM;
@@ -323,6 +333,15 @@ int check_avl(void)
 
             rc = avl_insert_str(&tree, add_term);
             free(add_term);
+        }
+        else if (act == TREE_ACT_AVG_CMP)
+        {
+            if (!tree)
+            {
+                rc = ERR_PARAM;
+                goto err;
+            }
+            printf("Среднее количество сравнений: %.2f\n", avl_calc_avg_cmp(tree));
         }
         else
         {

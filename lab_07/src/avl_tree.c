@@ -175,7 +175,7 @@ avl_tree_t *avl_search(avl_tree_t *head, const char *key)
     int cmp = strcmp(head->key, key);
     if (cmp == 0)
     {
-        head->is_repeated=true;
+        head->is_repeated = true;
         return head;
     }
     else if (cmp > 0)
@@ -621,4 +621,29 @@ void avl_search_symbol(avl_tree_t *tree, char symbol, size_t *cnt)
         avl_search_symbol(tree->rhs, symbol, cnt);
     else
         avl_search_symbol(tree->lhs, symbol, cnt);
+}
+
+static void calc_depth_sum(avl_tree_t *root, int current_depth, int *total_depth, int *total_nodes)
+{
+    if (root == NULL)
+        return;
+
+    *total_depth += current_depth;
+    (*total_nodes)++;
+
+    calc_depth_sum(root->lhs, current_depth + 1, total_depth, total_nodes);
+    calc_depth_sum(root->rhs, current_depth + 1, total_depth, total_nodes);
+}
+
+float avl_calc_avg_cmp(avl_tree_t *root)
+{
+    if (root == NULL)
+        return 0.0f;
+
+    int total_depth = 0;
+    int total_nodes = 0;
+
+    calc_depth_sum(root, 1, &total_depth, &total_nodes);
+
+    return (float)total_depth / total_nodes;
 }

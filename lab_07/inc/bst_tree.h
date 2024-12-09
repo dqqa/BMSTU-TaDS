@@ -40,4 +40,6 @@ void bst_to_graphviz(FILE *fp, const char *tree_name, bst_tree_t *t);
 
 int bst_save_tmp_open(bst_tree_t *t);
 
+float bst_calc_avg_cmp(bst_tree_t *root);
+
 #endif // TREE_H__

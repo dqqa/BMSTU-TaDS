@@ -23,6 +23,7 @@ typedef enum
     TREE_ACT_SEARCH_WORD,
     TREE_ACT_SEARCH_STARTING,
     TREE_ACT_ADD,
+    TREE_ACT_AVG_CMP,
     TREE_ACT_COUNT,
     TREE_ACT_UNKNOWN
 } tree_action_t;
