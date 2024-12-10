@@ -4,10 +4,18 @@
 #include <stdlib.h>
 #include <time.h>
 
+void print_guide(void)
+{
+    printf("Программа ищет узел, имеющий минимальную сумму путей до всех остальных.\n"
+           "В первой строке файла должно быть кол-во узлов (городов)\n"
+           "На последующих N строках по вертикали - исходные города, по горизонтали - конечные города.\n");
+}
+
 int main(int argc, char **argv)
 {
     if (argc != 2)
     {
+        print_guide();
         fprintf(stderr, "Usage: %s <file>\n", argv[0]);
         return ERR_ARGS;
     }
