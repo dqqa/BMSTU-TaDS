@@ -295,3 +295,24 @@ void ht_closed_calc_ram_usage(ht_closed_t *ht, size_t *bytes)
 {
     (*bytes) = sizeof(ht_closed_t) + sizeof(*ht->table) * ht->size;
 }
+
+void ht_closed_dbg_print(const ht_closed_t *ht)
+{
+    for (size_t i=0;i<ht->size;i++)
+    {
+        printf("%02zu. ", i);
+        switch (ht->table[i].state)
+        {
+            case STATE_BUSY:
+                printf("[Занято] \"%s\"", ht->table[i].data);
+                break;
+            case STATE_EMPTY:
+                printf("[Свободно]");
+                break;
+            case STATE_REMOVED:
+                printf("[Удалено]");
+                break;
+        }
+        printf("\n");
+    }
+}

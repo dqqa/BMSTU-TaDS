@@ -16,8 +16,8 @@ main_menu_action_t get_main_menu_act(void)
            "3. Проверка работы АВЛ-дерева\n"
            "4. Проверка работы хэш таблицы с открытым хешированием\n"
            "5. Проверка работы хэш таблицы с закрытым хешированием\n"
-           "6. Сравнение производительности\n"
-           "7. Изменение параметров\n");
+           //    "6. Сравнение производительности\n"
+           "6. Изменение параметров\n");
     printf("Введите операцию: ");
 
     int act;
@@ -405,7 +405,7 @@ int check_avl(void)
     return rc;
 }
 
-static void ht_open_show_callback(list_t *node, void *ind)
+static void __attribute_maybe_unused__ ht_open_show_callback(list_t *node, void *ind)
 {
     // printf("ind: %zu, list addr: %p => %s\n", *(size_t *)ind, (void *)node, node->key);
     printf("list addr: %p => %s\n", (void *)node, node->key);
@@ -500,7 +500,8 @@ int check_ht_open(void)
         {
             printf("Размер таблицы: %zu\n", ht->size);
 
-            ht_chain_each(ht, ht_open_show_callback, NULL);
+            // ht_chain_each(ht, ht_open_show_callback, NULL);
+            ht_chain_dbg_print(ht);
         }
         else if (act == HT_ACT_ADD)
         {
@@ -553,7 +554,7 @@ int check_ht_open(void)
     return rc;
 }
 
-void ht_closed_show_callback(struct __ht_closed_item *item, void *arg)
+static void __attribute_maybe_unused__ ht_closed_show_callback(struct __ht_closed_item *item, void *arg)
 {
     (void)arg;
     printf("%p => %s\n", (void *)item, item->data);
@@ -645,7 +646,8 @@ int check_ht_closed(void)
         else if (act == HT_ACT_SHOW)
         {
             printf("Размер таблицы: %zu\n", ht->size);
-            ht_closed_each(ht, ht_closed_show_callback, NULL);
+            // ht_closed_each(ht, ht_closed_show_callback, NULL);
+            ht_closed_dbg_print(ht);
         }
         else if (act == HT_ACT_ADD)
         {

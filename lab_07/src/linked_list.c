@@ -226,3 +226,15 @@ size_t list_size(const list_t *head)
 
     return cnt;
 }
+
+void list_dbg_print(const list_t *l)
+{
+    const list_t *tmp = l;
+    while (tmp)
+    {
+        printf("[%s] -> ", tmp->key);
+        tmp = tmp->next;
+    }
+
+    printf("[NULL]");
+}

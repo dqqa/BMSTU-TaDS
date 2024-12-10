@@ -43,6 +43,8 @@ int ht_closed_each(const ht_closed_t *arr, ht_closed_apply_fn_t func, void *para
 float ht_closed_calc_avg_cmp(ht_closed_t *ht);
 void ht_closed_calc_ram_usage(ht_closed_t *ht, size_t *bytes);
 
+void ht_closed_dbg_print(const ht_closed_t *ht);
+
 extern size_t g_max_collisions;
 
 #endif // HT_CLOSED_H__

@@ -52,10 +52,6 @@ int main(void)
         {
             rc = check_ht_closed();
         }
-        else if (act == MAIN_PERF_CMP)
-        {
-            // rc = perf_cmp();
-        }
         else if (act == MAIN_EDIT_PARAM)
         {
             printf("Введите максимальное количество коллизий для реструктуризации: ");

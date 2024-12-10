@@ -31,5 +31,6 @@ const list_t *list_find_min(const list_t *head);
 const list_t *list_find_max(const list_t *head);
 
 size_t list_size(const list_t *head);
+void list_dbg_print(const list_t *l);
 
 #endif // LINKED_LIST_H__

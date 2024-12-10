@@ -195,6 +195,7 @@ int ht_chain_load_file(FILE *fp, ht_chain_t **ht)
     char *line = get_str(fp, NULL);
     if (!line)
         return ERR_IO;
+
     while (line)
     {
         rc = ht_chain_insert(ht, line, NULL);
@@ -253,4 +254,17 @@ void ht_chain_calc_ram_usage(ht_chain_t *ht, size_t *bytes)
     (*bytes) = sizeof(ht_chain_t);
     for (size_t i = 0; i < ht->size; i++)
         (*bytes) += list_size(ht->table[i]) * sizeof(**ht->table);
+}
+
+void ht_chain_dbg_print(const ht_chain_t *ht)
+{
+    for (size_t i = 0; i < ht->size; i++)
+    {
+        printf("%02zu. ", i);
+        if (ht->table[i] == NULL)
+            printf("NULL");
+        else
+            list_dbg_print(ht->table[i]);
+        printf("\n");
+    }
 }

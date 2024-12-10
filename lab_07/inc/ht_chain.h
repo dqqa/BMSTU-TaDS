@@ -32,6 +32,7 @@ bool ht_chain_check_need_restruct(const ht_chain_t *ht);
 
 float ht_chain_calc_avg_cmp(ht_chain_t *ht);
 void ht_chain_calc_ram_usage(ht_chain_t *ht, size_t *bytes);
+void ht_chain_dbg_print(const ht_chain_t *ht);
 
 extern size_t g_max_collisions;
 
