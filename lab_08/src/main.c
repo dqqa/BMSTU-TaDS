@@ -47,6 +47,14 @@ int main(int argc, char **argv)
     size_t best_city = find_best_city(dist, vertices);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
+    printf("Матрица кратчайших расстояний:\n");
+    for (size_t i = 0; i < vertices; i++)
+    {
+        for (size_t j = 0; j < vertices; j++)
+            printf("%d ", dist[j][i]);
+        printf("\n");
+    }
+
     float t = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
 
     printf("Лучший город: %zu\n", best_city);

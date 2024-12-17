@@ -75,6 +75,8 @@ size_t find_best_city(int **dist, size_t vertices)
             best_city = i;
         }
     }
+    
+    printf("Минимальная сумма расстояний: %d\n", min_sum);
 
     return best_city;
 }

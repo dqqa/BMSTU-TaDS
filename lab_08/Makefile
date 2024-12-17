@@ -31,4 +31,4 @@ release: CFLAGS += -s -O2 -DRELEASE
 release: $(EXE)
 
 clean:
-	$(RM) out/* *.exe
+	$(RM) out/* *.exe *.gp *.png
