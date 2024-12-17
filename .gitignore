@@ -3,5 +3,7 @@
 *.gcda
 *.gcno
 *.d
-*.png
+*.out
 *.gp
+*.png
+
