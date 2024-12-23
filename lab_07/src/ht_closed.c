@@ -50,7 +50,7 @@ int ht_closed_restruct(ht_closed_t **ht, size_t prev_size)
     bool restruct_needed = false;
     for (size_t i = 0; !restruct_needed && i < (*ht)->size; i++)
     {
-        if ((*ht)->table[i].state == STATE_EMPTY)
+        if ((*ht)->table[i].state == STATE_EMPTY || (*ht)->table[i].state == STATE_REMOVED)
             continue;
 
         size_t hash = calc_hash_str((*ht)->table[i].data);
